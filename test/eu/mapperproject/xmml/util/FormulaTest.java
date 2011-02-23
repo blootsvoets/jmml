@@ -16,13 +16,15 @@ public class FormulaTest {
 	private Map<String,Integer> xyGive;
 	@Before
 	public void setUp() {
-		xy = ComplexFormula.create("x*y");
-		log = ComplexFormula.create("log(x)");
-		plus = ComplexFormula.create("x*y+x*log(x)");
-		pow = ComplexFormula.create("x^2");
-		sizeof = ComplexFormula.create("x*sizeof(double)");
-		parensA = ComplexFormula.create("x*sizeof(double) + (x+y)/x");
-		parensB = ComplexFormula.create("((x+x)*3 + (x+y)/x)");
+		try {
+		xy = Formula.parse("x*y");
+		log = Formula.parse("log(x)");
+		plus = Formula.parse("x*y+x*log(x)");
+		pow = Formula.parse("x^2");
+		sizeof = Formula.parse("x*sizeof(double)");
+		parensA = Formula.parse("x*sizeof(double) + (x+y)/x");
+		parensB = Formula.parse("((x+x)*3 + (x+y)/x)");
+		} catch (Exception e) {};
 		
 		xySet = new TreeSet<String>();
 		xySet.add("x"); xySet.add("y");
@@ -40,5 +42,14 @@ public class FormulaTest {
 	public void values() {
 		assertTrue(6d == xy.evaluate(xyGive));
 		assertTrue(128d == sizeof.evaluate(xyGive));
+	}
+	
+	@Test
+	public void operators() {
+		log.evaluate(xyGive);
+		plus.evaluate(xyGive);
+		pow.evaluate(xyGive);
+		parensA.evaluate(xyGive);
+		parensB.evaluate(xyGive);
 	}
 }
