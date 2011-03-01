@@ -14,14 +14,19 @@ import eu.mapperproject.xmml.ModelMetadata;
 import eu.mapperproject.xmml.XMMLDocument;
 import eu.mapperproject.xmml.definitions.Converter;
 import eu.mapperproject.xmml.definitions.Datatype;
+import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.Submodel;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.util.Formula;
+import eu.mapperproject.xmml.util.ParseToken;
+import eu.mapperproject.xmml.util.ParseToken.Optional;
+import eu.mapperproject.xmml.util.SIRange;
 import eu.mapperproject.xmml.util.SIUnit;
 import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
 import eu.mapperproject.xmml.util.Version;
 
+import nu.xom.Attribute;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
@@ -68,7 +73,9 @@ public class XMMLDocumentImporter {
 					SUPPORTED_VERSIONS.versionString() + " are supported.");
 		}
 		ModelMetadata mm = this.parseModelMetadata(model);
-		return new XMMLDocument(mm, null, null, xmmlVersion);
+		XMMLDefinitions def = this.parseDefinitions(model.getChildElements("definitions"));
+		
+		return new XMMLDocument(mm, def, null, xmmlVersion);
 	}
 	
 	/** Parses and returns the metadata of a model */
@@ -79,14 +86,23 @@ public class XMMLDocumentImporter {
 		String description = eDescription.size() > 0 ? eDescription.get(0).getValue() : null;
 		
 		String versionString = model.getAttributeValue("version");
-		Version modelVersion = new Version(versionString);
+		Version modelVersion = null;
+		if (versionString != null) {
+			modelVersion = new Version(versionString);
+		}
 		
 		return new ModelMetadata(id, name, description, modelVersion);
 	}
 	
 	private XMMLDefinitions parseDefinitions(Elements definitions) {
+		Element definition = definitions.get(0);
+		Map<String, Datatype> dtypes = parseDatatypes(definition.getChildElements("datatype"));
+		Map<String, Converter> cverter = parseConverters(definition.getChildElements("converter"), dtypes);
+		Map<String, Submodel> smodel = parseSubmodels(definition.getChildElements("submodel"), dtypes);
+		return new XMMLDefinitions(dtypes, cverter, smodel);
 	}
 	
+	/** Parses and returns the datatypes of a model */
 	private Map<String, Datatype> parseDatatypes(Elements datatypes) {
 		Map<String, Datatype> map = new HashMap<String, Datatype>();
 		
@@ -121,8 +137,9 @@ public class XMMLDocumentImporter {
 		return map;
 	}
 
-	private List<Converter> parseConverters(Elements converters, Map<String, Datatype> datatypes) {
-		List<Converter> list = new ArrayList<Converter>(converters.size());
+	/** Parses and returns the converters of a model */
+	private Map<String, Converter> parseConverters(Elements converters, Map<String, Datatype> datatypes) {
+		Map<String, Converter> map = new HashMap<String, Converter>(converters.size());
 		
 		for (int i = 0; i < converters.size(); i++) {
 			Converter ret = null;
@@ -146,7 +163,7 @@ public class XMMLDocumentImporter {
 			if (requires != null) {
 				String reqName = requires.getAttributeValue("name");
 				String reqDataName = requires.getAttributeValue("datatype");
-				Datatype reqData = datatypes.get("reqDataName");
+				Datatype reqData = datatypes.get(reqDataName);
 				String src = requires.getAttributeValue("src");
 				
 				if (reqData == null) {
@@ -160,14 +177,128 @@ public class XMMLDocumentImporter {
 			if (ret == null) {
 				ret = new Converter(id, from, to);
 			}
-			list.add(ret);
+			map.put(id, ret);
 		}
 		
-		return list;
+		return map;
 	}
 
-	private Map<String,Submodel> parseSubmodels(Elements submodels) {
+	/** Parses and returns the submodels of a model */
+	private Map<String,Submodel> parseSubmodels(Elements submodels, Map<String, Datatype> datatypes) {
+		Map<String, Submodel> map = new HashMap<String, Submodel>();
 		
+		for (int i = 0; i < submodels.size(); i++) {
+			Element submodel = submodels.get(i);
+			ModelMetadata meta = parseModelMetadata(submodel);
+			boolean initial = submodel.getAttributeValue("init").equals("yes");
+			Optional stateful = ParseToken.findObject(submodel.getAttributeValue("stateful"), ParseToken.optionalTokens);
+			Optional interactive = ParseToken.findObject(submodel.getAttributeValue("interactive"), ParseToken.optionalTokens);
+			
+			Map<String, Scale> scales = new HashMap<String, Scale>();
+			scales.putAll(parseScale(submodel.getChildElements("timescale"), Dimension.TIME));
+			scales.putAll(parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH));
+			scales.putAll(parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER));
+
+			// TODO: finish submodels
+			
+			map.put(meta.getId(), new Submodel(meta, scales, null, null, null, initial, stateful, interactive));
+		}
+		
+		return map;
+	}
+	
+	/** Parses and returns the scales of a submodel */
+	private Map<String, Scale> parseScale(Elements scales, Dimension dim) {
+		Map<String, Scale> map = new HashMap<String, Scale>();
+		
+		for (int i = 0; i < scales.size(); i++) {
+			Element scale = scales.get(i);
+			String id = scale.getAttributeValue("id");
+			if (id == null) {
+				if (dim == Dimension.TIME) {
+					id = "t";
+				}
+				else if (dim == Dimension.LENGTH) {
+					if (!map.containsKey("x")) id = "x";
+					else if (!map.containsKey("y")) id = "y";
+					else if (!map.containsKey("z")) id = "z";
+					else if (!map.containsKey("u")) id = "u";
+					else if (!map.containsKey("v")) id = "v";
+					else if (!map.containsKey("w")) id = "w";
+					else {
+						logger.warning("With more than 6 length scales, please provide names, now random names are used.");
+						id = "x" + Math.random();
+					}
+				}
+				else {
+					if (!map.containsKey("a")) id = "a";
+					else if (!map.containsKey("b")) id = "b";
+					else if (!map.containsKey("c")) id = "c";
+					else if (!map.containsKey("d")) id = "d";
+					else if (!map.containsKey("e")) id = "e";
+					else if (!map.containsKey("f")) id = "f";
+					else {
+						logger.warning("With more than 6 length scales, please provide names, now random names are used.");
+						id = "a" + Math.random();
+					}		
+				}
+			}
+			
+			SIRange delta = null; boolean deltaFixed = true;
+			String dattr = scale.getAttributeValue("delta");
+			if (dattr != null) {
+				delta = new SIRange(SIUnit.parseSIUnit(dattr));
+			}
+			else {
+				Element eDelta = scale.getFirstChildElement("delta");
+				if (eDelta == null) {
+					throw new IllegalArgumentException("Can not parse submodel scale if it contains no information on step size");
+				}
+				else {
+					String minStr = eDelta.getAttributeValue("min"), maxStr = eDelta.getAttributeValue("max");
+					SIUnit min = minStr == null ? null : SIUnit.parseSIUnit(minStr);
+					SIUnit max = maxStr == null ? null : SIUnit.parseSIUnit(maxStr);
+					
+					delta = new SIRange(min, max);
+					if (eDelta.getAttributeValue("type").equals("variable")) {
+						deltaFixed = false;
+					}
+				}
+			}
+			
+			SIRange max = null; boolean maxFixed = true;
+			String mattr = scale.getAttributeValue("max");
+			if (mattr != null) {
+				max = new SIRange(SIUnit.parseSIUnit(dattr));
+			}
+			else {
+				Element eMax = scale.getFirstChildElement("max");
+				if (eMax == null) {
+					throw new IllegalArgumentException("Can not parse submodel scale if it contains no information on maximum size");
+				}
+				else {
+					String minStr = eMax.getAttributeValue("min"), maxStr = eMax.getAttributeValue("max");
+					SIUnit min = minStr == null ? null : SIUnit.parseSIUnit(minStr);
+					SIUnit mx = maxStr == null ? null : SIUnit.parseSIUnit(maxStr);
+					
+					delta = new SIRange(min, mx);
+					if (eMax.getAttributeValue("type").equals("variable")) {
+						maxFixed = false;
+					}
+				}
+			}
+
+			Attribute dims = scale.getAttribute("dimensions");
+			int dimensions = 1;
+			if (dims != null) {
+				dimensions = Integer.parseInt(dims.getValue());
+			}
+			String dimName = scale.getAttributeValue("name"); 
+			
+			map.put(id, new Scale(id, dim, delta, deltaFixed, max, maxFixed, dimensions, dimName));
+		}
+		
+		return map;
 	}
 	
 	private CouplingTopology parseTopology(Elements topology, XMMLDefinitions definitions) {
