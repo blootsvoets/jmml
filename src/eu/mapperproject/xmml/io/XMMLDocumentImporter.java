@@ -3,6 +3,8 @@ package eu.mapperproject.xmml.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,9 @@ import eu.mapperproject.xmml.definitions.Datatype;
 import eu.mapperproject.xmml.definitions.Submodel;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
 import eu.mapperproject.xmml.topology.CouplingTopology;
+import eu.mapperproject.xmml.util.Formula;
+import eu.mapperproject.xmml.util.SIUnit;
+import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
 import eu.mapperproject.xmml.util.Version;
 
 import nu.xom.Builder;
@@ -80,7 +85,6 @@ public class XMMLDocumentImporter {
 	}
 	
 	private XMMLDefinitions parseDefinitions(Elements definitions) {
-		return null;
 	}
 	
 	private Map<String, Datatype> parseDatatypes(Elements datatypes) {
@@ -90,14 +94,76 @@ public class XMMLDocumentImporter {
 			Element datatype = datatypes.get(i);
 			String id = datatype.getAttributeValue("id");
 			String name = datatype.getAttributeValue("name");
+			
 			String size_estimate = datatype.getAttributeValue("size_estimate");
+			Formula size_formula = null; SIUnit size_bytes = null;
+			if (size_estimate != null) {
+				try {
+					size_formula = Formula.parse(size_estimate);
+				}
+				catch (ParseException e) {
+					try {
+						size_bytes = SIUnit.parseSIUnit(size_estimate);
+						if (size_bytes.getDimension() != Dimension.DATA) {
+							size_bytes = null;
+						}
+					} catch (IllegalArgumentException iae) {
+						// Check for null later
+					}
+				}
+				if (size_formula == null && size_bytes == null) {
+					logger.warning("size estimate of datatype '" + id + "' does not contain a valid size formula or size in bytes. Instead, it contains '" + size_estimate + "'");
+				}
+			}
+			map.put(id, new Datatype(id, name, size_formula, size_bytes));
 		}
 		
 		return map;
 	}
 
-	private List<Converter> parseConverters(Elements converters) {
+	private List<Converter> parseConverters(Elements converters, Map<String, Datatype> datatypes) {
+		List<Converter> list = new ArrayList<Converter>(converters.size());
 		
+		for (int i = 0; i < converters.size(); i++) {
+			Converter ret = null;
+			Element converter = converters.get(i);
+			String id = converter.getAttributeValue("id");
+			String fromData = converter.getAttributeValue("from");
+			Datatype from = datatypes.get(fromData);
+			String toData = converter.getAttributeValue("to");
+			Datatype to = datatypes.get(toData);
+			
+			if (from == null) {
+				logger.warning("converter '" + id + "' contains unknown data type '" + fromData + "' in its from-field and will not be processed");
+				continue;
+			}
+			if (to == null) {
+				logger.warning("converter '" + id + "' contains unknown data type '" + toData + "' in its to-field and will not be processed");
+				continue;
+			}
+			
+			Element requires = converter.getFirstChildElement("requires");
+			if (requires != null) {
+				String reqName = requires.getAttributeValue("name");
+				String reqDataName = requires.getAttributeValue("datatype");
+				Datatype reqData = datatypes.get("reqDataName");
+				String src = requires.getAttributeValue("src");
+				
+				if (reqData == null) {
+					logger.warning("requirement of converter '" + id + "' contains unknown data type '" + reqDataName + "' and will not be considered");
+				}
+				else {
+					ret = new Converter(id, from, to, reqName, reqData, src);
+				}
+			}
+			
+			if (ret == null) {
+				ret = new Converter(id, from, to);
+			}
+			list.add(ret);
+		}
+		
+		return list;
 	}
 
 	private Map<String,Submodel> parseSubmodels(Elements submodels) {
