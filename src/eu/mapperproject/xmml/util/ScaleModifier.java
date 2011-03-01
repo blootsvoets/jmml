@@ -4,19 +4,21 @@ import java.math.BigInteger;
 
 public class ScaleModifier implements Comparable<ScaleModifier>{
 	public enum Dimension {
-		DATA, TIME, LENGTH;
+		DATA, TIME, LENGTH, OTHER;
 	}
+	
+	private final static BigInteger one = BigInteger.valueOf(1), ten = BigInteger.valueOf(10);
 
 	public final static ScaleModifier SI = new ScaleModifier(0);
 	
-	public final static ScaleModifier MINUTE = new ScaleModifier(60, 1);
-	public final static ScaleModifier HOUR = new ScaleModifier(60*60, 1);
-	public final static ScaleModifier DAY = new ScaleModifier(60*60*24, 1);
-	public final static ScaleModifier WEEK = new ScaleModifier(60*60*24*7, 1);
-	public final static ScaleModifier MONTH = new ScaleModifier(60*60*24*365/12, 1);
-	public final static ScaleModifier YEAR = new ScaleModifier(60*60*24*365, 1);
+	public final static ScaleModifier MINUTE = new ScaleModifier(60, 1, Dimension.TIME);
+	public final static ScaleModifier HOUR = new ScaleModifier(60*60, 1, Dimension.TIME);
+	public final static ScaleModifier DAY = new ScaleModifier(60*60*24, 1, Dimension.TIME);
+	public final static ScaleModifier WEEK = new ScaleModifier(60*60*24*7, 1, Dimension.TIME);
+	public final static ScaleModifier MONTH = new ScaleModifier(60*60*24*365/12, 1, Dimension.TIME);
+	public final static ScaleModifier YEAR = new ScaleModifier(60*60*24*365, 1, Dimension.TIME);
 
-	public final static ScaleModifier BIT = new ScaleModifier(1, 8);
+	public final static ScaleModifier BIT = new ScaleModifier(1, 8, Dimension.DATA);
 	
 	public final static ScaleModifier MILLI = new ScaleModifier(-3);
 	public final static ScaleModifier MICRO = new ScaleModifier(-6);
@@ -39,39 +41,55 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		
 	private final BigInteger mult;
 	private final BigInteger div;
-	private Dimension dim;
+	private final Dimension dim;
 
-	public ScaleModifier(int exp) {
+	public ScaleModifier(int exp, Dimension dim) {
+		this.dim = dim;
 		if (exp >= 0) {
-			mult = BigInteger.valueOf(10).pow(exp);
-			div = BigInteger.valueOf(1);
+			mult = ten.pow(exp);
+			div = one;
 		}
 		else {
-			mult = BigInteger.valueOf(1);
-			div = BigInteger.valueOf(10).pow(-exp);
+			mult = one;
+			div = ten.pow(-exp);
 		}
+	}
+
+	public ScaleModifier(int exp) {
+		this(exp, null);
+	}
+
+	public ScaleModifier(long m, long div, Dimension dim) {
+		this(BigInteger.valueOf(m), BigInteger.valueOf(div), dim);
 	}
 
 	public ScaleModifier(long m, long div) {
-		this(BigInteger.valueOf(m), BigInteger.valueOf(div));
+		this(m, div, null);
 	}
 
-	public ScaleModifier(BigInteger m, BigInteger div) {
+	public ScaleModifier(BigInteger m, BigInteger div, Dimension dim) {
+		this.dim = dim;
 		BigInteger gcd = m.gcd(div);
 		this.mult = m.divide(gcd);
 		this.div = div.divide(gcd);
 	}
+
+	public ScaleModifier(BigInteger m, BigInteger div) {
+		this(m, div, null);
+	}
 	
 	/** Add a scale to another */
 	public ScaleModifier add(ScaleModifier other) {
-		return new ScaleModifier(mult.multiply(other.mult), div.multiply(other.div));
+		Dimension d = other.dim == null ? this.dim : other.dim;
+		return new ScaleModifier(mult.multiply(other.mult), div.multiply(other.div), d);
 	}
 
 	/**
 	 * Calculate the multiplication to get from this SI unit to the other.
 	 */
 	public ScaleModifier convert(ScaleModifier other) {
-		return new ScaleModifier(div.multiply(other.mult), mult.multiply(other.div));
+		Dimension d = other.dim == null ? this.dim : other.dim;
+		return new ScaleModifier(div.multiply(other.mult), mult.multiply(other.div), d);
 	}
 	
 	/**
@@ -83,13 +101,35 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		return this.convert(new ScaleModifier(n));
 	}
 	
+	public double apply(double orig) {
+		long m = this.mult.longValue();
+		long d = this.div.longValue();
+		if (m == Double.POSITIVE_INFINITY || d == Double.POSITIVE_INFINITY) {
+			throw new IllegalStateException("Can not apply numbers larger than longs");
+		}
+		
+		return (orig*m)/d;
+	}
+	
 	/**
 	 * @return dimension of the scale
 	 */
 	public Dimension getDimension() {
-		return dim;
+		return this.dim;
 	}
 
+	public boolean isDimensionless() {
+		return this.dim == null;
+	}
+	
+	/**
+	 * Set the dimensional axis of this scale modifier
+	 * @param dim Dimension to be set
+	 */
+	ScaleModifier changeDimension(Dimension dim) {
+		return new ScaleModifier(this.mult, this.div, dim);
+	}
+	
 	@Override
 	public int compareTo(ScaleModifier o) {
 		if (o.mult.equals(mult) && o.div.equals(div)) {
@@ -122,26 +162,36 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		return hashCode;
 	}
 	
+	@Override
+	public String toString() {
+		String dim = this.dim == null ? "" : "[" + this.dim + "]";
+		if (this.mult.equals(one) && !this.div.equals(one)) {
+			return this.div + "^-1" + dim;
+		}
+		else if (this.div.equals(one) && !this.mult.equals(1)) {
+			return this.mult + dim;
+		}
+		else {
+			return this.mult + "/" + this.div + dim;
+		}
+	}
 	private final static ParseToken<ScaleModifier>[] scaleTokens;
-	private final static ParseToken<ScaleModifier>[] timeTokens;
-	private final static ParseToken<ScaleModifier> dataToken = new ParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
 	private final static ParseToken<Dimension>[] dimTokens;
+	private final static ParseToken<ScaleModifier> bitToken = new ParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
 	static {
 		ScaleModifier[] objects = {
+				MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
 				MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO,
 				KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA
 			};
 		String[][] names = {
+				{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"months", "month"}, {"years", "year", "yrs", "yr"},
 				{"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"},
 				{"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"}
 			};
 		scaleTokens = ParseToken.createTokens(objects, names);
 		
-		objects = new ScaleModifier[] {MINUTE, HOUR, DAY, WEEK, MONTH, YEAR};
-		names = new String[][] {{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"years", "year", "yrs", "yr"}};
-		timeTokens = ParseToken.createTokens(objects, names);
-		
-		names = new String[][] {{"byte", "B", "b"}, {"seconds", "second", "sec", "s"}, {"meters", "meter", "m"}};
+		names = new String[][] {{"bytes", "byte", "B"}, {"seconds", "second", "sec", "s"}, {"meters", "meter", "m"}, {}};
 		dimTokens = ParseToken.createTokens(Dimension.values(), names);
 	}
 	
@@ -149,7 +199,7 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		ScaleModifier scale = null;
 		Dimension dim = null;
 		
-		// SI scale
+		// Scale
 		if (s.length() > 0) {
 			for (ParseToken<ScaleModifier> token : scaleTokens) {
 				if (token.startOf(s)) {
@@ -158,30 +208,18 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 				}
 			}
 		}
-		// Irregular time scale
-		if (scale == null && s.length() > 0) {
-			for (ParseToken<ScaleModifier> token : timeTokens) {
-				if (token.startOf(s)) {
-					s = token.getRemainder();
-					scale = token.getObject();
-					dim = Dimension.TIME;
-				}
-			}
-		}
-		// Irregular data scale
-		if (scale == null && s.length() > 0) {
-			if (dataToken.startOf(s)) {
-				s = dataToken.getRemainder();
-				scale = dataToken.getObject();
-				dim = Dimension.DATA;	
-			}
+		// Bit is both a dimension and an extra scale modifier
+		if (s.length() > 0 && bitToken.startOf(s)) {
+			s = bitToken.getRemainder();
+			scale = (scale == null) ? bitToken.getObject() : scale.add(bitToken.getObject());
+			dim = scale.dim;
 		}
 		// Dimension
 		if (dim == null && s.length() > 0) {
 			for (ParseToken<Dimension> token : dimTokens) {
 				if (token.startOf(s)) {
 					dim = token.getObject();
-					s = dataToken.getRemainder();
+					s = token.getRemainder();
 				}
 			}
 		}
@@ -190,7 +228,13 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 			throw new IllegalArgumentException("String could not be parsed as a Scale: " + s);
 		}
 		else {
-			scale.dim = dim;
+			if (scale == null) {
+				scale = SI;
+			}
+			if (scale.isDimensionless() && dim != null) {
+				scale = scale.changeDimension(dim);
+			}
+
 			return scale;
 		}
 	}
