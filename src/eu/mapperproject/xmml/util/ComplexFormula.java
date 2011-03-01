@@ -59,6 +59,8 @@ public class ComplexFormula extends Formula {
 			return Math.log(right.evaluate(vars)); 
 		case SQRT:
 			return Math.sqrt(right.evaluate(vars));
+		case NEGATE:
+			return -right.evaluate(vars);
 		default:
 			return right.evaluate(vars);
 		}

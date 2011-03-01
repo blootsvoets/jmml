@@ -13,16 +13,31 @@ import java.util.regex.Pattern;
 public abstract class Formula {
 	/** Symbols that can be used */
 	enum Operator {
-		PLUS("\\+"), MINUS("-"), TIMES("\\*"), DIVIDE("/"), POW("\\^"), LOG("log"), SQRT("sqrt"), SIZEOF("sizeof\\[([0-9]*)\\]"), TOKEN("\\[([0-9]*)\\]"), VARIABLE("[a-zA-Z_]\\w*"), NUMBER("[0-9\\.]");
+		PLUS('+', 2), MINUS('+', 2), TIMES('*', 2), DIVIDE('/', 2), NEGATE('-', 1), POW('^', 2), LOG("log", 1), SQRT("sqrt", 1), SIZEOF("sizeof", 0), TOKEN('[', 0), VARIABLE(null, 0), NUMBER(null, 0);
 		
-		private Pattern p;
+		private char single;
+		private String multiple;
+		private int params;
 		
-		Operator(String regex) {
-			p = Pattern.compile(regex);
+		Operator(String multiple, int parameters) {
+			this.params = parameters;
+			this.multiple = multiple;
+			this.single = (char)0;
 		}
 		
-		Matcher matches(String s) {
-			return p.matcher(s);
+		Operator(char single, int parameters) {
+			this.params = parameters;
+			this.multiple = null;
+			this.single = single;
+		}
+		
+		int lastIndexOf(String s) {
+			return s.lastIndexOf(single);
+			if (multiple != null) {
+		}
+		
+		int getParameterCount() {
+			return this.params;
 		}
 	}
 	
@@ -65,22 +80,29 @@ public abstract class Formula {
 			throw new IllegalArgumentException("Can not parse empty string");
 		}
 		
-		for (Operator op : Operator.values()) {
+		for (Operator op : Operator.values()) {			
 			Matcher m = op.matches(s);
 			
 			if (m.find()) {
-				int start = m.start();
+				int startGroup = m.groupCount() == 0 ? 0 : 1; 
+				int start = m.start(startGroup);
 				String before = s.substring(0, start);
-				String after = s.substring(m.end());
 				
-				if (start > 0) {
-					left = parseString(before, tokens);
+//				if (op == Operator.PLUS) {
+//					if (Operator.MINUS.matches(before).find()) continue;
+//				}
+//				if (op == Operator.TIMES) {
+//					if (Operator.DIVIDE.matches(before).find()) continue;
+//				}
+
+				if (op.getParameterCount() > 0) {
+					String after = s.substring(m.end());				
 					right = parseString(after, tokens);
+					left = (op.getParameterCount() == 2) ? parseString(before, tokens) : null;
 					current = new ComplexFormula(op, left, right);
 				}
 				else {
-					String token = m.groupCount() == 0 ? null : tokens.get(Integer.parseInt(m.group(1)));
-
+					String token = startGroup == 0 ? null : tokens.get(Integer.parseInt(m.group(1)));
 					switch (op) {
 					case SIZEOF:
 						current = new FormulaSizeof(token);
@@ -94,12 +116,9 @@ public abstract class Formula {
 					case TOKEN:
 						current = parseString(token, tokens);
 						break;
-					default:
-						right = parseString(after, tokens);
-						current = new ComplexFormula(op, right);
-						break;
 					}
 				}
+				
 				break;
 			}
 		}
