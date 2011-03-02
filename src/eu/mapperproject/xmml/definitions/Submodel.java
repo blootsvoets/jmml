@@ -4,7 +4,7 @@ import java.util.Map;
 
 import eu.mapperproject.xmml.ModelMetadata;
 import eu.mapperproject.xmml.Param;
-import eu.mapperproject.xmml.util.ParseToken.Optional;
+import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
 
 public class Submodel {
 	private Map<String,Port> in;

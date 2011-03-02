@@ -19,8 +19,8 @@ import eu.mapperproject.xmml.definitions.Submodel;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.util.Formula;
-import eu.mapperproject.xmml.util.ParseToken;
-import eu.mapperproject.xmml.util.ParseToken.Optional;
+import eu.mapperproject.xmml.util.MultiStringParseToken;
+import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
 import eu.mapperproject.xmml.util.SIRange;
 import eu.mapperproject.xmml.util.SIUnit;
 import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
@@ -115,7 +115,7 @@ public class XMMLDocumentImporter {
 			Formula size_formula = null; SIUnit size_bytes = null;
 			if (size_estimate != null) {
 				try {
-					size_formula = Formula.parse(size_estimate);
+					size_formula = Formula.parseFormula(size_estimate);
 				}
 				catch (ParseException e) {
 					try {
@@ -191,8 +191,8 @@ public class XMMLDocumentImporter {
 			Element submodel = submodels.get(i);
 			ModelMetadata meta = parseModelMetadata(submodel);
 			boolean initial = submodel.getAttributeValue("init").equals("yes");
-			Optional stateful = ParseToken.findObject(submodel.getAttributeValue("stateful"), ParseToken.optionalTokens);
-			Optional interactive = ParseToken.findObject(submodel.getAttributeValue("interactive"), ParseToken.optionalTokens);
+			Optional stateful = MultiStringParseToken.findObject(submodel.getAttributeValue("stateful"), MultiStringParseToken.optionalTokens);
+			Optional interactive = MultiStringParseToken.findObject(submodel.getAttributeValue("interactive"), MultiStringParseToken.optionalTokens);
 			
 			Map<String, Scale> scales = new HashMap<String, Scale>();
 			scales.putAll(parseScale(submodel.getChildElements("timescale"), Dimension.TIME));
