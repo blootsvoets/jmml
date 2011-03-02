@@ -17,6 +17,7 @@ import eu.mapperproject.xmml.definitions.Converter;
 import eu.mapperproject.xmml.definitions.Datatype;
 import eu.mapperproject.xmml.definitions.Port;
 import eu.mapperproject.xmml.definitions.Scale;
+import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.definitions.Submodel;
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
@@ -201,10 +202,11 @@ public class XMMLDocumentImporter {
 			Optional stateful = MultiStringParseToken.findObject(submodel.getAttributeValue("stateful"), MultiStringParseToken.optionalTokens);
 			Optional interactive = MultiStringParseToken.findObject(submodel.getAttributeValue("interactive"), MultiStringParseToken.optionalTokens);
 			
-			Map<String, Scale> scales = new HashMap<String, Scale>();
-			scales.putAll(parseScale(submodel.getChildElements("timescale"), Dimension.TIME, false));
-			scales.putAll(parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH, false));
-			scales.putAll(parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER, false));
+			
+			Scale timescale = parseScale(submodel.getChildElements("timescale"), Dimension.TIME, false).values().iterator().next();
+			Map<String, Scale> spacescale = parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH, false);
+			Map<String, Scale> otherscale = parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER, false);
+			ScaleMap scales = new ScaleMap(timescale, spacescale, otherscale);
 
 			Element ports = submodel.getFirstChildElement("ports");
 			Map<String, Port> in = parsePorts(ports.getChildElements("in"), true, datatypes);
