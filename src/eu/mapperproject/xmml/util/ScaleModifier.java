@@ -85,11 +85,18 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	}
 
 	/**
-	 * Calculate the multiplication to get from this SI unit to the other.
+	 * Divide this scale modifier by another
+	 */
+	public ScaleModifier div(ScaleModifier other) {
+		Dimension d = other.dim == null ? this.dim : other.dim;
+		return new ScaleModifier(mult.multiply(other.div), div.multiply(other.mult), d);
+	}
+	
+	/**
+	 * Calculate the scalemodifier needed to go from a unit in this scale to a unit in another scale.
 	 */
 	public ScaleModifier convert(ScaleModifier other) {
-		Dimension d = other.dim == null ? this.dim : other.dim;
-		return new ScaleModifier(div.multiply(other.mult), mult.multiply(other.div), d);
+		return other.div(this);
 	}
 	
 	/**
@@ -99,6 +106,11 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	 */
 	public ScaleModifier pow10(int n) {		
 		return this.convert(new ScaleModifier(n));
+	}
+	
+	/** Divide the scale by a value */
+	public ScaleModifier div(long d) {
+		return new ScaleModifier(this.mult, this.div.multiply(BigInteger.valueOf(d)));
 	}
 	
 	public double apply(double orig) {

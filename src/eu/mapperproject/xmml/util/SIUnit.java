@@ -44,12 +44,35 @@ public class SIUnit implements Comparable<SIUnit> {
 		this.scale = scale.changeDimension(dim);
 	}
 	
+	/** Add the given SIUnit to the current */
+	public SIUnit add(SIUnit other) {
+		double oval = getSuitableValue(other);
+		return new SIUnit(oval + this.value, this.scale);
+	}
+
+	/** Divide this unit by a long */
+	public SIUnit div(long d) {
+		return new SIUnit(this.value, this.scale.div(d));
+	}
+	
+	/** Divide this unit by another unit, making them scale less */
+	public SIUnit div(SIUnit other) {
+		return new SIUnit(this.value / other.value, this.scale.div(other.scale));
+	}
+
+	/** Get the dimension that the unit lives on, or null if none */
 	public Dimension getDimension() {
 		return this.scale.getDimension();
 	}
 	
+	/** Get the value of another SIUnit in the same scale as the current */
 	private double getSuitableValue(SIUnit other) {
 		return this.scale.convert(other.scale).apply(other.value);
+	}
+	
+	/** Get the double value of the current scale. If this unit falls out of the range of a double, +-infinity is returned. */ 
+	public double doubleValue() {
+		return this.scale.apply(this.value);
 	}
 	
 	@Override

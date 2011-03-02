@@ -11,13 +11,20 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import eu.mapperproject.xmml.ModelMetadata;
+import eu.mapperproject.xmml.Param;
 import eu.mapperproject.xmml.XMMLDocument;
 import eu.mapperproject.xmml.definitions.Converter;
 import eu.mapperproject.xmml.definitions.Datatype;
+import eu.mapperproject.xmml.definitions.Port;
 import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.Submodel;
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
+import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
+import eu.mapperproject.xmml.topology.Filter;
+import eu.mapperproject.xmml.topology.Instance;
+import eu.mapperproject.xmml.topology.InstancePort;
 import eu.mapperproject.xmml.util.Formula;
 import eu.mapperproject.xmml.util.MultiStringParseToken;
 import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
@@ -73,17 +80,18 @@ public class XMMLDocumentImporter {
 					SUPPORTED_VERSIONS.versionString() + " are supported.");
 		}
 		ModelMetadata mm = this.parseModelMetadata(model);
-		XMMLDefinitions def = this.parseDefinitions(model.getChildElements("definitions"));
+		XMMLDefinitions def = this.parseDefinitions(model.getFirstChildElement("definitions"));
+		CouplingTopology ct = this.parseTopology(model.getFirstChildElement("topology"), def);
 		
-		return new XMMLDocument(mm, def, null, xmmlVersion);
+		return new XMMLDocument(mm, def, ct, xmmlVersion);
 	}
 	
 	/** Parses and returns the metadata of a model */
 	private ModelMetadata parseModelMetadata(Element model) {
 		String id = model.getAttributeValue("id");
 		String name = model.getAttributeValue("name");
-		Elements eDescription = model.getChildElements("description");
-		String description = eDescription.size() > 0 ? eDescription.get(0).getValue() : null;
+		Element eDescription = model.getFirstChildElement("description");
+		String description = eDescription == null ? null : eDescription.getValue();
 		
 		String versionString = model.getAttributeValue("version");
 		Version modelVersion = null;
@@ -94,8 +102,7 @@ public class XMMLDocumentImporter {
 		return new ModelMetadata(id, name, description, modelVersion);
 	}
 	
-	private XMMLDefinitions parseDefinitions(Elements definitions) {
-		Element definition = definitions.get(0);
+	private XMMLDefinitions parseDefinitions(Element definition) {
 		Map<String, Datatype> dtypes = parseDatatypes(definition.getChildElements("datatype"));
 		Map<String, Converter> cverter = parseConverters(definition.getChildElements("converter"), dtypes);
 		Map<String, Submodel> smodel = parseSubmodels(definition.getChildElements("submodel"), dtypes);
@@ -195,20 +202,69 @@ public class XMMLDocumentImporter {
 			Optional interactive = MultiStringParseToken.findObject(submodel.getAttributeValue("interactive"), MultiStringParseToken.optionalTokens);
 			
 			Map<String, Scale> scales = new HashMap<String, Scale>();
-			scales.putAll(parseScale(submodel.getChildElements("timescale"), Dimension.TIME));
-			scales.putAll(parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH));
-			scales.putAll(parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER));
+			scales.putAll(parseScale(submodel.getChildElements("timescale"), Dimension.TIME, false));
+			scales.putAll(parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH, false));
+			scales.putAll(parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER, false));
 
-			// TODO: finish submodels
+			Element ports = submodel.getFirstChildElement("ports");
+			Map<String, Port> in = parsePorts(ports.getChildElements("in"), true, datatypes);
+			Map<String, Port> out = parsePorts(ports.getChildElements("out"), false, datatypes);
 			
-			map.put(meta.getId(), new Submodel(meta, scales, null, null, null, initial, stateful, interactive));
+			Map<String,Param> params = parseParams(submodel.getChildElements("param")); 
+			
+			map.put(meta.getId(), new Submodel(meta, scales, in, out, params, initial, stateful, interactive));
 		}
 		
 		return map;
 	}
 	
+	/** Parse param elements */
+	private Map<String, Param> parseParams(Elements params) {
+		Map<String, Param> map = new HashMap<String, Param>();
+		
+		for (int i = 0; i < params.size(); i++) {
+			Element param = params.get(i);
+			String id = param.getAttributeValue("id");
+			String value = param.getAttributeValue("value");
+			map.put(id, new Param(id, value));
+		}
+		
+		return map;
+	}
+
+	/** Parse in or out ports */
+	private Map<String, Port> parsePorts(Elements ports, boolean in,
+			Map<String, Datatype> datatypes) {
+		Map<String, Port> map = new HashMap<String, Port>();
+		
+		for (int i = 0; i < ports.size(); i++) {
+			Element port = ports.get(i);
+			
+			String id = port.getAttributeValue("id");
+			SEL operator = SEL.valueOf(port.getAttributeValue("operator"));
+			if ((in && operator.isSending()) || (!in && operator.isReceiving())) {
+				String prefix = in ? " not" : "";
+				logger.warning("port '" + id + "' contains the wrong type of operator for its type, it should" + prefix + " be able to send. This port will be disregarded.");
+				continue;
+			}
+			String dataStr = port.getAttributeValue("datatype");
+			Datatype datatype = null;
+			if (dataStr != null) {
+				datatype = datatypes.get(dataStr);
+				if (datatype == null) {
+					logger.warning("port '" + id + "' does not contain a valid datatype but '" + dataStr + "' instead, its datatype will be disregarded");
+				}
+			}
+			Port.Type state = port.getAttributeValue("type").equals("state") ? Port.Type.STATE : Port.Type.NORMAL;
+			
+			map.put(id, new Port(id, operator, datatype, state));
+		}
+		
+		return map;
+	}
+
 	/** Parses and returns the scales of a submodel */
-	private Map<String, Scale> parseScale(Elements scales, Dimension dim) {
+	private Map<String, Scale> parseScale(Elements scales, Dimension dim, boolean asInstance) {
 		Map<String, Scale> map = new HashMap<String, Scale>();
 		
 		for (int i = 0; i < scales.size(); i++) {
@@ -295,13 +351,167 @@ public class XMMLDocumentImporter {
 			}
 			String dimName = scale.getAttributeValue("name"); 
 			
+			// TODO: check subranges.
+			if (asInstance) {
+				Scale subScale = map.get(id);
+				if (subScale == null) {
+					logger.warning("In a submodel instance, only scales may be overridden that were already defined in the submodel. Scale '" + id + "' was not previously defined in a submodel.");
+					continue;
+				}
+				SIRange subDelta = subScale.getDelta();
+				if (!subDelta.isPoint() && !subDelta.contains(delta)) {
+					logger.warning("");
+				}
+			}
+			
 			map.put(id, new Scale(id, dim, delta, deltaFixed, max, maxFixed, dimensions, dimName));
 		}
 		
 		return map;
 	}
 	
-	private CouplingTopology parseTopology(Elements topology, XMMLDefinitions definitions) {
-		return null;
+	private CouplingTopology parseTopology(Element topology, XMMLDefinitions definitions) {
+		Map<String,Instance> instances = parseInstances(topology.getChildElements("instance"), definitions.getSubmodels());
+		List<Coupling> couplings = parseCouplings(topology.getChildElements("instance"), instances, definitions);
+		return new CouplingTopology(instances, couplings);
+	}
+
+	/**
+	 * @param childElements
+	 * @param instances
+	 * @return
+	 */
+	private List<Coupling> parseCouplings(Elements couplings,
+			Map<String, Instance> instances, XMMLDefinitions definitions) {
+		List<Coupling> list = new ArrayList<Coupling>();
+		
+		for (int i = 0; i < instances.size(); i++) {
+			Element coupling = couplings.get(i);
+			
+			String name = coupling.getAttributeValue("name");
+			InstancePort from = parseCouplingPort(coupling.getAttributeValue("from"), true, instances);
+			InstancePort to = parseCouplingPort(coupling.getAttributeValue("to"), false, instances);
+			
+			Datatype dfrom = from.getPort().getDatatype(), dto = to.getPort().getDatatype();
+			List<Filter> filters = parseFilters(coupling.getChildElements("filter"), definitions, dfrom, dto, from, to);
+			
+			list.add(new Coupling(name, from, to, filters));
+		}
+		
+		return list;
+	}
+	
+	/** Parse filters of a conduit */
+	private List<Filter> parseFilters(Elements filters, XMMLDefinitions definitions, Datatype dfrom, Datatype dto, InstancePort from, InstancePort to) {
+		List<Filter> list = new ArrayList<Filter>();
+		Datatype tmpto = null;
+		
+		for (int i = 0; i < filters.size(); i++) {
+			Element filter = filters.get(i);
+			String name = filter.getAttributeValue("name");
+			Filter.Type type = Filter.Type.valueOf(filter.getAttributeValue("type").toUpperCase());
+			
+			if (type == Filter.Type.CONVERTER && dfrom != null && dto != null) {
+				Converter c = definitions.getConverter(name);
+				if (c != null) {
+					if (!c.getFrom().equals(from)) {
+						logger.warning("converter '" + c.getId() + "' in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' but is listed as a filter for that datatype");
+					}
+					else {
+						tmpto = c.getTo();
+					}
+				}
+			}
+			
+			String scaleStr = filter.getAttributeValue("scale").toLowerCase();
+			Dimension scale = null;
+			if (scaleStr != null) {
+				if (scaleStr.equals("time") || scaleStr.equals("temporal")) {
+					scale = Dimension.TIME;
+				}
+				if (scaleStr.equals("space") || scaleStr.equals("spatial") || scaleStr.equals("length")) {
+					scale = Dimension.LENGTH;
+				}
+				else {
+					scale = Dimension.OTHER;
+				}
+			}
+			double factor = 1d;
+			try {
+				factor = Double.parseDouble(filter.getAttributeValue("factor"));
+			} catch (NumberFormatException e) {
+				logger.warning("factor of filter '" + name + "' in conduit from '" + from + "' to '" + to + "' should be a double but could not be parsed and will be ignored");
+			}
+			list.add(new Filter(name, type, scale, factor));
+		}
+		if (tmpto != null && to != null && !tmpto.equals(to)) {
+			logger.warning("list of converters in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' to datatype '" + dto.getId() + "' but to datatype '" + tmpto.getId() + "' instead");
+		}
+		
+		return list;
+	}
+
+	private InstancePort parseCouplingPort(String value, boolean from, Map<String, Instance> instances) {
+		String[] id = value.split("\\.");
+		if (id.length != 2) {
+			String prefix = from ? "sending" : "receiving";
+			logger.warning(prefix + " coupling port '" + value + "' can not be split into an instance name and port name");
+			return null;
+		}
+		
+		Instance inst = instances.get(id[0]);
+		if (inst == null) {
+			String prefix = from ? "sending" : "receiving";
+			logger.warning(prefix + " coupling port '" + value + "' does not translate to a submodel instance");
+			return null;
+		}
+		
+		Submodel s = inst.getSubmodel();
+		Port port = from ? s.getOutPort(id[1]) : s.getInPort(id[1]);
+		if (port == null) {
+			String prefix = from ? "sending" : "receiving";
+			logger.warning("instance '" + id[0] + "' does not have a " + prefix + " port named '" + id[1] + "' for coupling");
+			return null;			
+		}
+		return new InstancePort(inst, port);
+	}
+
+	/**
+	 * @param childElements
+	 * @param submodels
+	 * @return
+	 */
+	private Map<String, Instance> parseInstances(Elements instances,
+			Map<String, Submodel> submodels) {
+		Map<String, Instance> map = new HashMap<String, Instance>();
+		
+		for (int i = 0; i < instances.size(); i++) {
+			Element instance = instances.get(i);
+			String id = instance.getAttributeValue("id");
+			String subStr = instance.getAttributeValue("submodel");
+			Submodel submodel = submodels.get(subStr);
+			if (submodel == null) {
+				logger.warning("instance with non-existant submodel '" + subStr + "' is excluded from the topology.");
+				continue;
+			}
+			if (id == null) {
+				id = submodel.getId();
+			}
+			if (map.containsKey(id)) {
+				logger.warning("an instance with id '" + id + "' already exists, a duplicate will not be added");
+				continue;
+			}
+			
+			String domain = instance.getAttributeValue("domain");
+			boolean initial = instance.getAttributeValue("init").equals("yes");
+
+			Map<String, Scale> scales = new HashMap<String, Scale>();
+			scales.putAll(parseScale(instance.getChildElements("timescale"), Dimension.TIME, true));
+			scales.putAll(parseScale(instance.getChildElements("spacescale"), Dimension.LENGTH, true));
+			scales.putAll(parseScale(instance.getChildElements("otherscale"), Dimension.OTHER, true));
+
+			map.put(id, new Instance(id, submodel, domain, initial, scales));
+		}
+		return map;
 	}
 }

@@ -24,4 +24,25 @@ public class Converter {
 		this.reqData = reqData;
 		this.src = src;
 	}
+
+	/**
+	 * @return the datatype that the converter converts from
+	 */
+	public Datatype getFrom() {
+		return this.from;
+	}
+
+	/**
+	 * @return the datatype that the converter converts to
+	 */
+	public Datatype getTo() {
+		return to;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
 }

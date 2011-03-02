@@ -18,7 +18,7 @@ public class SIUnitTest {
 	
 	@Test
 	public void compare() {
-		assertSame(-1, o1s.compareTo(o1min)); 
+		assertEquals(new Integer(-1), new Integer(o1s.compareTo(o1min))); 
 	}
 	
 	@Test 
@@ -54,5 +54,16 @@ public class SIUnitTest {
 		SIUnit.parseSIUnit("1 kbit");
 		SIUnit.parseSIUnit("1 MB");
 		assertEquals(SIUnit.parseSIUnit("8 bit"), SIUnit.parseSIUnit("1 byte"));
+	}
+	
+	@Test
+	public void div() {
+		assertEquals(new Double(60d), new Double(o1min.div(o1s).doubleValue()));
+		assertEquals(new Double(30d), new Double(o1min.div(2l).doubleValue()));
+	}
+	
+	@Test
+	public void add() {
+		assertEquals(new Double(61d), new Double(o1min.add(o1s).doubleValue()));
 	}
 }
