@@ -13,31 +13,61 @@ import java.util.regex.Pattern;
 public abstract class Formula {
 	/** Symbols that can be used */
 	enum Operator {
-		PLUS('+', 2), MINUS('+', 2), TIMES('*', 2), DIVIDE('/', 2), NEGATE('-', 1), POW('^', 2), LOG("log", 1), SQRT("sqrt", 1), SIZEOF("sizeof", 0), TOKEN('[', 0), VARIABLE(null, 0), NUMBER(null, 0);
+		PLUS('+'), MINUS("[^*/^+-]-", 2), TIMES('*'), DIVIDE('/'), NEGATE("-", 1), POW('^'),
+		LOG("log", 1), SQRT("sqrt", 1),
+		SIZEOF("sizeof\\[(\\d+)\\]", 0), TOKEN("\\[(\\d+)\\]", 0), VARIABLE("[a-zA-Z_][a-zA-Z0-9_]*", 0), NUMBER("-?(\\d*\\.)?\\d+([eE]-?\\d+)?", 0);
 		
-		private char single;
-		private String multiple;
-		private int params;
+		private final ParseToken<Operator> token;
+		private final int params;
 		
 		Operator(String multiple, int parameters) {
 			this.params = parameters;
-			this.multiple = multiple;
-			this.single = (char)0;
+			if (this.params == 1) {
+				this.token = new MultiStringParseToken<Operator>(this, new String[] {multiple}); 
+			}
+			else {
+				this.token = new RegexParseToken<Operator>(this, multiple);
+			}
 		}
 		
-		Operator(char single, int parameters) {
-			this.params = parameters;
-			this.multiple = null;
-			this.single = single;
-		}
-		
-		int lastIndexOf(String s) {
-			return s.lastIndexOf(single);
-			if (multiple != null) {
+		Operator(char single) {
+			this.params = 2;
+			this.token = new CharParseToken<Operator>(this, single);
 		}
 		
 		int getParameterCount() {
 			return this.params;
+		}
+		
+		int endIndex(String s) {
+			int end = 0;
+			if (this.params == 2) {
+				end = token.lastIndexOf(s) + 1;
+				// Don't allow two-parameter operators to not have left side
+				if (end == 1) end = 0;
+			}
+			else if (this.params == 1) {
+				if (token.startOf(s)) {
+					end = s.length() - token.getRemainder().length(); 
+				}
+			}
+			else {
+				if (token.is(s)) {
+					end = s.length();
+				}
+			}
+			return end;
+		}
+		
+		String getRemainder() {
+			return token.getRemainder();
+		}
+		
+		Matcher getMatcher() {
+			if (token instanceof RegexParseToken) {
+				return ((RegexParseToken<Operator>)token).getMatchObject();
+			}
+			return null;
 		}
 	}
 	
@@ -60,7 +90,7 @@ public abstract class Formula {
 	 */
 	public abstract double evaluate(Map<String,Integer> variables);
 
-	public static Formula parse(String formulaString) throws ParseException {
+	public static Formula parseFormula(String formulaString) throws ParseException {
 		formulaString = whitespace.matcher(formulaString).replaceAll("");
 		List<String> tokens = tokenizeParens(formulaString);
 		return parseString(tokens.get(0), tokens);
@@ -76,35 +106,42 @@ public abstract class Formula {
 		Formula left, right;
 		Formula current = null;
 		
-		if (s.isEmpty()) {
+		if (s == null || s.isEmpty()) {
 			throw new IllegalArgumentException("Can not parse empty string");
 		}
 		
-		for (Operator op : Operator.values()) {			
-			Matcher m = op.matches(s);
-			
-			if (m.find()) {
-				int startGroup = m.groupCount() == 0 ? 0 : 1; 
-				int start = m.start(startGroup);
-				String before = s.substring(0, start);
-				
-//				if (op == Operator.PLUS) {
-//					if (Operator.MINUS.matches(before).find()) continue;
-//				}
-//				if (op == Operator.TIMES) {
-//					if (Operator.DIVIDE.matches(before).find()) continue;
-//				}
+		for (Operator op : Operator.values()) {
+			int index = op.endIndex(s);
+			if (index > 0) {
+				// Assuming single char for two-parameter operators not right for MINUS
+				if (op == Operator.MINUS) {
+					index++;
+				}
+				// Minus and divide have the same priority and should be handled at the same time
+				if (op == Operator.PLUS) {
+					if (Operator.MINUS.endIndex(op.getRemainder()) > 0) continue;
+				}
+				if (op == Operator.TIMES) {
+					if (Operator.DIVIDE.endIndex(op.getRemainder()) > 0) continue;
+				}
 
+				// 1- and 2-parameter operators, both take a parameter
 				if (op.getParameterCount() > 0) {
-					String after = s.substring(m.end());				
-					right = parseString(after, tokens);
-					left = (op.getParameterCount() == 2) ? parseString(before, tokens) : null;
+					right = parseString(op.getRemainder(), tokens);
+					left = null;
+					if (op.getParameterCount() == 2) {
+						String before = s.substring(0, index - 1);
+						left = parseString(before, tokens);
+					}
 					current = new ComplexFormula(op, left, right);
 				}
+				// 0-parameter operators can take the full input
 				else {
-					String token = startGroup == 0 ? null : tokens.get(Integer.parseInt(m.group(1)));
+					Matcher m = op.getMatcher();
+					String token;
 					switch (op) {
 					case SIZEOF:
+						token = tokens.get(Integer.parseInt(m.group(1)));
 						current = new FormulaSizeof(token);
 						break;
 					case VARIABLE:
@@ -114,6 +151,7 @@ public abstract class Formula {
 						current = new FormulaNumber(s);
 						break;
 					case TOKEN:
+						token = tokens.get(Integer.parseInt(m.group(1)));
 						current = parseString(token, tokens);
 						break;
 					}
@@ -123,7 +161,7 @@ public abstract class Formula {
 			}
 		}
 		if (current == null) {
-			throw new ParseException("Can not parse empty string", 0);
+			throw new ParseException("Can not parse string '" + s + "' as a formula", 0);
 		}
 		return current;
 	}

@@ -175,56 +175,59 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 			return this.mult + "/" + this.div + dim;
 		}
 	}
-	private final static ParseToken<ScaleModifier>[] scaleTokens;
-	private final static ParseToken<Dimension>[] dimTokens;
-	private final static ParseToken<ScaleModifier> bitToken = new ParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
+	private final static MultiStringParseToken<ScaleModifier>[] scaleTokens;
+	private final static MultiStringParseToken<Dimension>[] dimTokens;
+	private final static MultiStringParseToken<ScaleModifier> bitToken = new MultiStringParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
 	static {
 		ScaleModifier[] objects = {
 				MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
-				MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO,
-				KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA
+				KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA,
+				MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO
 			};
 		String[][] names = {
 				{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"months", "month"}, {"years", "year", "yrs", "yr"},
-				{"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"},
-				{"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"}
+				{"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"},
+				{"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"}
 			};
-		scaleTokens = ParseToken.createTokens(objects, names);
+		scaleTokens = MultiStringParseToken.createTokens(objects, names);
 		
 		names = new String[][] {{"bytes", "byte", "B"}, {"seconds", "second", "sec", "s"}, {"meters", "meter", "m"}, {}};
-		dimTokens = ParseToken.createTokens(Dimension.values(), names);
+		dimTokens = MultiStringParseToken.createTokens(Dimension.values(), names);
 	}
 	
 	public static ScaleModifier parseScale(String s) {
 		ScaleModifier scale = null;
 		Dimension dim = null;
+		if (s.length() == 0) s = null;
 		
 		// Scale
-		if (s.length() > 0) {
-			for (ParseToken<ScaleModifier> token : scaleTokens) {
+		if (s != null) {
+			for (MultiStringParseToken<ScaleModifier> token : scaleTokens) {
 				if (token.startOf(s)) {
 					s = token.getRemainder();
 					scale = token.getObject();
+					break;
 				}
 			}
 		}
 		// Bit is both a dimension and an extra scale modifier
-		if (s.length() > 0 && bitToken.startOf(s)) {
+		if (s != null && bitToken.startOf(s)) {
 			s = bitToken.getRemainder();
 			scale = (scale == null) ? bitToken.getObject() : scale.add(bitToken.getObject());
 			dim = scale.dim;
 		}
 		// Dimension
-		if (dim == null && s.length() > 0) {
-			for (ParseToken<Dimension> token : dimTokens) {
+		if (dim == null && s != null) {
+			for (MultiStringParseToken<Dimension> token : dimTokens) {
 				if (token.startOf(s)) {
 					dim = token.getObject();
 					s = token.getRemainder();
+					break;
 				}
 			}
 		}
 		
-		if (s.length() > 0) {
+		if (s != null) {
 			throw new IllegalArgumentException("String could not be parsed as a Scale: " + s);
 		}
 		else {
