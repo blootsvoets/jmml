@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
+import eu.mapperproject.xmml.topology.Domain;
 import eu.mapperproject.xmml.topology.Filter;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstancePort;
@@ -374,7 +376,7 @@ public class XMMLDocumentImporter {
 	
 	private CouplingTopology parseTopology(Element topology, XMMLDefinitions definitions) {
 		Map<String,Instance> instances = parseInstances(topology.getChildElements("instance"), definitions.getSubmodels());
-		List<Coupling> couplings = parseCouplings(topology.getChildElements("instance"), instances, definitions);
+		Collection<Coupling> couplings = parseCouplings(topology.getChildElements("coupling"), instances, definitions);
 		return new CouplingTopology(instances, couplings);
 	}
 
@@ -383,9 +385,9 @@ public class XMMLDocumentImporter {
 	 * @param instances
 	 * @return
 	 */
-	private List<Coupling> parseCouplings(Elements couplings,
+	private Collection<Coupling> parseCouplings(Elements couplings,
 			Map<String, Instance> instances, XMMLDefinitions definitions) {
-		List<Coupling> list = new ArrayList<Coupling>();
+		Collection<Coupling> list = new ArrayList<Coupling>();
 		
 		for (int i = 0; i < instances.size(); i++) {
 			Element coupling = couplings.get(i);
@@ -486,6 +488,7 @@ public class XMMLDocumentImporter {
 	private Map<String, Instance> parseInstances(Elements instances,
 			Map<String, Submodel> submodels) {
 		Map<String, Instance> map = new HashMap<String, Instance>();
+		Map<String, List<Domain>> domains = new HashMap<String, List<Domain>>();
 		
 		for (int i = 0; i < instances.size(); i++) {
 			Element instance = instances.get(i);
@@ -504,8 +507,15 @@ public class XMMLDocumentImporter {
 				continue;
 			}
 			
+<<<<<<< Updated upstream
 			String domain = instance.getAttributeValue("domain");
 			boolean initial = instance.getAttributeValue("init").equals("yes");
+=======
+			String domainStr = instance.getAttributeValue("domain");
+			Domain domain = domainStr == null ? null : Domain.parseDomain(domainStr, domains);
+			String initialStr = instance.getAttributeValue("init");
+			boolean initial = initialStr == null ? false : initialStr.equals("yes");
+>>>>>>> Stashed changes
 
 			Map<String, Scale> scales = new HashMap<String, Scale>();
 			scales.putAll(parseScale(instance.getChildElements("timescale"), Dimension.TIME, true));

@@ -32,7 +32,7 @@ public class Tuple<T> {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (!this.getClass().equals(o.getClass())) return false;
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		@SuppressWarnings("rawtypes")
 		Tuple t = (Tuple)o;
 		return t.left.equals(left) && t.right.equals(right);

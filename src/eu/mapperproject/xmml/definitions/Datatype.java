@@ -25,7 +25,7 @@ public class Datatype {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (!this.getClass().equals(o.getClass())) return false;
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		return ((Datatype)o).id.equals(id);
 	}
 }

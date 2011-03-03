@@ -5,21 +5,19 @@ import java.util.Map;
 import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.Submodel;
 
-public class Instance {
+/**
+ * An instance of a submodel, with its own id, domain and scales
+ * @author Joris Borgdorff
+ *
+ */
+public class Instance implements Identifiable, Domainable {
 
 	private final String id;
 	private final Submodel submodel;
-	private final String domain;
-	private final boolean initial;
-	private final Map<String, Scale> scales;
-
-	/**
-	 * @param id
-	 * @param submodel
-	 * @param domain
-	 * @param initial
-	 * @param scales
-	 */
+	private final Domain domain;
+	private boolean initial;
+	private boolean isfinal;
+	private final ScaleMap scales;
 	public Instance(String id, Submodel submodel, String domain,
 			boolean initial, Map<String, Scale> scales) {
 		this.id = id;
@@ -43,4 +41,25 @@ public class Instance {
 		return id;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.mapperproject.xmml.topology.Domainable#getDomain()
+	 */
+	@Override
+	public Domain getDomain() {
+		return this.domain;
+	}
+
+	/**
+	 * Whether the instance will be among the ones that are initially active
+	 */
+	public boolean isInitial() {
+		return initial;
+	}
+
+	/**
+	 * Whether the instance will be among the final ones to exit
+	 */
+	public boolean isFinal() {
+		return isfinal;
+	}
 }

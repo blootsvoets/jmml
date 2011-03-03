@@ -6,11 +6,12 @@ package eu.mapperproject.xmml.topology;
 import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
 
 /**
- * A coupling filter
+ * A coupling filter.
  * @author Joris Borgdorff
  *
  */
 public class Filter {
+	/** Fitering type. */
 	public enum Type {
 		INTERPOLATION, REDUCTION, CONVERTER
 	}
