@@ -1,23 +1,24 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
+import eu.mapperproject.xmml.topology.Coupling;
+import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
-import eu.mapperproject.xmml.topology.algorithms.CouplingDescription.CouplingType;
-import eu.mapperproject.xmml.topology.algorithms.graph.Category;
-import eu.mapperproject.xmml.topology.algorithms.graph.Node;
+import eu.mapperproject.xmml.util.graph.Category;
+import eu.mapperproject.xmml.util.graph.GraphvizNode;
 
-public class ProcessIteration extends AbstractInstance<ProcessReference> implements GraphvizNode {
+public class ProcessIteration implements GraphvizNode {
 	Annotation<ProcessReference> iter, inst, oper;
-	LabelStack label;
 	
 	public enum ProgressType {
 		OPERATOR, ITERATION, INSTANCE, CURRENT, COPY, RESET;
 	}
 	
-	public ProcessIteration(ProcessReference pd) {
-		this(pd, new Annotation<ProcessReference>(AnnotationType.ITERATION), new Annotation<ProcessReference>(AnnotationType.INSTANCE), new Annotation<ProcessReference>(AnnotationType.OPERATOR), new LabelStack());
+	public ProcessIteration(Instance pd) {
+		this(pd, new Annotation<ProcessReference>(AnnotationType.ITERATION), new Annotation<ProcessReference>(AnnotationType.INSTANCE), new Annotation<ProcessReference>(AnnotationType.OPERATOR));
 	}
 	
-	ProcessIteration(ProcessReference pd, Annotation<ProcessReference> it, Annotation<ProcessReference> nt, Annotation<ProcessReference> op, LabelStack label) {
+	ProcessIteration(Instance pd, Annotation<ProcessReference> it, Annotation<ProcessReference> nt, Annotation<ProcessReference> op) {
 		super(pd, pd.getDomain());
 		if (!it.getType().equals(AnnotationType.ITERATION) || !nt.getType().equals(AnnotationType.INSTANCE) || !op.getType().equals(AnnotationType.OPERATOR)) {
 			throw new IllegalArgumentException("ProcessIteration initialized with wrong Annotation types");
@@ -28,7 +29,6 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 		this.iter = new Annotation<ProcessReference>(it);
 		this.inst = new Annotation<ProcessReference>(nt);
 		this.oper = new Annotation<ProcessReference>(op);
-		this.label = label;
 	}
 	
 	public boolean instanceCompleted() {
@@ -47,37 +47,37 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 		return firstIteration() && !firstInstance() && getDescription().getDescription().stateful();
 	}
 	
-	public CouplingType receivingType() {
-		if (firstIteration()) return CouplingType.FINIT;
-		else if (this.oper.getCounter() == 1) return CouplingType.S;
+	public SEL receivingType() {
+		if (firstIteration()) return SEL.finit;
+		else if (this.oper.getCounter() == 1) return SEL.S;
 		else return null;
 	}
 
-	public CouplingType getCouplingType() {
-		return CouplingType.getCoupling(this.oper.getCounter());
+	public SEL getCouplingType() {
+		return SEL.values()[this.oper.getCounter()];
 	}
 	
-	public ProcessIteration nextIteration(CouplingDescription pd) {
+	public ProcessIteration nextIteration(Coupling pd) {
 		return this.progress(pd, ProgressType.ITERATION, ProgressType.CURRENT);
 	}
 	
-	public ProcessIteration nextInstance(CouplingDescription pd) {
+	public ProcessIteration nextInstance(Coupling pd) {
 		return this.progress(pd, ProgressType.INSTANCE, ProgressType.CURRENT);
 	}
 	
-	public ProcessIteration nextWorker(CouplingDescription pd) {
+	public ProcessIteration nextWorker(Coupling pd) {
 		return this.progress(pd, ProgressType.INSTANCE, ProgressType.INSTANCE);
 	}
 	
-	public ProcessIteration copyWorker(CouplingDescription pd) {
+	public ProcessIteration copyWorker(Coupling pd) {
 		return this.progress(pd, ProgressType.COPY, ProgressType.COPY);
 	}
 	
-	public ProcessIteration relieveWorkerInstance(CouplingDescription pd) {
+	public ProcessIteration relieveWorkerInstance(Coupling pd) {
 		return this.progress(pd, ProgressType.INSTANCE, ProgressType.RESET);
 	}
 
-	public ProcessIteration relieveWorkerIteration(CouplingDescription pd) {
+	public ProcessIteration relieveWorkerIteration(Coupling pd) {
 		return this.progress(pd, ProgressType.ITERATION, ProgressType.RESET);
 	}
 	
@@ -87,7 +87,7 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 		oper.merge(pi.oper);
 	}
 
-	public ProcessIteration progress(CouplingDescription cd, ProgressType instance, ProgressType worker) {		
+	public ProcessIteration progress(Coupling cd, ProgressType instance, ProgressType worker) {		
 		AnnotationMapping<ProcessReference> am = AnnotationMappingKB.getInstance().get(this, cd);
 		if (am != null) {
 			System.out.println("Using annotatation mapping");
@@ -106,7 +106,6 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 		Annotation<ProcessReference> nt = this.getFromFollowing(AnnotationType.INSTANCE, cd);
 		Annotation<ProcessReference> op = this.getFromFollowing(AnnotationType.OPERATOR, cd);
 
-		LabelStack lb;
 		switch (instance) {
 			case ITERATION:
 				if (op == null) {
@@ -153,23 +152,6 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 				break;
 			default:
 				throw new IllegalArgumentException("Only OPERATOR, ITERATION, PREVIOUS, INSTANCE and COPY operations are allowed for instance progress.");
-		}
-		
-		switch (worker) {
-			case RESET:
-				lb = this.label.decreaseLevel();
-				break;
-			case INSTANCE:
-				lb = this.label.increaseLevel();
-				break;
-			case CURRENT:
-				lb = this.label.copy();
-				break;
-			case COPY:
-				lb = this.label.next();
-				break;
-			default:
-				throw new IllegalArgumentException("Only INSTANCE, RESET, CURRENT and COPY operations are allowed for worker progress.");
 		}
 		
 		ProcessIteration pnext = ProcessIterationFactory.getInstance().getIteration(pd, it, nt, op, lb);
@@ -235,12 +217,12 @@ public class ProcessIteration extends AbstractInstance<ProcessReference> impleme
 	}
 	
 	@Override
-	public Category getCatagory() {
+	public Category getCategory() {
 		return new Category(this.getDomain());
 	}
 	
 	@Override
-	protected int otherHashCode() {
+	public int hashCode() {
 		int hashCode = 1;
 		hashCode = 31*hashCode + this.inst.hashCode();
 		hashCode = 31*hashCode + this.iter.hashCode();

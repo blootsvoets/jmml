@@ -34,7 +34,7 @@ public class GraphToGraphvizExporter {
 		this(false, false, true);
 	}
 
-	public void export(PTGraph input, File f) throws IOException {
+	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, File f) throws IOException {
 		PrintStream out = null;
 		try {
 			out = new PrintStream(f);
@@ -46,15 +46,15 @@ public class GraphToGraphvizExporter {
 		}
 	}
 
-	public void export(PTGraph input, PrintStream out) {
+	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, PrintStream out) {
 		out.println(this.convert(input));
 	}
 
-	public void print(PTGraph input) {
+	public void print(PTGraph<GraphvizNode, GraphvizEdge> input) {
 		this.export(input, System.out);
 	}
 
-	public void export(PTGraph input, File f, File pdf) throws IOException, InterruptedException {
+	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, File f, File pdf) throws IOException, InterruptedException {
 		System.out.println("Converting to PDF...");
 		Runtime.getRuntime().exec(new String[] {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()}).waitFor();
 	}
@@ -95,9 +95,9 @@ public class GraphToGraphvizExporter {
 		return lne("\"" + n.getName() + "\"" + properties);
 	}
 		
-	private String clusterContents(Cluster c, Tree<Cluster> clusters) {
+	private String clusterContents(Cluster<GraphvizNode, GraphvizEdge> c, Tree<Cluster<GraphvizNode, GraphvizEdge>> clusters) {
 		String ret = "";
-		PTGraph g = c.getGraph();
+		PTGraph<GraphvizNode, GraphvizEdge> g = c.getGraph();
 		if (g != null) {
 			for (GraphvizNode n : g.getNodes()) {
 				ret += this.nodeTemplate(n);
@@ -108,7 +108,7 @@ public class GraphToGraphvizExporter {
 			}
 		}
 
-		for (Cluster subc : clusters.getChildren(c)) {
+		for (Cluster<GraphvizNode, GraphvizEdge> subc : clusters.getChildren(c)) {
 			ret += ln("subgraph \"cluster_" + subc.getName() + "\" {");
 			tab.increase();
 			ret += lne("label=\"" + subc.getName() + "\",labeljust=l") + lne(subc.getStyle());
@@ -120,21 +120,21 @@ public class GraphToGraphvizExporter {
 		return ret;
 	}
 	
-	private String graphContents(PTGraph input) {
-		Tree<Cluster> clusters;
+	private String graphContents(PTGraph<GraphvizNode, GraphvizEdge> input) {
+		Tree<Cluster<GraphvizNode, GraphvizEdge>> clusters;
 
 		if (this.cluster) {
-			 clusters = input.partition();
+			 clusters = PTGraph.partition(input);
 		}
 		else {
-			clusters = new Tree<Cluster>();
-			clusters.add(new Cluster(Category.NO_CATEGORY, input));
+			clusters = new Tree<Cluster<GraphvizNode, GraphvizEdge>>();
+			clusters.add(new Cluster<GraphvizNode, GraphvizEdge>(Category.NO_CATEGORY, input));
 		}
 		
 		return clusterContents(clusters.getRoot(), clusters);
 	}
 	
-	public String convert(PTGraph input) {
+	public String convert(PTGraph<GraphvizNode, GraphvizEdge> input) {
 		this.hasStart = false;
 		this.hasEnd = false;
 

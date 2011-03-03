@@ -3,69 +3,58 @@ package eu.mapperproject.xmml.topology.algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.mapperproject.xmml.topology.algorithms.CouplingDescription.CouplingType;
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
+import eu.mapperproject.xmml.topology.Coupling;
+import eu.mapperproject.xmml.topology.Domain;
 import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.topology.algorithms.TaskGraph.ModelComplexity;
-import eu.mapperproject.xmml.topology.algorithms.graph.Category;
-import eu.mapperproject.xmml.topology.algorithms.graph.Edge;
+import eu.mapperproject.xmml.util.graph.Category;
+import eu.mapperproject.xmml.util.graph.GraphvizEdge;
 
-public class CouplingInstance extends AbstractInstance<CouplingDescription> implements GraphvizEdge {
+public class CouplingInstance implements GraphvizEdge {
 	private ProcessIteration from;
 	private ProcessIteration to;
 	private ModelComplexity mc;
+	private Domain domain;
+	private Coupling desc;
 	
-	public CouplingInstance(ProcessIteration from, ProcessIteration to, CouplingDescription cd, ModelComplexity mc) {
-		super(cd, cd == null ? Domain.MULTIPLE : cd.getDomain());
+	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd, ModelComplexity mc) {
+		this.desc = cd;
+		this.domain = cd == null ? Domain.MULTIPLE : cd.getDomain();
 		this.from = from;
 		this.to = to;
 		this.mc = mc;
 	}
 	
-	public static List<CouplingInstance> calculateTo(ProcessIteration from, CouplingDescription cd, TaskGraphState state) {
+	public static List<CouplingInstance> calculateTo(ProcessIteration from, Coupling cd, TaskGraphState state) {
 		List<CouplingInstance> cis = new ArrayList<CouplingInstance>();
 		
-		if (cd.hasMultiple()) {
-			ProcessIteration pnext = from.nextWorker(cd);
-			cis.add(new CouplingInstance(from, pnext, cd, ModelComplexity.MULTIPLICITY));
-			for (int i = 1; i < cd.getMultiplicity(); i++) {
-				pnext = pnext.copyWorker(cd);
-				cis.add(new CouplingInstance(from, pnext, cd, null));
-			}
-		}
-		else {
-			CouplingInstance ci;
-			if (cd.toMatches(CouplingType.FINIT)) {
-				ci = state.initInstance(cd);				
-				if (ci != null) cis.add(ci);
-			}
-			
-			ci = calculateSingleTo(from, cd);
+		CouplingInstance ci;
+		if (cd.getToPort().getOperator() == SEL.finit) {
+			ci = state.initInstance(cd);				
 			if (ci != null) cis.add(ci);
 		}
+		
+		ci = calculateSingleTo(from, cd);
+		if (ci != null) cis.add(ci);
 		
 		return cis;
 	}
 	
-	private static CouplingInstance calculateSingleTo(ProcessIteration from, CouplingDescription cd) {
+	private static CouplingInstance calculateSingleTo(ProcessIteration from, Coupling cd) {
 		ProgressType instance, worker;
 		ModelComplexity mc = null;
 		
-		if (cd.toMatches(CouplingType.FINIT)) {
+		if (cd.getToPort().getOperator() == SEL.finit) {
 			instance = ProgressType.INSTANCE;
-			mc = cd.fromMatches(CouplingType.OF) ? ModelComplexity.PATH : ModelComplexity.TREE;
+			mc = cd.getFromPort().getOperator() == SEL.Of ? ModelComplexity.PATH : ModelComplexity.TREE;
 		}
 		else {
 			instance = ProgressType.ITERATION;
 			mc = ModelComplexity.ROOTED_DAG;
 		}
 		
-		if (cd.removesMultiple()) {
-			worker = ProgressType.RESET;
-			mc = ModelComplexity.LABEL_REMOVAL;
-		}
-		else {
-			worker = ProgressType.CURRENT;
-		}
+		worker = ProgressType.CURRENT;
 
 		ProcessIteration pnext = from.progress(cd, instance, worker);
 		if (pnext == null) return null;
@@ -100,7 +89,7 @@ public class CouplingInstance extends AbstractInstance<CouplingDescription> impl
 			else return "step";
 		}
 		else {
-			return this.desc.getLabel();
+			return this.desc.getName();
 		}
 	}
 	
@@ -110,8 +99,8 @@ public class CouplingInstance extends AbstractInstance<CouplingDescription> impl
 	}
 
 	@Override
-	public Category getCatagory() {
-		return new Category(this.getDomain());
+	public Category getCategory() {
+		return new Category(this.domain);
 	}
 	
 	@Override

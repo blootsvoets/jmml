@@ -16,23 +16,23 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
  * @author Joris Borgdorff
  *
  */
-public class PTGraph<T> {
+public class PTGraph<T, E extends Edge<T>> {
 	private final boolean directed;
-	private final Collection<Edge<T>> edges;
+	private final Collection<E> edges;
 	private final Collection<T> nodes;
 	private boolean[] hasExtremity;
 	
 	public PTGraph(boolean directed) {
 		this.directed = directed;
-		this.edges = new ArrayList<Edge<T>>();
+		this.edges = new ArrayList<E>();
 		this.nodes = new ArrayList<T>();
 		this.hasExtremity = new boolean[] {false, false};
 	}
 	
-	public PTGraph(Graph<T, Edge<T>> graph, T source, T sink) {
+	public PTGraph(Graph<T, E> graph, T source, T sink) {
 		this.directed = graph instanceof DirectedGraph;
 		this.nodes = new ArrayList<T>(graph.getVertices());
-		this.edges = new ArrayList<Edge<T>>(graph.getEdges());
+		this.edges = new ArrayList<E>(graph.getEdges());
 
 		for (Edge<T> e : this.edges) {
 			if (e.getFrom() == null) {
@@ -44,13 +44,13 @@ public class PTGraph<T> {
 		}
 	}
 		
-	public static <T extends Child<T>> PTGraph<T> graphFromTree(Tree<T> tree) {
-		PTGraph<T> graph = new PTGraph<T>(true);
+	public static <T extends Child<T>> PTGraph<T, ? extends Edge<T>> graphFromTree(Tree<T> tree) {
+		PTGraph<T, SimpleEdge<T>> graph = new PTGraph<T,SimpleEdge<T>>(true);
 		
 		for (T elem : tree) {
 			graph.nodes.add(elem);
 			if (!elem.isRoot()) {
-				graph.edges.add(new SimpleEdge<T>(elem.parent(), elem));
+				graph.edges.add(new SimpleEdge<T>(elem.parent(), elem, Category.NO_CATEGORY));
 			}
 		}
 		return graph;
@@ -64,7 +64,7 @@ public class PTGraph<T> {
 		return this.edges.isEmpty() && this.nodes.isEmpty();
 	}
 	
-	public void addEdge(Edge<T> e) {
+	public void addEdge(E e) {
 		this.edges.add(e);
 	}
 	
@@ -89,7 +89,7 @@ public class PTGraph<T> {
 		this.nodes.add(n);
 	}
 	
-	public Collection<Edge<T>> getEdges() {
+	public Collection<E> getEdges() {
 		return this.edges;
 	}
 
@@ -119,19 +119,19 @@ public class PTGraph<T> {
 		return graph;
 	}
 	
-	public static <T extends Categorizable> Tree<Cluster> partition(PTGraph<T> graph) {
-		Map<Category,PTGraph<T>> map = partitionMap(graph);		
+	public static <T extends Categorizable, E extends Edge<T>> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph) {
+		Map<Category,PTGraph<T,E>> map = partitionMap(graph);		
 		Tree<Category> categories = new Tree<Category>(map.keySet());
-		Map<Category,Cluster> clusters = new HashMap<Category,Cluster>();
-		Tree<Cluster> tree = new Tree<Cluster>();
+		Map<Category,Cluster<T,E>> clusters = new HashMap<Category,Cluster<T,E>>();
+		Tree<Cluster<T,E>> tree = new Tree<Cluster<T,E>>();
 		
 		for (Category c : categories) {
-			Cluster cl;
+			Cluster<T,E> cl;
 			if (c.isRoot()) {
-				cl = new Cluster(c, map.get(c));
+				cl = new Cluster<T,E>(c, map.get(c));
 			}
 			else {
-				cl = new Cluster(c, map.get(c), clusters.get(c.parent()));
+				cl = new Cluster<T,E>(c, map.get(c), clusters.get(c.parent()));
 			}
 			clusters.put(c, cl);
 			tree.add(cl);
@@ -140,9 +140,9 @@ public class PTGraph<T> {
 		return tree;
 	}
 	
-	private static <T extends Categorizable> Map<Category,PTGraph<T>> partitionMap(PTGraph<T> graph) {
-		Map<Category,PTGraph<T>> map = new HashMap<Category,PTGraph<T>>();
-		for (Edge<T> e : graph.getEdges()) {
+	private static <T extends Categorizable, E extends Edge<T>> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph) {
+		Map<Category,PTGraph<T,E>> map = new HashMap<Category,PTGraph<T,E>>();
+		for (E e : graph.getEdges()) {
 			subgraph(graph, e, map).addEdge(e);
 		}
 		for (T n : graph.getNodes()) {
@@ -151,11 +151,11 @@ public class PTGraph<T> {
 		return map;
 	}
 	
-	private static <T extends Categorizable> PTGraph<T> subgraph(PTGraph<T> graph, Categorizable elem, Map<Category, PTGraph<T>> map) {
+	private static <T extends Categorizable, E extends Edge<T>> PTGraph<T,E> subgraph(PTGraph<T,E> graph, Categorizable elem, Map<Category, PTGraph<T,E>> map) {
 		Category c = elem.getCategory();
-		PTGraph<T> subg = map.get(c);
+		PTGraph<T,E> subg = map.get(c);
 		if (subg == null) {
-			subg = new PTGraph<T>(graph.isDirected());
+			subg = new PTGraph<T,E>(graph.isDirected());
 			map.put(c, subg);
 		}
 		return subg;

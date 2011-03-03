@@ -11,17 +11,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Elements;
+import nu.xom.ParsingException;
+import nu.xom.ValidityException;
 import eu.mapperproject.xmml.ModelMetadata;
 import eu.mapperproject.xmml.Param;
 import eu.mapperproject.xmml.XMMLDocument;
 import eu.mapperproject.xmml.definitions.Converter;
 import eu.mapperproject.xmml.definitions.Datatype;
 import eu.mapperproject.xmml.definitions.Port;
-import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.definitions.Submodel;
-import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.definitions.XMMLDefinitions;
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Domain;
@@ -30,19 +35,10 @@ import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstancePort;
 import eu.mapperproject.xmml.util.Formula;
 import eu.mapperproject.xmml.util.MultiStringParseToken;
-import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
-import eu.mapperproject.xmml.util.SIRange;
 import eu.mapperproject.xmml.util.SIUnit;
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
 import eu.mapperproject.xmml.util.Version;
-
-import nu.xom.Attribute;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Elements;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
+import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
+import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
 
 /**
  * Import a xMML file using the XOM library

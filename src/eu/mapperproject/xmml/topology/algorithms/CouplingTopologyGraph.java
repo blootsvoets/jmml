@@ -8,18 +8,20 @@ import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.util.graph.Category;
 import eu.mapperproject.xmml.util.graph.EdgeDecorator;
+import eu.mapperproject.xmml.util.graph.GraphvizEdge;
+import eu.mapperproject.xmml.util.graph.GraphvizNode;
 import eu.mapperproject.xmml.util.graph.NodeDecorator;
 import eu.mapperproject.xmml.util.graph.PTGraph;
-import eu.mapperproject.xmml.util.graph.SimpleEdge;
+import eu.mapperproject.xmml.util.graph.SimpleGraphvizEdge;
 import eu.mapperproject.xmml.util.graph.SimpleNode;
 
 public class CouplingTopologyGraph {
-	private final PTGraph topology;
+	private final PTGraph<GraphvizNode, GraphvizEdge> topology;
 	private CouplingTopology desc;
 	
 	public CouplingTopologyGraph(CouplingTopology desc) {
 		this.desc = desc;
-		this.topology = new PTGraph(true);
+		this.topology = new PTGraph<GraphvizNode, GraphvizEdge>(true);
 		this.computeGraph();
 	}
 	
@@ -31,11 +33,11 @@ public class CouplingTopologyGraph {
 			this.topology.addNode(n);
 			
 			if (i.isFinal()) {
-				this.topology.addEdge(new SimpleEdge(n, SimpleNode.END));
+				this.topology.addEdge(new SimpleGraphvizEdge(n, SimpleNode.END));
 				this.topology.setSink(SimpleNode.END);
 			}
 			if (i.isInitial()) {
-				this.topology.addEdge(new SimpleEdge(SimpleNode.START, n));
+				this.topology.addEdge(new SimpleGraphvizEdge(SimpleNode.START, n));
 				this.topology.setSource(SimpleNode.START);
 			}
 		}
@@ -73,7 +75,7 @@ public class CouplingTopologyGraph {
 		}
 	}
 
-	public PTGraph getGraph() {
+	public PTGraph<GraphvizNode, GraphvizEdge> getGraph() {
 		return this.topology;
 	}
 }

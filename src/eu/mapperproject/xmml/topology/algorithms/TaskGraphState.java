@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import eu.mapperproject.xmml.topology.algorithms.CouplingDescription.CouplingType;
-import eu.mapperproject.xmml.topology.algorithms.util.PTList;
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
+import eu.mapperproject.xmml.topology.Coupling;
 
 public class TaskGraphState implements Iterable<ProcessIteration> {
 	private List<ProcessIteration> activeProcesses;
 	private Set<ProcessIteration> visited;
-	private Map<ProcessIteration,Set<CouplingDescription>> snoozingProcesses;
+	private Map<ProcessIteration,Set<Coupling>> snoozingProcesses;
 	private Map<ProcessReference,ProcessIteration> states;
 	private ModelDescription model;
 
 	public TaskGraphState(ModelDescription desc) {
 		states = new HashMap<ProcessReference,ProcessIteration>();
 		activeProcesses = new ArrayList<ProcessIteration>();
-		snoozingProcesses = new HashMap<ProcessIteration,Set<CouplingDescription>>();
+		snoozingProcesses = new HashMap<ProcessIteration,Set<Coupling>>();
 		visited = new HashSet<ProcessIteration>();
 		this.model = desc;
 	}
@@ -32,8 +32,8 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			if (this.visited.contains(to)) {
 				//throw new IllegalStateException("Revisiting pi " + ci);
 			}
-			CouplingDescription cd = ci.getDescription();
-			Set<CouplingDescription> cis = PTList.getSet(to, snoozingProcesses);
+			Coupling cd = ci.getDescription();
+			Set<Coupling> cis = PTList.getSet(to, snoozingProcesses);
 			if (!cis.contains(cd)) {
 				cis.add(cd);
 				if (hasAllCouplings(to, cis, false)) {
@@ -48,8 +48,8 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		return null;
 	}
 	
-	private boolean hasAllCouplings(ProcessIteration pi, Set<CouplingDescription> cds, boolean print) {
-		CouplingType receivingType = pi.receivingType();
+	private boolean hasAllCouplings(ProcessIteration pi, Set<Coupling> cds, boolean print) {
+		SEL receivingType = pi.receivingType();
 		
 		if (receivingType != null) {
 			if ((pi.needsState() || (!pi.firstIteration() &&
@@ -62,7 +62,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 				return true;
 			}
 				
-			for (CouplingDescription cd : model.toCouplingMatching(pi.getDescription(), receivingType)) {
+			for (Coupling cd : model.toCouplingMatching(pi.getDescription(), receivingType)) {
 				if (!cds.contains(cd)) {
 					if (print) System.out.println(pi + " is missing: " + cd);
 					return false;
@@ -73,7 +73,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		return true;
 	}
 	
-	public CouplingInstance initInstance(CouplingDescription cd) {
+	public CouplingInstance initInstance(Coupling cd) {
 		CouplingInstance ci = null;
 		if (cd.getTo().getDescription().stateful()) {
 			ProcessIteration prev = states.remove(cd.getTo());
@@ -90,7 +90,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	public void printDeadlock() {
 		if (this.activeProcesses.isEmpty() && !this.snoozingProcesses.isEmpty()) {
 			System.out.println("Deadlock:");
-			for (Map.Entry<ProcessIteration, Set<CouplingDescription>> m : snoozingProcesses.entrySet()) {
+			for (Map.Entry<ProcessIteration, Set<Coupling>> m : snoozingProcesses.entrySet()) {
 				hasAllCouplings(m.getKey(), m.getValue(), true);
 			}
 		}

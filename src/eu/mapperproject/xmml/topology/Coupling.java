@@ -3,6 +3,7 @@ package eu.mapperproject.xmml.topology;
 import java.util.List;
 
 import eu.mapperproject.xmml.definitions.Port;
+import eu.mapperproject.xmml.util.graph.Category;
 import eu.mapperproject.xmml.util.graph.Edge;
 
 /**
@@ -63,5 +64,10 @@ public class Coupling implements Domainable, Edge<Instance> {
 	 * If the name was not specified this returns null */
 	public String getName() {
 		return this.name;
+	}
+
+	@Override
+	public Category getCategory() {
+		return new Category(this.getDomain());
 	}
 }

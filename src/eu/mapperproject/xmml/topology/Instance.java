@@ -18,7 +18,7 @@ public class Instance implements Identifiable, Domainable {
 	private boolean isfinal;
 	private final ScaleMap scales;
 
-	public Instance(String id, Submodel submodel, String domain,
+	public Instance(String id, Submodel submodel, Domain domain,
 			boolean initial, ScaleMap scales) {
 		this.id = id;
 		this.submodel = submodel;

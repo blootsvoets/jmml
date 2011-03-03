@@ -1,28 +1,33 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import eu.mapperproject.xmml.topology.algorithms.CouplingDescription.CouplingType;
-import eu.mapperproject.xmml.topology.algorithms.graph.PTGraph;
+import eu.mapperproject.xmml.topology.CouplingTopology;
+import eu.mapperproject.xmml.topology.Instance;
+import eu.mapperproject.xmml.util.graph.GraphvizEdge;
+import eu.mapperproject.xmml.util.graph.GraphvizNode;
+import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
-public class TaskGraph extends AbstractInstance<ModelDescription> {
-	private final PTGraph graph;
+public class TaskGraph {
+	private final PTGraph<GraphvizNode, GraphvizEdge> graph;
 	private final List<ProcessIteration> pis;
 	private final Set<ModelComplexity> complexities;
+	private CouplingTopology desc;
 	
-	public TaskGraph(ModelDescription model) {
-		this(model, false, false);
+	public TaskGraph(CouplingTopology topology) {
+		this(topology, false, false);
 	}
 	
-	public TaskGraph(ModelDescription model, boolean horizontal, boolean subgraphs) {
-		super(model, null);
-		this.graph = new PTGraph(true);
+	public TaskGraph(CouplingTopology topology, boolean horizontal, boolean subgraphs) {
+		this.desc = topology;
+		this.graph = new PTGraph<GraphvizNode, GraphvizEdge>(true);
 		this.complexities = EnumSet.noneOf(ModelComplexity.class);
-		this.pis = descriptionToIteration(model.getProcesses());
+		this.pis = descriptionToIteration(topology.getInstances());
 	}
 
 	
@@ -43,7 +48,7 @@ public class TaskGraph extends AbstractInstance<ModelDescription> {
 		}
 	}
 
-	public PTGraph getGraph() {
+	public PTGraph<GraphvizNode, GraphvizEdge> getGraph() {
 		if (this.graph.isEmpty()) {
 			this.computeGraph();
 		}
@@ -136,9 +141,9 @@ public class TaskGraph extends AbstractInstance<ModelDescription> {
 		System.out.println(mc);
 	}
 	
-	public static List<ProcessIteration> descriptionToIteration(List<ProcessReference> pds) {
+	public static List<ProcessIteration> descriptionToIteration(Collection<Instance> pds) {
 		ArrayList<ProcessIteration> pis = new ArrayList<ProcessIteration>(pds.size());
-		for (ProcessReference pd : pds) {
+		for (Instance pd : pds) {
 			pis.add(new ProcessIteration(pd));
 		}
 		return pis;

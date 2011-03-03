@@ -3,9 +3,6 @@ package eu.mapperproject.xmml.topology;
 import java.util.Collection;
 import java.util.Map;
 
-import eu.mapperproject.xmml.topology.algorithms.ProcessReference;
-import eu.mapperproject.xmml.topology.algorithms.CouplingDescription.CouplingType;
-
 /**
  * Coupling Topology of a multiscale model
  * @author Joris Borgdorff

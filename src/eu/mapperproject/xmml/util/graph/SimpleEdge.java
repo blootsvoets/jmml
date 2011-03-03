@@ -7,10 +7,12 @@ package eu.mapperproject.xmml.util.graph;
  */
 public class SimpleEdge<T> implements Edge<T> {
 	private final T from, to;
+	private final Category category;
 	
-	public SimpleEdge(T from, T to) {
+	public SimpleEdge(T from, T to, Category category) {
 		this.from = from;
 		this.to = to;
+		this.category = category;
 	}
 	
 	@Override
@@ -25,7 +27,6 @@ public class SimpleEdge<T> implements Edge<T> {
 	
 	@Override
 	public Category getCategory() {
-		// FIXME
-		return Category.NO_CATEGORY;
+		return this.category;
 	}
 }

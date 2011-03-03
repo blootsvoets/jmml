@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
-import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.util.SIRange;
