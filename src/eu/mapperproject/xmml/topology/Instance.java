@@ -1,17 +1,21 @@
 package eu.mapperproject.xmml.topology;
 
-import java.util.Map;
-
-import eu.mapperproject.xmml.definitions.Scale;
+import eu.mapperproject.xmml.Identifiable;
+import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.definitions.Submodel;
 
-public class Instance {
+/**
+ * An instance of a submodel, with its own id, domain and scales
+ * @author Joris Borgdorff
+ *
+ */
+public class Instance implements Identifiable {
 
 	private final String id;
 	private final Submodel submodel;
 	private final String domain;
 	private final boolean initial;
-	private final Map<String, Scale> scales;
+	private final ScaleMap scales;
 
 	/**
 	 * @param id
@@ -21,7 +25,7 @@ public class Instance {
 	 * @param scales
 	 */
 	public Instance(String id, Submodel submodel, String domain,
-			boolean initial, Map<String, Scale> scales) {
+			boolean initial, ScaleMap scales) {
 		this.id = id;
 		this.submodel = submodel;
 		this.domain = domain;

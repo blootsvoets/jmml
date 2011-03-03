@@ -3,6 +3,7 @@
  */
 package eu.mapperproject.xmml.definitions;
 
+import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.util.SIRange;
 import eu.mapperproject.xmml.util.SIUnit;
 import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
@@ -12,7 +13,7 @@ import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
  * @author Joris Borgdorff
  *
  */
-public class Scale {
+public class Scale implements Identifiable {
 	private String id;
 	private Dimension dim;
 	private String dimName;
@@ -47,5 +48,39 @@ public class Scale {
 	 */
 	public SIRange getDelta() {
 		return this.delta;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.mapperproject.xmml.Identifiable#getId()
+	 */
+	@Override
+	public String getId() {
+		return id;
+	}
+	
+	/** Get the dimensional axis of this scale */
+	public Dimension getDimension() {
+		return this.dim;
+	}
+
+	/**
+	 * @return range of the maximum size
+	 */
+	public SIRange getMax() {
+		return max;
+	}
+
+	/**
+	 * @return whether the delta should be fixed when specifying a submodel instance
+	 */
+	public boolean hasDeltaFixed() {
+		return deltaFixed;
+	}
+
+	/**
+	 * @return whether the maximum should be fixed when specifying a submodel instance
+	 */
+	public boolean hasMaxFixed() {
+		return maxFixed;
 	}
 }

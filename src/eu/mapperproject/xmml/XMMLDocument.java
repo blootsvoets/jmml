@@ -11,6 +11,11 @@ import eu.mapperproject.xmml.io.XMMLDocumentImporter;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.util.Version;
 
+/**
+ * An xMML document
+ * @author Joris Borgdorff
+ *
+ */
 public class XMMLDocument {
 	private final ModelMetadata model;
 	private final Version xmmlVersion;

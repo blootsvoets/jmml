@@ -6,7 +6,6 @@ package eu.mapperproject.xmml.util;
 /**
  * A ParseToken keeps an object and can match that to a String
  * @author Joris Borgdorff
- * @author Joris Borgdorff
  *
  */
 public interface ParseToken<T> {
@@ -38,6 +37,7 @@ public interface ParseToken<T> {
 	public String getRemainder();
 
 	/**
+	 * Get the represented object
 	 * @return the represented object
 	 */
 	public T getObject();

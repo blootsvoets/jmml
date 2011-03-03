@@ -1,10 +1,13 @@
 package eu.mapperproject.xmml.definitions;
+
+import eu.mapperproject.xmml.Identifiable;
+
 /**
  * Define a data converter, from one datatype to another
  * @author Joris Borgdorff
  *
  */
-public class Converter {
+public class Converter implements Identifiable {
 	private final Datatype to;
 	private final Datatype from;
 	private final String id;

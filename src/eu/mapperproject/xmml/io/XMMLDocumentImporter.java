@@ -48,7 +48,7 @@ import nu.xom.ValidityException;
  * @author Joris Borgdorff
  */
 public class XMMLDocumentImporter {
-	final static Logger logger = Logger.getLogger(XMMLDocumentImporter.class.getName());
+	private final static Logger logger = Logger.getLogger(XMMLDocumentImporter.class.getName());
 	
 	/** XOM parser that will be used */
 	private Builder parser;
@@ -202,11 +202,11 @@ public class XMMLDocumentImporter {
 			Optional stateful = MultiStringParseToken.findObject(submodel.getAttributeValue("stateful"), MultiStringParseToken.optionalTokens);
 			Optional interactive = MultiStringParseToken.findObject(submodel.getAttributeValue("interactive"), MultiStringParseToken.optionalTokens);
 			
-			
-			Scale timescale = parseScale(submodel.getChildElements("timescale"), Dimension.TIME, false).values().iterator().next();
-			Map<String, Scale> spacescale = parseScale(submodel.getChildElements("spacescale"), Dimension.LENGTH, false);
-			Map<String, Scale> otherscale = parseScale(submodel.getChildElements("otherscale"), Dimension.OTHER, false);
-			ScaleMap scales = new ScaleMap(timescale, spacescale, otherscale);
+			ScaleParser parser = new ScaleParser(meta.getId());
+			parser.parseElements(submodel.getChildElements("timescale"), Dimension.TIME);
+			parser.parseElements(submodel.getChildElements("spacescale"), Dimension.LENGTH);
+			parser.parseElements(submodel.getChildElements("otherscale"), Dimension.OTHER);
+			ScaleMap scales = parser.getScaleMap();
 
 			Element ports = submodel.getFirstChildElement("ports");
 			Map<String, Port> in = parsePorts(ports.getChildElements("in"), true, datatypes);
@@ -265,116 +265,9 @@ public class XMMLDocumentImporter {
 		return map;
 	}
 
-	/** Parses and returns the scales of a submodel */
-	private Map<String, Scale> parseScale(Elements scales, Dimension dim, boolean asInstance) {
-		Map<String, Scale> map = new HashMap<String, Scale>();
-		
-		for (int i = 0; i < scales.size(); i++) {
-			Element scale = scales.get(i);
-			String id = scale.getAttributeValue("id");
-			if (id == null) {
-				if (dim == Dimension.TIME) {
-					id = "t";
-				}
-				else if (dim == Dimension.LENGTH) {
-					if (!map.containsKey("x")) id = "x";
-					else if (!map.containsKey("y")) id = "y";
-					else if (!map.containsKey("z")) id = "z";
-					else if (!map.containsKey("u")) id = "u";
-					else if (!map.containsKey("v")) id = "v";
-					else if (!map.containsKey("w")) id = "w";
-					else {
-						logger.warning("With more than 6 length scales, please provide names, now random names are used.");
-						id = "x" + Math.random();
-					}
-				}
-				else {
-					if (!map.containsKey("a")) id = "a";
-					else if (!map.containsKey("b")) id = "b";
-					else if (!map.containsKey("c")) id = "c";
-					else if (!map.containsKey("d")) id = "d";
-					else if (!map.containsKey("e")) id = "e";
-					else if (!map.containsKey("f")) id = "f";
-					else {
-						logger.warning("With more than 6 length scales, please provide names, now random names are used.");
-						id = "a" + Math.random();
-					}		
-				}
-			}
-			
-			SIRange delta = null; boolean deltaFixed = true;
-			String dattr = scale.getAttributeValue("delta");
-			if (dattr != null) {
-				delta = new SIRange(SIUnit.parseSIUnit(dattr));
-			}
-			else {
-				Element eDelta = scale.getFirstChildElement("delta");
-				if (eDelta == null) {
-					throw new IllegalArgumentException("Can not parse submodel scale if it contains no information on step size");
-				}
-				else {
-					String minStr = eDelta.getAttributeValue("min"), maxStr = eDelta.getAttributeValue("max");
-					SIUnit min = minStr == null ? null : SIUnit.parseSIUnit(minStr);
-					SIUnit max = maxStr == null ? null : SIUnit.parseSIUnit(maxStr);
-					
-					delta = new SIRange(min, max);
-					if (eDelta.getAttributeValue("type").equals("variable")) {
-						deltaFixed = false;
-					}
-				}
-			}
-			
-			SIRange max = null; boolean maxFixed = true;
-			String mattr = scale.getAttributeValue("max");
-			if (mattr != null) {
-				max = new SIRange(SIUnit.parseSIUnit(dattr));
-			}
-			else {
-				Element eMax = scale.getFirstChildElement("max");
-				if (eMax == null) {
-					throw new IllegalArgumentException("Can not parse submodel scale if it contains no information on maximum size");
-				}
-				else {
-					String minStr = eMax.getAttributeValue("min"), maxStr = eMax.getAttributeValue("max");
-					SIUnit min = minStr == null ? null : SIUnit.parseSIUnit(minStr);
-					SIUnit mx = maxStr == null ? null : SIUnit.parseSIUnit(maxStr);
-					
-					delta = new SIRange(min, mx);
-					if (eMax.getAttributeValue("type").equals("variable")) {
-						maxFixed = false;
-					}
-				}
-			}
-
-			Attribute dims = scale.getAttribute("dimensions");
-			int dimensions = 1;
-			if (dims != null) {
-				dimensions = Integer.parseInt(dims.getValue());
-			}
-			String dimName = scale.getAttributeValue("name"); 
-			
-			// TODO: check subranges.
-			if (asInstance) {
-				Scale subScale = map.get(id);
-				if (subScale == null) {
-					logger.warning("In a submodel instance, only scales may be overridden that were already defined in the submodel. Scale '" + id + "' was not previously defined in a submodel.");
-					continue;
-				}
-				SIRange subDelta = subScale.getDelta();
-				if (!subDelta.isPoint() && !subDelta.contains(delta)) {
-					logger.warning("");
-				}
-			}
-			
-			map.put(id, new Scale(id, dim, delta, deltaFixed, max, maxFixed, dimensions, dimName));
-		}
-		
-		return map;
-	}
-	
 	private CouplingTopology parseTopology(Element topology, XMMLDefinitions definitions) {
 		Map<String,Instance> instances = parseInstances(topology.getChildElements("instance"), definitions.getSubmodels());
-		List<Coupling> couplings = parseCouplings(topology.getChildElements("instance"), instances, definitions);
+		List<Coupling> couplings = parseCouplings(topology.getChildElements("coupling"), instances, definitions);
 		return new CouplingTopology(instances, couplings);
 	}
 
@@ -389,7 +282,6 @@ public class XMMLDocumentImporter {
 		
 		for (int i = 0; i < instances.size(); i++) {
 			Element coupling = couplings.get(i);
-			
 			String name = coupling.getAttributeValue("name");
 			InstancePort from = parseCouplingPort(coupling.getAttributeValue("from"), true, instances);
 			InstancePort to = parseCouplingPort(coupling.getAttributeValue("to"), false, instances);
@@ -505,12 +397,14 @@ public class XMMLDocumentImporter {
 			}
 			
 			String domain = instance.getAttributeValue("domain");
-			boolean initial = instance.getAttributeValue("init").equals("yes");
+			String initialStr = instance.getAttributeValue("init");
+			boolean initial = initialStr == null ? false : initialStr.equals("yes");
 
-			Map<String, Scale> scales = new HashMap<String, Scale>();
-			scales.putAll(parseScale(instance.getChildElements("timescale"), Dimension.TIME, true));
-			scales.putAll(parseScale(instance.getChildElements("spacescale"), Dimension.LENGTH, true));
-			scales.putAll(parseScale(instance.getChildElements("otherscale"), Dimension.OTHER, true));
+			ScaleParser parser = new ScaleParser(id, submodel.getScaleMap());
+			parser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
+			parser.parseElements(instance.getChildElements("spacescale"), Dimension.LENGTH);
+			parser.parseElements(instance.getChildElements("otherscale"), Dimension.OTHER);
+			ScaleMap scales = parser.getScaleMap();
 
 			map.put(id, new Instance(id, submodel, domain, initial, scales));
 		}

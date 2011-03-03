@@ -7,7 +7,7 @@ import eu.mapperproject.xmml.util.Version;
  * @author Joris Borgdorff
  *
  */
-public class ModelMetadata {
+public class ModelMetadata implements Identifiable {
 	private final String id;
 	private final String name;
 	private final String description;

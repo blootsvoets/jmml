@@ -2,23 +2,40 @@ package eu.mapperproject.xmml.definitions;
 
 import java.util.Map;
 
+import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.ModelMetadata;
 import eu.mapperproject.xmml.Param;
 import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
 
-public class Submodel {
+/** An xMML submodel
+ * 
+ * @author Joris Borgdorff
+ */
+public class Submodel implements Identifiable {
+	/** Operators of the submodel execution loop (SEL) */
 	public enum SEL {
-		finit(false), Oi(true), B(false), S(false), Of(true);
+		/** Initialization */
+		finit(false),
+		/** Intermediate observation */
+		Oi(true),
+		/** Boundary condition */
+		B(false),
+		/** Solver */
+		S(false),
+		/** Final observation */
+		Of(true);
 		
 		private boolean sending;
 		
-		SEL(boolean send) {
+		private SEL(boolean send) {
 			this.sending = send;
 		}
 		
+		/** Whether the operator may send data */
 		public boolean isSending() {
 			return this.sending;
 		}
+		/** Whether the operator may receive data */
 		public boolean isReceiving() {
 			return !this.sending;
 		}
@@ -58,5 +75,12 @@ public class Submodel {
 	/** Get an out port by its name */
 	public Port getOutPort(String name) {
 		return out.get(name);
+	}
+
+	/**
+	 * @return the scale map of the submodel
+	 */
+	public ScaleMap getScaleMap() {
+		return scales;
 	}
 }
