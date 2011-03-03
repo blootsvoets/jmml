@@ -1,8 +1,7 @@
 package eu.mapperproject.xmml.topology;
 
-import java.util.Map;
-
-import eu.mapperproject.xmml.definitions.Scale;
+import eu.mapperproject.xmml.Identifiable;
+import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.definitions.Submodel;
 
 /**
@@ -18,8 +17,9 @@ public class Instance implements Identifiable, Domainable {
 	private boolean initial;
 	private boolean isfinal;
 	private final ScaleMap scales;
+
 	public Instance(String id, Submodel submodel, String domain,
-			boolean initial, Map<String, Scale> scales) {
+			boolean initial, ScaleMap scales) {
 		this.id = id;
 		this.submodel = submodel;
 		this.domain = domain;

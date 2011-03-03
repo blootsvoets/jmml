@@ -1,5 +1,6 @@
 package eu.mapperproject.xmml.definitions;
 
+import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 
 /**
@@ -7,7 +8,8 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
  * @author Joris Borgdorff
  *
  */
-public class Port {
+public class Port implements Identifiable {
+	/** Port type, if it transmits state variables or normal data */
 	public enum Type {
 		STATE, NORMAL;
 	}

@@ -1,9 +1,14 @@
 package eu.mapperproject.xmml.definitions;
 
+import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.util.Formula;
 import eu.mapperproject.xmml.util.SIUnit;
-
-public class Datatype {
+/**
+ * An xMML datatype, possibly representing a real data object
+ * @author Joris Borgdorff
+ *
+ */
+public class Datatype implements Identifiable {
 	private final String id;
 	private final String name;
 	private final Formula size_formula;

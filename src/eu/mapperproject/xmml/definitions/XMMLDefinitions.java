@@ -5,6 +5,11 @@ import java.util.Map;
 
 import eu.mapperproject.xmml.util.Tuple;
 
+/**
+ * Definitions of multiscale model elements, including datatypes, converters and submodels
+ * @author Joris Borgdorff
+ *
+ */
 public class XMMLDefinitions {
 	private Map<String,Datatype> datatypes;
 	private Map<String,Converter> converters;

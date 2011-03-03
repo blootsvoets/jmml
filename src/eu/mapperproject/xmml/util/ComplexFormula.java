@@ -40,7 +40,7 @@ public class ComplexFormula extends Formula {
 	
 	/** Calculates the formula, given the variable values
 	 * 
-	 * @param variables a map of each variable with a value
+	 * @param vars a map of each variable with a value
 	 * @return its value; a double
 	 */
 	public double evaluate(Map<String,Integer> vars) {
