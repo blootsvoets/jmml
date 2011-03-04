@@ -32,6 +32,11 @@ public class SIRange {
 		this(value, value);
 	}
 	
+	/** Whether the minimum and maximum of the range are both set values */
+	public boolean isDefinite() {
+		return (min != null && max != null);
+	}
+	
 	/** Minimum value of the range.
 	 * 
 	 * If null is returned, interpret as negative infinity. 
@@ -50,15 +55,17 @@ public class SIRange {
 	
 	/** Whether the range is in fact a single point or value */
 	public boolean isPoint() {
-		if (this.min == null || this.max == null) {
+		if (!this.isDefinite()) {
 			return false;
 		}
 		return this.min.equals(this.max);
 	}
 	
-	/** The mean value between the minimum and maximum */
+	/** The mean value between the minimum and maximum.
+	 * Returns null if either the minimum or maximum is null
+	 */
 	public SIUnit getMean() {
-		if (this.min == null || this.max == null) {
+		if (!this.isDefinite()) {
 			return null;
 		}
 		return this.max.add(this.min).div(2l);

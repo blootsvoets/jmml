@@ -1,13 +1,14 @@
 package eu.mapperproject.xmml.definitions;
 
 import eu.mapperproject.xmml.Identifiable;
+import eu.mapperproject.xmml.util.graph.Edge;
 
 /**
  * Define a data converter, from one datatype to another
  * @author Joris Borgdorff
  *
  */
-public class Converter implements Identifiable {
+public class Converter implements Identifiable, Edge<Datatype> {
 	private final Datatype to;
 	private final Datatype from;
 	private final String id;

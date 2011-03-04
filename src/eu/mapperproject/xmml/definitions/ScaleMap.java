@@ -56,6 +56,11 @@ public class ScaleMap {
 		return this.all.containsKey(id);
 	}
 	
+	/** Get the average number of timesteps using the current scale */
+	public int getTimesteps() {
+		return this.time.getSteps();
+	}
+	
 	/** Copy references to each of the scales in the scale map to a new scale map */
 	public ScaleMap copy() {
 		ScaleMap copy = new ScaleMap();

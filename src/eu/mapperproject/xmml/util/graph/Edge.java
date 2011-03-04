@@ -7,7 +7,7 @@ package eu.mapperproject.xmml.util.graph;
  * A basic edge of a graph
  * @author Joris Borgdorff
  */
-public interface Edge<T> extends Categorizable {
+public interface Edge<T> {
 	/** Get the tail node of the edge */
 	public T getFrom();
 

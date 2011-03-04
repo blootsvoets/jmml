@@ -11,7 +11,7 @@ import eu.mapperproject.xmml.topology.Domain;
  *
  * @author Joris Borgdorff
  */ 
-public class Category implements Child<Category>, GraphvizNode {
+public class Category implements Child<Category>, StyledNode {
 	/** A non-category, for specifying anything uncategorized */
 	public final static Category NO_CATEGORY = new Category(Domain.MULTIPLE.toString(), new String[0]);
 

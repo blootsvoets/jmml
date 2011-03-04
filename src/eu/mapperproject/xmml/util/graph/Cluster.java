@@ -4,7 +4,7 @@ package eu.mapperproject.xmml.util.graph;
  * A hierarchical clustering, based on a category.
  * @author Joris Borgdorff
  */
-public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, GraphvizNode {
+public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, StyledNode {
 	private final Category category;
 	private final PTGraph<T,E> graph;
 	private final Cluster<T,E> parent;

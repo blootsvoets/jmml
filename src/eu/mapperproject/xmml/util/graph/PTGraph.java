@@ -44,13 +44,13 @@ public class PTGraph<T, E extends Edge<T>> {
 		}
 	}
 		
-	public static <T extends Child<T>> PTGraph<T, ? extends Edge<T>> graphFromTree(Tree<T> tree) {
-		PTGraph<T, SimpleEdge<T>> graph = new PTGraph<T,SimpleEdge<T>>(true);
+	public static <T extends StyledNode & Child<T>> PTGraph<StyledNode, StyledEdge> graphFromTree(Tree<T> tree) {
+		PTGraph<StyledNode, StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(true);
 		
 		for (T elem : tree) {
 			graph.nodes.add(elem);
 			if (!elem.isRoot()) {
-				graph.edges.add(new SimpleEdge<T>(elem.parent(), elem, Category.NO_CATEGORY));
+				graph.edges.add(new SimpleStyledEdge(elem.parent(), elem));
 			}
 		}
 		return graph;
@@ -119,7 +119,7 @@ public class PTGraph<T, E extends Edge<T>> {
 		return graph;
 	}
 	
-	public static <T extends Categorizable, E extends Edge<T>> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph) {
+	public static <T extends Categorizable, E extends Edge<T> & Categorizable> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph) {
 		Map<Category,PTGraph<T,E>> map = partitionMap(graph);		
 		Tree<Category> categories = new Tree<Category>(map.keySet());
 		Map<Category,Cluster<T,E>> clusters = new HashMap<Category,Cluster<T,E>>();
@@ -140,7 +140,7 @@ public class PTGraph<T, E extends Edge<T>> {
 		return tree;
 	}
 	
-	private static <T extends Categorizable, E extends Edge<T>> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph) {
+	private static <T extends Categorizable, E extends Edge<T> & Categorizable> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph) {
 		Map<Category,PTGraph<T,E>> map = new HashMap<Category,PTGraph<T,E>>();
 		for (E e : graph.getEdges()) {
 			subgraph(graph, e, map).addEdge(e);
@@ -151,7 +151,7 @@ public class PTGraph<T, E extends Edge<T>> {
 		return map;
 	}
 	
-	private static <T extends Categorizable, E extends Edge<T>> PTGraph<T,E> subgraph(PTGraph<T,E> graph, Categorizable elem, Map<Category, PTGraph<T,E>> map) {
+	private static <T, E extends Edge<T>> PTGraph<T,E> subgraph(PTGraph<T,E> graph, Categorizable elem, Map<Category, PTGraph<T,E>> map) {
 		Category c = elem.getCategory();
 		PTGraph<T,E> subg = map.get(c);
 		if (subg == null) {

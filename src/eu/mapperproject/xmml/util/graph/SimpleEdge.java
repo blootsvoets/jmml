@@ -5,7 +5,7 @@ package eu.mapperproject.xmml.util.graph;
  * @author Joris Borgdorff
  *
  */
-public class SimpleEdge<T> implements Edge<T> {
+public class SimpleEdge<T> implements Edge<T>, Categorizable {
 	private final T from, to;
 	private final Category category;
 	

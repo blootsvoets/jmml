@@ -278,7 +278,7 @@ public class XMMLDocumentImporter {
 			Map<String, Instance> instances, XMMLDefinitions definitions) {
 		Collection<Coupling> list = new ArrayList<Coupling>();
 		
-		for (int i = 0; i < instances.size(); i++) {
+		for (int i = 0; i < couplings.size(); i++) {
 			Element coupling = couplings.get(i);
 			String name = coupling.getAttributeValue("name");
 			InstancePort from = parseCouplingPort(coupling.getAttributeValue("from"), true, instances);

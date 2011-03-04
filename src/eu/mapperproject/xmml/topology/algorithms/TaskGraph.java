@@ -2,21 +2,19 @@ package eu.mapperproject.xmml.topology.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
+import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
-import eu.mapperproject.xmml.util.graph.GraphvizEdge;
-import eu.mapperproject.xmml.util.graph.GraphvizNode;
+import eu.mapperproject.xmml.topology.InstanceOperator;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
 public class TaskGraph {
-	private final PTGraph<GraphvizNode, GraphvizEdge> graph;
+	private final PTGraph<ProcessIteration, CouplingInstance> graph;
 	private final List<ProcessIteration> pis;
-	private final Set<ModelComplexity> complexities;
 	private CouplingTopology desc;
 	
 	public TaskGraph(CouplingTopology topology) {
@@ -25,33 +23,13 @@ public class TaskGraph {
 	
 	public TaskGraph(CouplingTopology topology, boolean horizontal, boolean subgraphs) {
 		this.desc = topology;
-		this.graph = new PTGraph<GraphvizNode, GraphvizEdge>(true);
-		this.complexities = EnumSet.noneOf(ModelComplexity.class);
+		this.graph = new PTGraph<ProcessIteration, CouplingInstance>(true);
 		this.pis = descriptionToIteration(topology.getInstances());
 	}
 
 	
-	public enum ModelComplexity {
-		PATH, TREE, ROOTED_DAG("rooted DAG"), DAG("DAG"), SYNC_DAG("synchronized DAG"), MERGE, MULTIPLICITY, LABEL_REMOVAL("label removal");
-		private final String desc;
-		
-		ModelComplexity() {
-			this.desc = this.name().replace('_', ' ').toLowerCase();
-		}
-
-		ModelComplexity(String desc) {
-			this.desc = desc;
-		}
-		
-		public String toString() {
-			return "Model includes '" + this.desc + "'-type complexity.";
-		}
-	}
-
-	public PTGraph<GraphvizNode, GraphvizEdge> getGraph() {
-		if (this.graph.isEmpty()) {
-			this.computeGraph();
-		}
+	public PTGraph<ProcessIteration, CouplingInstance> getGraph() {
+		this.computeGraph();
 		
 		return this.graph;
 	}
@@ -61,19 +39,20 @@ public class TaskGraph {
 		
 		// Initialize processes with no initialization
 		for (ProcessIteration pi : pis) {
-			if (this.desc.isInitial(pi.getDescription())) {
-				this.activateStart(state, pi);
+			if (pi.getInstance().isInitial()) {
+				state.activate(pi);
+				this.graph.addNode(pi);
 			}
 		}
 		
 		// As long as there are active processes, continue building the graph
 		for (ProcessIteration pi : state) {
 			boolean complete = pi.instanceCompleted();
-			if (pi.getCouplingType().canSend(complete)) {		
+			if (pi.getCouplingType().isSending()) {		
 				boolean hasNext = this.computeNextIteration(state, pi, complete);
 					
 				if (complete && !hasNext) {
-					this.activateEnd(state, pi);
+					pi.setFinal();
 				}
 			}
 			
@@ -92,12 +71,11 @@ public class TaskGraph {
 	 * Computes the next iteration given the current process iteration
 	 * @return whether a next iteration could be computed
 	 */
-	
 	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi, boolean complete) {
-		CouplingType ct = complete ? CouplingType.OF : CouplingType.OI;
-		List<CouplingDescription> cds = this.desc.fromCouplingsMatching(pi.getDescription(), ct);
+		SEL ct = complete ? SEL.Of : SEL.Oi;
+		Collection<Coupling> cds = this.desc.getFrom(new InstanceOperator(pi.getInstance(), ct));
 		
-		for (CouplingDescription cd : cds) {
+		for (Coupling cd : cds) {
 			List<CouplingInstance> cis = CouplingInstance.calculateTo(pi, cd, state);
 			this.activate(state, cis);
 		}
@@ -105,22 +83,12 @@ public class TaskGraph {
 		return !cds.isEmpty();
 	}
 	
-	private void activateStart(TaskGraphState state, ProcessIteration pi) {
-		this.activate(state, new CouplingInstance(null, pi, null, null));
-	}
-	
 	private void activateStep(TaskGraphState state, ProcessIteration pi) {
-		ProcessIteration pnext = pi.nextIteration(null);
-		if (pnext != null) this.activate(state, new CouplingInstance(pi, pnext, null, null));		
+		ProcessIteration pnext = pi.nextStep();
+		if (pnext != null) this.activate(state, new CouplingInstance(pi, pnext));		
 	}
 	
-	private void activateEnd(TaskGraphState state, ProcessIteration pi) {
-		this.activate(state, new CouplingInstance(pi, null, null, null));
-	}
-
 	private void activate(TaskGraphState state, CouplingInstance ci) {
-		this.addComplexity(ci.getComplexity());
-
 		ProcessIteration active = state.activate(ci);
 		if (active != null) this.graph.addNode(active);
 
@@ -131,14 +99,6 @@ public class TaskGraph {
 		for (CouplingInstance ci : cis) {
 			this.activate(state, ci);
 		}
-	}
-	
-	private void addComplexity(ModelComplexity mc) {
-		if (mc == null || this.complexities.contains(mc))
-			return;
-		
-		this.complexities.add(mc);
-		System.out.println(mc);
 	}
 	
 	public static List<ProcessIteration> descriptionToIteration(Collection<Instance> pds) {

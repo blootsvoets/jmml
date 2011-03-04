@@ -5,32 +5,31 @@ import java.util.List;
 
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
-import eu.mapperproject.xmml.topology.Domain;
 import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
-import eu.mapperproject.xmml.topology.algorithms.TaskGraph.ModelComplexity;
-import eu.mapperproject.xmml.util.graph.Category;
-import eu.mapperproject.xmml.util.graph.GraphvizEdge;
+import eu.mapperproject.xmml.util.graph.Edge;
 
-public class CouplingInstance implements GraphvizEdge {
+public class CouplingInstance implements Edge<ProcessIteration> {
 	private ProcessIteration from;
 	private ProcessIteration to;
-	private ModelComplexity mc;
-	private Domain domain;
-	private Coupling desc;
+	private Coupling coupling;
 	
-	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd, ModelComplexity mc) {
-		this.desc = cd;
-		this.domain = cd == null ? Domain.MULTIPLE : cd.getDomain();
+	/** Create an instance of a coupling between one process iteration and another */
+	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
+		this.coupling = cd;
 		this.from = from;
 		this.to = to;
-		this.mc = mc;
+	}
+	
+	/** Create an instance of a state coupling between one process iteration the next */
+	public CouplingInstance(ProcessIteration from, ProcessIteration to) {
+		this(from, to, null);
 	}
 	
 	public static List<CouplingInstance> calculateTo(ProcessIteration from, Coupling cd, TaskGraphState state) {
 		List<CouplingInstance> cis = new ArrayList<CouplingInstance>();
 		
 		CouplingInstance ci;
-		if (cd.getToPort().getOperator() == SEL.finit) {
+		if (cd.getFromOperator().getOperator() == SEL.finit) {
 			ci = state.initInstance(cd);				
 			if (ci != null) cis.add(ci);
 		}
@@ -42,36 +41,36 @@ public class CouplingInstance implements GraphvizEdge {
 	}
 	
 	private static CouplingInstance calculateSingleTo(ProcessIteration from, Coupling cd) {
-		ProgressType instance, worker;
-		ModelComplexity mc = null;
+		ProgressType instance;
 		
-		if (cd.getToPort().getOperator() == SEL.finit) {
+		if (cd.getToOperator().getOperator() == SEL.finit) {
 			instance = ProgressType.INSTANCE;
-			mc = cd.getFromPort().getOperator() == SEL.Of ? ModelComplexity.PATH : ModelComplexity.TREE;
 		}
 		else {
 			instance = ProgressType.ITERATION;
-			mc = ModelComplexity.ROOTED_DAG;
 		}
 		
-		worker = ProgressType.CURRENT;
-
-		ProcessIteration pnext = from.progress(cd, instance, worker);
+		ProcessIteration pnext = from.progress(cd, instance);
 		if (pnext == null) return null;
-		else return new CouplingInstance(from, pnext, cd, mc);
+		else return new CouplingInstance(from, pnext, cd);
 	}
 	
-	public ModelComplexity getComplexity() {
-		return this.mc;
+	public boolean isState() {
+		return this.coupling == null;
 	}
 	
+	public Coupling getCoupling() {
+		return this.coupling;
+	}
+
+	@Override
 	public boolean equals(Object o) {
-		if (!super.equals(o)) return false;
+		if (o == null || this.getClass().equals(o.getClass())) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
 		return this.from.equals(ci.from) && this.to.equals(ci.to);
 	}
-
+	
 	@Override
 	public ProcessIteration getFrom() {
 		return this.from;
@@ -82,27 +81,6 @@ public class CouplingInstance implements GraphvizEdge {
 		return this.to;
 	}
 
-	@Override
-	public String getLabel() {
-		if (this.desc == null) {
-			if (this.from == null || this.to == null) return null;
-			else return "step";
-		}
-		else {
-			return this.desc.getName();
-		}
-	}
-	
-	@Override
-	public String getStyle() {
-		return (this.desc == null && this.from != null && this.to != null) ? "style=dashed" : null;
-	}
-
-	@Override
-	public Category getCategory() {
-		return new Category(this.domain);
-	}
-	
 	@Override
 	public String toString() {
 		return this.from + " -> " + this.to;

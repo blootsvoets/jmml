@@ -45,29 +45,39 @@ public class Coupling implements Domainable, Edge<Instance> {
 		return from.getInstance();
 	}
 
+	/** Return the id of the instance where the coupling comes from */ 
+	public String getFromId() {
+		return from.getInstance().getId();
+	}
+
 	/** Return the instance where the coupling goes to */ 
 	public Instance getTo() {
 		return to.getInstance();
 	}
 	
-	/** Get the port of the sending end */
-	public Port getFromPort() {
-		return from.getPort();
+	/** Return the instance where the coupling goes to */ 
+	public String getToId() {
+		return to.getInstance().getId();
+	}	
+
+	/** Get the port of the receiving end */
+	public InstanceOperator getToOperator() {
+		return to.getInstanceOperator();
 	}
 
 	/** Get the port of the receiving end */
-	public Port getToPort() {
-		return from.getPort();
+	public InstanceOperator getFromOperator() {
+		return from.getInstanceOperator();
 	}
-	
+
 	/** Get the name of the coupling.
 	 * If the name was not specified this returns null */
 	public String getName() {
 		return this.name;
 	}
-
+	
 	@Override
-	public Category getCategory() {
-		return new Category(this.getDomain());
+	public String toString() {
+		return from + " -> " + to; 
 	}
 }

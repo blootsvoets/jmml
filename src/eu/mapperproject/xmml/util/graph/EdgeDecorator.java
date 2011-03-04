@@ -7,7 +7,7 @@ package eu.mapperproject.xmml.util.graph;
  * Decorates an object as an edge
  * @author Joris Borgdorff
  */
-public class EdgeDecorator<T> extends SimpleGraphvizEdge {
+public class EdgeDecorator<T> extends SimpleStyledEdge {
 
 	private final T object;
 	private final String style;
@@ -18,7 +18,7 @@ public class EdgeDecorator<T> extends SimpleGraphvizEdge {
 	 * @param from
 	 * @param to
 	 */
-	public EdgeDecorator(T object, String label, String style, GraphvizNode from, GraphvizNode to) {
+	public EdgeDecorator(T object, String style, String label, StyledNode from, StyledNode to) {
 		super(from, to);
 		this.object = object;
 		this.label = label;

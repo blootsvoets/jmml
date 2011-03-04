@@ -24,6 +24,7 @@ public class Instance implements Identifiable, Domainable {
 		this.submodel = submodel;
 		this.domain = domain;
 		this.initial = initial;
+		this.isfinal = false;
 		this.scales = scales;
 	}
 
@@ -49,6 +50,16 @@ public class Instance implements Identifiable, Domainable {
 		return this.domain;
 	}
 
+	/** Set this instance to be among the ones initially active programmatically */
+	public void setInitial() {
+		this.initial = true;
+	}
+	
+	/** Set this instance to be among the final ones to exit programmatically */
+	public void setFinal() {
+		this.isfinal = true;
+	}
+
 	/**
 	 * Whether the instance will be among the ones that are initially active
 	 */
@@ -61,5 +72,13 @@ public class Instance implements Identifiable, Domainable {
 	 */
 	public boolean isFinal() {
 		return isfinal;
+	}
+	
+	/**
+	 * Whether this instance should be completed after a given number of timesteps
+	 * @param steps the number of timesteps so far
+	 */
+	public boolean isCompleted(int steps) {
+		return this.scales.getTimesteps() <= steps - 1;
 	}
 }

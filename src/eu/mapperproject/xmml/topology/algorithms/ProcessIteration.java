@@ -4,52 +4,74 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
-import eu.mapperproject.xmml.util.graph.Category;
-import eu.mapperproject.xmml.util.graph.GraphvizNode;
 
-public class ProcessIteration implements GraphvizNode {
-	Annotation<ProcessReference> iter, inst, oper;
+public class ProcessIteration {
+	private static final ProcessIterationCache cache = new ProcessIterationCache();
+	Annotation<Instance> iter, inst, oper;
+	private Instance instance;
+	private boolean isfinal;
 	
 	public enum ProgressType {
-		OPERATOR, ITERATION, INSTANCE, CURRENT, COPY, RESET;
+		OPERATOR, ITERATION, INSTANCE, CURRENT;
 	}
 	
 	public ProcessIteration(Instance pd) {
-		this(pd, new Annotation<ProcessReference>(AnnotationType.ITERATION), new Annotation<ProcessReference>(AnnotationType.INSTANCE), new Annotation<ProcessReference>(AnnotationType.OPERATOR));
+		this(pd, new Annotation<Instance>(AnnotationType.ITERATION), new Annotation<Instance>(AnnotationType.INSTANCE), new Annotation<Instance>(AnnotationType.OPERATOR));
 	}
 	
-	ProcessIteration(Instance pd, Annotation<ProcessReference> it, Annotation<ProcessReference> nt, Annotation<ProcessReference> op) {
-		super(pd, pd.getDomain());
+	ProcessIteration(Instance pd, Annotation<Instance> it, Annotation<Instance> nt, Annotation<Instance> op) {
+		this.instance = pd;
 		if (!it.getType().equals(AnnotationType.ITERATION) || !nt.getType().equals(AnnotationType.INSTANCE) || !op.getType().equals(AnnotationType.OPERATOR)) {
 			throw new IllegalArgumentException("ProcessIteration initialized with wrong Annotation types");
 		}
 		it.add(pd);
 		nt.add(pd);
 		op.add(pd);
-		this.iter = new Annotation<ProcessReference>(it);
-		this.inst = new Annotation<ProcessReference>(nt);
-		this.oper = new Annotation<ProcessReference>(op);
+		this.iter = new Annotation<Instance>(it);
+		this.inst = new Annotation<Instance>(nt);
+		this.oper = new Annotation<Instance>(op);
+		this.isfinal = false;
+	}
+	
+	public boolean isFinal() {
+		return this.isfinal;
+	}
+	
+	public boolean isInitial() {
+		return this.instance.isInitial() && firstInstance() && initializing();
+	}
+	
+	public void setFinal() {
+		this.isfinal = true;
 	}
 	
 	public boolean instanceCompleted() {
-		return this.desc.isCompleted(this.iter.getCounter()) && (this.oper.getCounter() == 1 || this.desc.isMicromodel());
+		return this.oper.getCounter() == SEL.Of.ordinal();
+	}
+	
+	public boolean loopCompleted() {
+		return this.instance.isCompleted(this.iter.getCounter()) && (this.oper.getCounter() >= SEL.S.ordinal());
+	}
+	
+	public Instance getInstance() {
+		return this.instance;
 	}
 	
 	public boolean firstInstance() {
 		return this.inst.getCounter() == 0;
 	}
 	
-	public boolean firstIteration() {
-		return this.iter.getCounter() == 0 && this.oper.getCounter() == 0;
+	public boolean initializing() {
+		return this.oper.getCounter() == SEL.finit.ordinal();
 	}
 	
 	public boolean needsState() {
-		return firstIteration() && !firstInstance() && getDescription().getDescription().stateful();
+		return initializing() && !firstInstance() && instance.getSubmodel().isStateful();
 	}
 	
 	public SEL receivingType() {
-		if (firstIteration()) return SEL.finit;
-		else if (this.oper.getCounter() == 1) return SEL.S;
+		SEL op = SEL.values()[this.oper.getCounter()];
+		if (op.isReceiving()) return op;
 		else return null;
 	}
 
@@ -57,124 +79,116 @@ public class ProcessIteration implements GraphvizNode {
 		return SEL.values()[this.oper.getCounter()];
 	}
 	
+	public ProcessIteration nextStep() {
+		return this.progress(ProgressType.ITERATION);
+	}
+	
+	public ProcessIteration nextState() {
+		return this.progress(ProgressType.INSTANCE);
+	}
+
 	public ProcessIteration nextIteration(Coupling pd) {
-		return this.progress(pd, ProgressType.ITERATION, ProgressType.CURRENT);
+		return this.progress(pd, ProgressType.ITERATION);
 	}
 	
 	public ProcessIteration nextInstance(Coupling pd) {
-		return this.progress(pd, ProgressType.INSTANCE, ProgressType.CURRENT);
+		return this.progress(pd, ProgressType.INSTANCE);
 	}
-	
-	public ProcessIteration nextWorker(Coupling pd) {
-		return this.progress(pd, ProgressType.INSTANCE, ProgressType.INSTANCE);
-	}
-	
-	public ProcessIteration copyWorker(Coupling pd) {
-		return this.progress(pd, ProgressType.COPY, ProgressType.COPY);
-	}
-	
-	public ProcessIteration relieveWorkerInstance(Coupling pd) {
-		return this.progress(pd, ProgressType.INSTANCE, ProgressType.RESET);
-	}
-
-	public ProcessIteration relieveWorkerIteration(Coupling pd) {
-		return this.progress(pd, ProgressType.ITERATION, ProgressType.RESET);
-	}
-	
+		
 	public void merge(ProcessIteration pi) {
 		iter.merge(pi.iter);
 		inst.merge(pi.inst);
 		oper.merge(pi.oper);
 	}
 
-	public ProcessIteration progress(Coupling cd, ProgressType instance, ProgressType worker) {		
-		AnnotationMapping<ProcessReference> am = AnnotationMappingKB.getInstance().get(this, cd);
-		if (am != null) {
-			System.out.println("Using annotatation mapping");
-			return am.map(this, cd);
-		}
-
-		ProcessReference pd;
-		if (cd == null) {
-			pd = this.desc;
-		}
-		else {
-			pd = cd.getTo();
-		}
+	public ProcessIteration progress(ProgressType instance) {		
+		Instance pd = this.instance;
 		
-		Annotation<ProcessReference> it = this.getFromFollowing(AnnotationType.ITERATION, cd);
-		Annotation<ProcessReference> nt = this.getFromFollowing(AnnotationType.INSTANCE, cd);
-		Annotation<ProcessReference> op = this.getFromFollowing(AnnotationType.OPERATOR, cd);
+		Annotation<Instance> it = null;
+		Annotation<Instance> nt = null;
+		Annotation<Instance> op = null;
 
 		switch (instance) {
 			case ITERATION:
-				if (op == null) {
-					if (cd == null) {
-						if (this.oper.current(pd).getCounter() == 0 && !pd.isMicromodel()) {
-							op = this.oper.next(pd);
-							it = it == null ? this.iter.current(pd) : it;		
-						}
-						else {
-							op = this.oper.reset(pd);
-							it = it == null ? this.iter.next(pd) : it;
-						}
-					}
-					else {
-						int opnum = cd.getToType().getNum();
-						if (it == null) {
-							it = (opnum > this.oper.current(pd).getCounter() && !pd.isMicromodel()) ? this.iter.current(pd) : this.iter.next(pd);
-						}
-						op = this.oper.set(pd, opnum);
-					}
+				nt = this.inst.current(pd);
+
+				// Loop until the end condition is met
+				if (this.oper.current(pd).getCounter() < SEL.S.ordinal() || pd.isCompleted(this.iter.current(pd).getCounter())) {
+					op = this.oper.next(pd);
+					it = this.iter.current(pd);
 				}
-				else if (it == null){
-					it = op.current(pd).getCounter() == 0 || pd.isMicromodel() ? this.iter.next(pd) : this.iter.current(pd);
+				else {
+					op = this.oper.set(pd, SEL.Oi.ordinal());
+					it = this.iter.next(pd);
 				}
+
 				if (pd.isCompleted(it.getCounter() - 1)) {
 					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + it);
 				}
-				nt = nt == null ? this.inst.current(pd) : nt;
 				break;
 			case INSTANCE:
-				it = it == null ? this.iter.current(pd) : it;
-				if (nt == null) {
-					nt = this.inst.next(pd);
-//					AnnotationFactory af = AnnotationFactory.getInstance();
-//					nt = af.getAnnotation(pd, this.inst).next(pd);
-//					af.maxAnnotation(pd, nt);
-				}
-				if (op == null) op = (cd == null) ? this.oper.reset(pd) : this.oper.set(pd, cd.getToType().getNum());
-				break;
-			case COPY:
-				it = it == null ? new Annotation<ProcessReference>(this.iter) : it;
-				nt = nt == null ? new Annotation<ProcessReference>(this.inst) : nt;
-				op = op == null ? new Annotation<ProcessReference>(this.oper) : op;
+				nt = this.inst.next(pd);
+				it = this.iter.reset(pd);
+				op = this.oper.reset(pd);
 				break;
 			default:
 				throw new IllegalArgumentException("Only OPERATOR, ITERATION, PREVIOUS, INSTANCE and COPY operations are allowed for instance progress.");
 		}
 		
-		ProcessIteration pnext = ProcessIterationFactory.getInstance().getIteration(pd, it, nt, op, lb);
+		ProcessIteration pnext = cache.getIteration(pd, it, nt, op);
 		pnext.iter.merge(it);
 		pnext.inst.merge(nt);
 		pnext.oper.merge(op);
 		return pnext;
 	}
 	
-	/** see if the annotation has a following annotation, otherwise return null */
-	private Annotation<ProcessReference> getFromFollowing(AnnotationType to, CouplingDescription cd) {
-		if (cd == null) return null;
-		AnnotationType ft = cd.follow(to);
-		if (ft == null) return null;
-		return new Annotation<ProcessReference>(this.getAnnotation(ft));
+	public ProcessIteration progress(Coupling cd, ProgressType instance) {		
+		Instance pd = cd.getTo();
+		
+		Annotation<Instance> it = null;
+		Annotation<Instance> nt = null;
+		Annotation<Instance> op = null;
+
+		switch (instance) {
+			case ITERATION:
+				int opnum = cd.getToOperator().getOperatorNum();
+				if (opnum >= this.oper.current(pd).getCounter()) {
+					it = this.iter.current(pd); 
+				}
+				else {
+					it = this.iter.next(pd);
+				}
+				op = this.oper.set(pd, opnum);
+
+				if (pd.isCompleted(it.getCounter() - 1)) {
+					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + it);
+				}
+				nt = this.inst.current(pd);
+				break;
+			case INSTANCE:
+				it = this.iter.current(pd);
+				nt = this.inst.next(pd);
+				op = this.oper.set(pd, cd.getToOperator().getOperatorNum());
+				break;
+			default:
+				throw new IllegalArgumentException("Only OPERATOR, ITERATION, PREVIOUS, INSTANCE and COPY operations are allowed for instance progress.");
+		}
+		
+		ProcessIteration pnext = cache.getIteration(pd, it, nt, op);
+//		pnext.iter.merge(it);
+//		pnext.inst.merge(nt);
+//		pnext.oper.merge(op);
+		return pnext;
 	}
 	
-	public Annotation<ProcessReference> getAnnotation(AnnotationType at) {
+	public Annotation<Instance> getAnnotation(AnnotationType at) {
 		switch (at) {
 		case INSTANCE:
 			return this.inst;
 		case ITERATION:
 			return this.iter;
+		case OPERATOR:
+			return this.oper;
 		default:
 			throw new IllegalArgumentException("Annotation type not supported by ProcessIteration");
 		}
@@ -182,43 +196,21 @@ public class ProcessIteration implements GraphvizNode {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!super.equals(o)) return false;
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		ProcessIteration other = (ProcessIteration)o;
 		
-		return inst.equals(other.inst) && iter.equals(other.iter) && oper.equals(other.oper) && label.equals(other.label);
+		return this.instance.equals(other.instance) && inst.equals(other.inst) && iter.equals(other.iter) && oper.equals(other.oper);
 	}
 
 	@Override
 	public String toString() {
-		String ret = "";
-		if (!this.label.isEmpty()) ret += this.label + ":";
-		String pdString = this.inst.getCounter() > 0 ? desc.toString() + this.inst.counterString() : desc.toString();
-		String count;
-		if (desc.isMicromodel()) {
-			count = "";
+		String ret = instance.getId();
+		if (this.inst.getCounter() > 0) {
+			ret += this.inst.counterString();
 		}
-		else {
-			count = "(";
-			if (this.desc.multistep()) count += this.iter.counterString() + ",";
-			count += CouplingType.getCoupling(this.oper.getCounter()) +  ")";
-		}
+		String count = "(" + this.iter.counterString() + "," + SEL.values()[this.oper.getCounter()] +  ")";
 		
-		return ret + pdString + count;
-	}
-	
-	@Override
-	public String getName() {
-		return this.toString();
-	}
-
-	@Override
-	public String getStyle() {
-		return null;
-	}
-	
-	@Override
-	public Category getCategory() {
-		return new Category(this.getDomain());
+		return ret + count;
 	}
 	
 	@Override

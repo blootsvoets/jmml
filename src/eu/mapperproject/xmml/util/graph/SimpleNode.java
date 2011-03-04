@@ -5,7 +5,7 @@ package eu.mapperproject.xmml.util.graph;
  * @author Joris Borgdorff
  *
  */
-public class SimpleNode implements GraphvizNode {
+public class SimpleNode implements StyledNode {
 	private final String name;
 	private final String style;
 	
@@ -43,7 +43,7 @@ public class SimpleNode implements GraphvizNode {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
-		return this.getName().equals(((GraphvizNode)o).getName());
+		return this.getName().equals(((StyledNode)o).getName());
 	}
 	
 	@Override

@@ -18,11 +18,6 @@ public class InstancePort {
 		this.instance = instance;
 		this.port = port;
 	}
-
-	@Override
-	public String toString() {
-		return this.instance.getId() + "." + this.port.getId();
-	}
 	
 	/**
 	 * @return the Port of the instance
@@ -36,5 +31,17 @@ public class InstancePort {
 	 */
 	public Instance getInstance() {
 		return instance;
+	}
+	
+	/**
+	 * Get the operation that is associated with this port
+	 */
+	public InstanceOperator getInstanceOperator() {
+		return new InstanceOperator(this.instance, this.port.getOperator());
+	}
+
+	@Override
+	public String toString() {
+		return this.instance.getId() + "." + this.port.getId();
 	}
 }

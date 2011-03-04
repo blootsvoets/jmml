@@ -7,10 +7,9 @@ import java.io.PrintStream;
 import eu.mapperproject.xmml.util.Indent;
 import eu.mapperproject.xmml.util.graph.Category;
 import eu.mapperproject.xmml.util.graph.Cluster;
-import eu.mapperproject.xmml.util.graph.GraphvizEdge;
-import eu.mapperproject.xmml.util.graph.GraphvizNode;
+import eu.mapperproject.xmml.util.graph.StyledEdge;
+import eu.mapperproject.xmml.util.graph.StyledNode;
 import eu.mapperproject.xmml.util.graph.PTGraph;
-import eu.mapperproject.xmml.util.graph.SimpleNode;
 import eu.mapperproject.xmml.util.graph.Tree;
 
 /**
@@ -20,7 +19,6 @@ import eu.mapperproject.xmml.util.graph.Tree;
 public class GraphToGraphvizExporter {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
-	private boolean hasStart, hasEnd;
 	private final static String DOT_EXEC = "/usr/local/bin/dot";
 	
 	public GraphToGraphvizExporter(boolean cluster, boolean horizontal, boolean edgeLabel) {
@@ -34,7 +32,7 @@ public class GraphToGraphvizExporter {
 		this(false, false, true);
 	}
 
-	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, File f) throws IOException {
+	public void export(PTGraph<StyledNode, StyledEdge> input, File f) throws IOException {
 		PrintStream out = null;
 		try {
 			out = new PrintStream(f);
@@ -46,20 +44,21 @@ public class GraphToGraphvizExporter {
 		}
 	}
 
-	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, PrintStream out) {
+	public void export(PTGraph<StyledNode, StyledEdge> input, PrintStream out) {
 		out.println(this.convert(input));
 	}
 
-	public void print(PTGraph<GraphvizNode, GraphvizEdge> input) {
+	public void print(PTGraph<StyledNode, StyledEdge> input) {
 		this.export(input, System.out);
 	}
 
-	public void export(PTGraph<GraphvizNode, GraphvizEdge> input, File f, File pdf) throws IOException, InterruptedException {
+	public void export(PTGraph<StyledNode, StyledEdge> input, File f, File pdf) throws IOException, InterruptedException {
+		this.export(input, f);
 		System.out.println("Converting to PDF...");
 		Runtime.getRuntime().exec(new String[] {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()}).waitFor();
 	}
 	
-	private String edgeTemplate(GraphvizEdge e, boolean directed) {
+	private String edgeTemplate(StyledEdge e, boolean directed) {
 		String label = e.getLabel();
 		String style = e.getStyle();
 		String properties = "";
@@ -74,41 +73,32 @@ public class GraphToGraphvizExporter {
 		}
 		
 		String arrow = directed ? "->" : "--";
-		GraphvizNode from = e.getFrom(), to = e.getTo();
-		if (from == null) {
-			from = SimpleNode.START;
-			this.hasStart = true;
-		}
-		if (to == null) {
-			to = SimpleNode.END;
-			this.hasEnd = true;
-		}
 
-		return lne("\"" + from + "\" " + arrow + " \"" + to + "\"" + properties);
+		return lne("\"" + e.getFrom() + "\" " + arrow + " \"" + e.getTo() + "\"" + properties);
 	}
 	
 	
-	private String nodeTemplate(GraphvizNode n) {
+	private String nodeTemplate(StyledNode n) {
 		String style = n.getStyle();
 		String properties = style == null ? "" : " [" + style + "]";
 		
 		return lne("\"" + n.getName() + "\"" + properties);
 	}
 		
-	private String clusterContents(Cluster<GraphvizNode, GraphvizEdge> c, Tree<Cluster<GraphvizNode, GraphvizEdge>> clusters) {
+	private String clusterContents(Cluster<StyledNode, StyledEdge> c, Tree<Cluster<StyledNode, StyledEdge>> clusters) {
 		String ret = "";
-		PTGraph<GraphvizNode, GraphvizEdge> g = c.getGraph();
+		PTGraph<StyledNode, StyledEdge> g = c.getGraph();
 		if (g != null) {
-			for (GraphvizNode n : g.getNodes()) {
+			for (StyledNode n : g.getNodes()) {
 				ret += this.nodeTemplate(n);
 			}
 
-			for (GraphvizEdge e : g.getEdges()) {
+			for (StyledEdge e : g.getEdges()) {
 				ret += this.edgeTemplate(e, g.isDirected());
 			}
 		}
 
-		for (Cluster<GraphvizNode, GraphvizEdge> subc : clusters.getChildren(c)) {
+		for (Cluster<StyledNode, StyledEdge> subc : clusters.getChildren(c)) {
 			ret += ln("subgraph \"cluster_" + subc.getName() + "\" {");
 			tab.increase();
 			ret += lne("label=\"" + subc.getName() + "\",labeljust=l") + lne(subc.getStyle());
@@ -120,24 +110,21 @@ public class GraphToGraphvizExporter {
 		return ret;
 	}
 	
-	private String graphContents(PTGraph<GraphvizNode, GraphvizEdge> input) {
-		Tree<Cluster<GraphvizNode, GraphvizEdge>> clusters;
+	private String graphContents(PTGraph<StyledNode, StyledEdge> input) {
+		Tree<Cluster<StyledNode, StyledEdge>> clusters;
 
 		if (this.cluster) {
 			 clusters = PTGraph.partition(input);
 		}
 		else {
-			clusters = new Tree<Cluster<GraphvizNode, GraphvizEdge>>();
-			clusters.add(new Cluster<GraphvizNode, GraphvizEdge>(Category.NO_CATEGORY, input));
+			clusters = new Tree<Cluster<StyledNode, StyledEdge>>();
+			clusters.add(new Cluster<StyledNode, StyledEdge>(Category.NO_CATEGORY, input));
 		}
 		
 		return clusterContents(clusters.getRoot(), clusters);
 	}
 	
-	public String convert(PTGraph<GraphvizNode, GraphvizEdge> input) {
-		this.hasStart = false;
-		this.hasEnd = false;
-
+	public String convert(PTGraph<StyledNode, StyledEdge> input) {
 		String g = input.isDirected() ? "digraph" : "graph";
 
 		String ret = g + " G {";
@@ -148,9 +135,6 @@ public class GraphToGraphvizExporter {
 		}
 
 		ret += this.graphContents(input);
-		
-		if (this.hasStart) ret += nodeTemplate(SimpleNode.START);
-		if (this.hasEnd) ret += nodeTemplate(SimpleNode.END);
 		
 		tab.decrease();
 		ret += ln("}");

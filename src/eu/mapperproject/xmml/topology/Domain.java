@@ -7,6 +7,11 @@ import java.util.Map;
 import eu.mapperproject.xmml.util.graph.Child;
 import eu.mapperproject.xmml.util.graph.Tree;
 
+/**
+ * A natural domain of a process, hierarchically ordered
+ * @author Joris Borgdorff
+ *
+ */
 public class Domain implements Child<Domain> {
 	private final String name;
 	private final Domain parent;
@@ -23,6 +28,7 @@ public class Domain implements Child<Domain> {
 		this.name = name;
 	}
 	
+	/** Create a new domain which is a child of the current domain */
 	public Domain getChild(String name) {
 		return new Domain(name, this);
 	}
@@ -63,7 +69,7 @@ public class Domain implements Child<Domain> {
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		Domain other = (Domain)o;
-		return this.name.equals(other.name) && this.parent.equals(other.parent);
+		return this.name.equals(other.name) && ((this.parent == null && other.parent == null) || this.parent.equals(other.parent));
 	}
 	
 	/**
@@ -88,7 +94,7 @@ public class Domain implements Child<Domain> {
 			}
 			if (useExisting) {
 				for (Domain d : list) {
-					if (!d.isRoot() && child.parent().equals(parent)) {
+					if (!d.isRoot() && d.parent().equals(parent)) {
 						child = d;
 					}
 				}

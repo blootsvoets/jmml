@@ -83,4 +83,11 @@ public class Submodel implements Identifiable {
 	public ScaleMap getScaleMap() {
 		return scales;
 	}
+
+	/**
+	 * Whether the submodel is stateful
+	 */
+	public boolean isStateful() {
+		return this.stateful != Optional.NO;
+	}
 }

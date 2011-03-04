@@ -14,33 +14,51 @@ import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
  *
  */
 public class Scale implements Identifiable {
-	private String id;
-	private Dimension dim;
-	private String dimName;
-	private int dimensions;
-	private SIRange delta;
-	private boolean deltaFixed;
-	private SIRange max;
-	private boolean maxFixed;
+	private final String id;
+	private final Dimension dim;
+	private final String dimName;
+	private final int dimensions;
+	private final SIRange delta;
+	private final boolean deltaFixed;
+	private final SIRange max;
+	private final boolean maxFixed;
+	private final int steps;
 	
 	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed, int dimensions, String dimName) {
 		this.id = id;
 		this.dim = dim;
+		this.dimName = dimName;
 		this.dimensions = dimensions;
 		this.delta = delta;
 		this.deltaFixed = deltaFixed;
 		this.max = max;
 		this.maxFixed = maxFixed;
+		this.steps = calculateSteps();
 	}
 
 	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed) {
 		this(id, dim, delta, deltaFixed, max, maxFixed, 1, null);
 	}
 	
-	/** Number of steps that can be distinguished within this scale, using the mean values of delat and max, if they are ranges */
-	public int steps() {
+	/**
+	 * Calculate the number of steps that can be taken given the ranges
+	 * Returns -1 if delta or max is not set or not definite
+	 */
+	private int calculateSteps() {
+		if (delta == null || !delta.isDefinite() || max == null || !max.isDefinite()) {
+			return -1;
+		}
+		
 		SIUnit d = delta.getMean(), L = max.getMean();
-		return (int)Math.round(L.div(d).doubleValue());
+		return (int)Math.round(L.div(d).doubleValue());		
+	}
+	
+	/**
+	 * Number of steps that can be distinguished within this scale,
+	 * using the mean values of delta and max, if they are ranges
+	 */
+	public int getSteps() {
+		return steps;
 	}
 
 	/**
