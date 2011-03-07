@@ -67,25 +67,18 @@ public class ProcessIterationTest {
 		assertEquals(piBasic1, piOther);
 	}
 
-	@Test
-	public void iterationOrderIndifferent() {
-		piBasic1 = piBasic1.nextIteration(cdBasic2other);
-		piBasic1 = piBasic1.nextStep();
-		piOther = piOther.nextIteration(cdOther2basic);
-		piOther = piOther.nextIteration(cdBasic2other);
-		assertEquals(piBasic1, piOther);
-	}
-
-	@Test //(expected= IllegalStateException.class)
+	@Test(expected= IllegalStateException.class)
 	public void completion() {
+		// Oi
 		piBasicz = piBasicz.nextStep();
+		// B
 		piBasicz = piBasicz.nextStep();
+		// S
 		piBasicz = piBasicz.nextStep();
+		// Of
 		piBasicz = piBasicz.nextStep();
-		piBasicz = piBasicz.nextStep();
-		piBasicz = piBasicz.nextStep();
-		System.out.println(piBasicz);
 		assertTrue(piBasicz.instanceCompleted());
+		// Error
 		piBasicz = piBasicz.nextStep();
 	}
 }

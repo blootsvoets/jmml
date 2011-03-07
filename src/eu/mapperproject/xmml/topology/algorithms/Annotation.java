@@ -1,6 +1,11 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-/** An Annotation keeps a counter of an object and last known counters of peer objects */
+/** An Annotation keeps a counter of an object and last known counters of peer objects.
+ *
+ * Besides the merge operation, all operations are immutable.
+ *
+ * @author Joris Borgdorff
+ */
 public class Annotation<T> {
 	protected final Trace<T> t;
 	protected final AnnotationType type;

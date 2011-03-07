@@ -8,6 +8,7 @@ import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 public class ProcessIteration {
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
 	Annotation<Instance> iter, inst, oper;
+	private AnnotationSet givenAnnot, currentAnnot;
 	private Instance instance;
 	private boolean isfinal;
 	
@@ -21,9 +22,6 @@ public class ProcessIteration {
 	
 	ProcessIteration(Instance pd, Annotation<Instance> it, Annotation<Instance> nt, Annotation<Instance> op) {
 		this.instance = pd;
-		if (!it.getType().equals(AnnotationType.ITERATION) || !nt.getType().equals(AnnotationType.INSTANCE) || !op.getType().equals(AnnotationType.OPERATOR)) {
-			throw new IllegalArgumentException("ProcessIteration initialized with wrong Annotation types");
-		}
 		it.setSubject(pd);
 		nt.setSubject(pd);
 		op.setSubject(pd);
@@ -195,19 +193,6 @@ public class ProcessIteration {
 		return pnext;
 	}
 	
-	public Annotation<Instance> getAnnotation(AnnotationType at) {
-		switch (at) {
-		case INSTANCE:
-			return this.inst;
-		case ITERATION:
-			return this.iter;
-		case OPERATOR:
-			return this.oper;
-		default:
-			throw new IllegalArgumentException("Annotation type not supported by ProcessIteration");
-		}
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
@@ -219,20 +204,69 @@ public class ProcessIteration {
 	@Override
 	public String toString() {
 		String ret = instance.getId();
-		if (this.inst.getCounter() > 0) {
-			ret += this.inst.counterString();
-		}
-		String count = "(" + this.iter.counterString() + "," + SEL.values()[this.oper.getCounter()] +  ")";
 		
-		return ret + count;
+		return ret + givenAnnot;
 	}
 	
 	@Override
 	public int hashCode() {
 		int hashCode = this.instance.hashCode();
-		hashCode = 31*hashCode + this.inst.hashCode();
-		hashCode = 31*hashCode + this.iter.hashCode();
-		hashCode = 31*hashCode + this.oper.hashCode();
 		return hashCode;
+	}
+	
+	private static class AnnotationSet {
+		private Annotation<Instance> inst;
+		private Annotation<Instance> iter;
+		private Annotation<Instance> oper;
+
+		AnnotationSet(Annotation<Instance> inst, Annotation<Instance> iter, Annotation<Instance> oper) {
+			if (!iter.getType().equals(AnnotationType.ITERATION) || !inst.getType().equals(AnnotationType.INSTANCE) || !oper.getType().equals(AnnotationType.OPERATOR)) {
+				throw new IllegalArgumentException("AnnotationSet initialized with wrong Annotation types");
+			}
+
+			this.inst = inst;
+			this.iter = iter;
+			this.oper = oper;
+		}
+		
+		/** Current operator. */
+		SEL getOperator() {
+			return SEL.values()[this.oper.getCounter()];
+		}
+		
+		/** Current operator is larger than or equal to the given operator. */
+		boolean operatorLE(SEL op) {
+			return this.oper.getCounter() >= op.ordinal();
+		}
+
+		/** Current operator is larger than or equal to the given operator. */
+		boolean operatorEq(SEL op) {
+			return this.oper.getCounter() == op.ordinal();
+		}
+
+		@Override
+		public int hashCode() {
+			int hashCode = this.inst.hashCode();
+			hashCode = 31*hashCode + this.iter.hashCode();
+			hashCode = 31*hashCode + this.oper.hashCode();
+			return hashCode;
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || !this.getClass().equals(o.getClass())) return false;
+			AnnotationSet as = (AnnotationSet)o;
+			return this.inst.equals(as.inst) && this.iter.equals(as.iter) && this.oper.equals(as.oper);
+		}
+		
+		@Override
+		public String toString() {
+			String ret = "";
+			if (this.inst.getCounter() > 0) {
+				ret += this.inst.counterString();
+			}
+			ret += "(" + this.iter.counterString() + "," + SEL.values()[this.oper.getCounter()] +  ")";
+			return ret;
+		}
 	}
 }

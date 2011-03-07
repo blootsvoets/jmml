@@ -3,7 +3,9 @@ package eu.mapperproject.xmml.topology.algorithms;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Keeps track of which index objects had, when last referenced */
+/** Keeps track of which index objects had, when last referenced
+  * All of the functions 
+  */
 public class Trace<T> {
 	private final Map<T, Integer> map;
 
@@ -50,7 +52,7 @@ public class Trace<T> {
 	}
 
 	/** Get the current value for given object. May not be called if the object is not instantiated in the
-	 * trace yet.
+	 * trace yet. Does not change the trace.
 	 * @throws IllegalStateException if the given object is not yet instantiated
 	 */
 	public int currentInt(T o) {
@@ -80,7 +82,7 @@ public class Trace<T> {
 		return this.map.containsKey(o);
 	}
 
-	/** Removes and uninstantiates given object from this trace */
+	/** Removes and thus uninstantiates given object from this trace */
 	public void reset(T o) {
 		this.map.remove(o);
 	}
