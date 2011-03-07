@@ -9,6 +9,7 @@ import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstanceOperator;
+import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
@@ -76,29 +77,35 @@ public class TaskGraph {
 		Collection<Coupling> cds = this.desc.getFrom(new InstanceOperator(pi.getInstance(), ct));
 		
 		for (Coupling cd : cds) {
-			List<CouplingInstance> cis = CouplingInstance.calculateTo(pi, cd, state);
-			this.activate(state, cis);
+			this.calculateTo(pi, cd, state);
 		}
 		
 		return !cds.isEmpty();
 	}
 	
+	/** Create an instance of a normal coupling between one process iteration the next */
+	private void calculateTo(ProcessIteration from, Coupling cd, TaskGraphState state) {
+		CouplingInstance ci;
+		if (cd.getToOperator().getOperator() == SEL.finit) {
+			ci = state.initInstance(cd);
+			if (ci != null) this.addToGraph(ci, state);
+		}
+		
+		ci = from.calculateCouplingInstance(cd);
+		if (ci != null) this.addToGraph(ci, state);
+	}
+		
 	private void activateStep(TaskGraphState state, ProcessIteration pi) {
 		ProcessIteration pnext = pi.nextStep();
-		if (pnext != null) this.activate(state, new CouplingInstance(pi, pnext));		
+		if (pnext != null) {
+			this.addToGraph(new CouplingInstance(pi, pnext), state);
+		}
 	}
 	
-	private void activate(TaskGraphState state, CouplingInstance ci) {
+	private void addToGraph(CouplingInstance ci, TaskGraphState state) {
 		ProcessIteration active = state.activate(ci);
 		if (active != null) this.graph.addNode(active);
-
-		this.graph.addEdge(ci);
-	}
-	
-	private void activate(TaskGraphState state, List<CouplingInstance> cis) {
-		for (CouplingInstance ci : cis) {
-			this.activate(state, ci);
-		}
+		this.graph.addEdge(ci);		
 	}
 	
 	public static List<ProcessIteration> descriptionToIteration(Collection<Instance> pds) {

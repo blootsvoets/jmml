@@ -60,4 +60,19 @@ public class Port implements Identifiable {
 		return type;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		return this.id.equals(((Port)o).id);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.id + "(" + this.operator + ")";
+	}
 }

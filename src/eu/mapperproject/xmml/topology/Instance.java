@@ -79,6 +79,35 @@ public class Instance implements Identifiable, Domainable {
 	 * @param steps the number of timesteps so far
 	 */
 	public boolean isCompleted(int steps) {
-		return this.scales.getTimesteps() <= steps - 1;
+		return this.scales.getTimesteps() <= steps + 1;
+	}
+
+	@Override
+	public String toString() {
+		String subId = submodel.getId();
+		if (this.id.equals(subId)) {
+			return this.id;
+		}
+		else {
+			return this.id + "<" + subId + ">";
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		return this.id.equals(((Instance)o).id);
+	}
+	
+	/** Whether all aspects of this instance equal the other, not just the id */
+	public boolean deepEquals(Object o) {
+		if (!this.equals(o)) return false;
+		Instance i = (Instance)o;
+		return this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
 	}
 }

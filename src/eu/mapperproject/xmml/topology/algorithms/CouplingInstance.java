@@ -8,6 +8,11 @@ import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.graph.Edge;
 
+/**
+ * Represents an actual data transfer over a coupling from one processiteration to the other.
+ * @author Joris Borgdorff
+ *
+ */
 public class CouplingInstance implements Edge<ProcessIteration> {
 	private ProcessIteration from;
 	private ProcessIteration to;
@@ -23,36 +28,6 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	/** Create an instance of a state coupling between one process iteration the next */
 	public CouplingInstance(ProcessIteration from, ProcessIteration to) {
 		this(from, to, null);
-	}
-	
-	public static List<CouplingInstance> calculateTo(ProcessIteration from, Coupling cd, TaskGraphState state) {
-		List<CouplingInstance> cis = new ArrayList<CouplingInstance>();
-		
-		CouplingInstance ci;
-		if (cd.getFromOperator().getOperator() == SEL.finit) {
-			ci = state.initInstance(cd);				
-			if (ci != null) cis.add(ci);
-		}
-		
-		ci = calculateSingleTo(from, cd);
-		if (ci != null) cis.add(ci);
-		
-		return cis;
-	}
-	
-	private static CouplingInstance calculateSingleTo(ProcessIteration from, Coupling cd) {
-		ProgressType instance;
-		
-		if (cd.getToOperator().getOperator() == SEL.finit) {
-			instance = ProgressType.INSTANCE;
-		}
-		else {
-			instance = ProgressType.ITERATION;
-		}
-		
-		ProcessIteration pnext = from.progress(cd, instance);
-		if (pnext == null) return null;
-		else return new CouplingInstance(from, pnext, cd);
 	}
 	
 	public boolean isState() {

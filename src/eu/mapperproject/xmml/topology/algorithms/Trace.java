@@ -5,7 +5,7 @@ import java.util.Map;
 
 /** Keeps track of which index objects had, when last referenced */
 public class Trace<T> {
-	Map<T, Integer> map;
+	private final Map<T, Integer> map;
 
 	public Trace() {
 		this.map = new HashMap<T, Integer>();
@@ -61,6 +61,10 @@ public class Trace<T> {
 		return n;
 	}
 	
+	/** Get the previous value for given object. May not be called if the object is not instantiated in the
+	 * trace yet, or in its first iteration.
+	 * @throws IllegalStateException if the given object is not yet instantiated or in its first iteration
+	 */
 	public int previousInt(T o) {
 		Integer n = this.map.get(o);
 		if (n == null || n == 0) {
