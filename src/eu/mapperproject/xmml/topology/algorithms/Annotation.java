@@ -1,5 +1,7 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import java.util.Collection;
+
 /** An Annotation keeps a counter of an object and last known counters of peer objects.
  *
  * Besides the merge operation, all operations are immutable.
@@ -79,9 +81,16 @@ public class Annotation<T> {
 		return this.counter;
 	}
 
-	/** Add all peer information of the given annotation to the current one. */
-	public void merge(Annotation<T> an) {
-		this.t.merge(an.t);
+	/** Add all peer information of the given annotation to the current one.
+	 * Returns a collection of objects that actually override the previous trace information */
+	public Collection<T> merge(Annotation<T> an) {
+		return this.t.merge(an.t);
+	}
+
+	/** Add selected information of the given annotation to the current one.
+	 * Returns a collection of objects that actually override the previous trace information */
+	public void override(Annotation<T> an, Collection<T> col) {
+		this.t.override(an.t, col);
 	}
 
 	/** Get the string value of the counter */

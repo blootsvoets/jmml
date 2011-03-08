@@ -1,6 +1,8 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /** Keeps track of which index objects had, when last referenced
@@ -25,13 +27,23 @@ public class Trace<T> {
 	}
 
 	/** Merges the values of the given trace with the current trace, choosing the largest of the values */
-	public void merge(Trace<T> t) {
+	public Collection<T> merge(Trace<T> t) {
+		Collection<T> ret = new HashSet<T>();
 		for (T key : t.map.keySet()) {
 			Integer newval = t.map.get(key);
 			Integer val = map.get(key);
 			if (val == null || newval.compareTo(val) > 0) {
 				map.put(key, newval);
+				ret.add(key);
 			}
+		}
+		return ret;
+	}
+
+	/** Overrides the values of the given trace with the current trace, selected by given collection */
+	public void override(Trace<T> t, Collection<T> select) {
+		for (T key : select) {
+			this.map.put(key, t.map.get(key));
 		}
 	}
 

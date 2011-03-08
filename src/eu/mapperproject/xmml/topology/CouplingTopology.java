@@ -14,8 +14,10 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
 public class CouplingTopology {
 
 	private final Map<String, Instance> instances;
+	private final Collection<Instance> initialInstances;
 	private final Map<InstanceOperator,Collection<Coupling>> fromCouplings, toCouplings;
 	private final Collection<Coupling> couplings;
+	private final Map<Instance,Collection<Coupling>> needInitInstances;
 	private final static Collection<Coupling> emptyCollection = new ArrayList<Coupling>(0);
 
 	/**
@@ -28,6 +30,9 @@ public class CouplingTopology {
 		this.couplings = couplings;
 		this.fromCouplings = new HashMap<InstanceOperator,Collection<Coupling>>();
 		this.toCouplings = new HashMap<InstanceOperator,Collection<Coupling>>();
+		this.initialInstances = new ArrayList<Instance>();
+		this.needInitInstances = new HashMap<Instance,Collection<Coupling>>();
+		
 		for (Coupling c : couplings) {
 			putCoupling(c, c.getFromOperator(), this.fromCouplings);
 			putCoupling(c, new InstanceOperator(c.getFrom(), null), this.fromCouplings);
@@ -39,8 +44,21 @@ public class CouplingTopology {
 			if (this.getFrom(new InstanceOperator(i, SEL.Of)).isEmpty()) {
 				i.setFinal();
 			}
-			if (this.getTo(new InstanceOperator(i, null)).isEmpty()) {
+			
+			Collection<Coupling> allTo = this.getTo(new InstanceOperator(i, null));
+			if (allTo.isEmpty()) {
 				i.setInitial();
+				initialInstances.add(i);
+			}
+			else if (i.isInitial()) {
+				initialInstances.add(i);
+			}
+			else if (this.getTo(new InstanceOperator(i, SEL.finit)).isEmpty()) {
+				Collection<Coupling> newC = new ArrayList<Coupling>(allTo.size());
+				for (Coupling c : allTo) {
+					newC.add(c.copyWithToOperator(SEL.finit));
+				}
+				needInitInstances.put(i, newC);
 			}
 		}
 	}
@@ -65,6 +83,21 @@ public class CouplingTopology {
 		return this.instances.values();
 	}
 	
+	/** Get all instances that are initially active */
+	public Collection<Instance> getInitialInstances() {
+		return this.initialInstances;
+	}
+	
+	/** Whether given instance is not able to initialize by itself */
+	public boolean needsInitInstances(Instance i) {
+		return this.needInitInstances.containsKey(i);
+	}
+
+	/** Whether given instance is not able to initialize by itself */
+	public Collection<Coupling> needsInitCouplings(Instance i) {
+		return this.needInitInstances.get(i);
+	}
+
 	/** Get all couplings matching an instance operator.
 	 * Returns an empty collection if no match was found. If a null operator is given, returns all couplings from a given instance.
 	 */

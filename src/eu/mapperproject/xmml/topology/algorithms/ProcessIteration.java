@@ -1,5 +1,6 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -63,6 +64,10 @@ public class ProcessIteration {
 	
 	public boolean firstInstance() {
 		return this.annot.getInstance() == 0;
+	}
+
+	public boolean firstLoop() {
+		return this.annot.getIteration() == 0 && this.annot.operatorLE(SEL.S);
 	}
 	
 	public boolean initializing() {
@@ -177,7 +182,7 @@ public class ProcessIteration {
 		Instance pd = cd.getTo();		
 		AnnotationSet set = new AnnotationSet(this.givenAnnot);
 		set.setSubject(pd);
-
+		
 		switch (instance) {
 			case ITERATION:
 				SEL op = cd.getToOperator().getOperator();
@@ -185,7 +190,7 @@ public class ProcessIteration {
 					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + set.getIteration());
 				}
 
-				if (!set.operatorLE(op)) {
+				if (!set.operatorLE(op) || set.operatorEq(op)) {
 					set.next(AnnotationType.ITERATION);
 				}
 
@@ -312,9 +317,9 @@ public class ProcessIteration {
 		
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
-			for (Map.Entry<AnnotationType,Annotation<Instance>> an : this.map.entrySet()) {
-				an.getValue().merge(set.map.get(an.getKey()));
-			}
+			map.get(AnnotationType.INSTANCE).merge(set.map.get(AnnotationType.INSTANCE));
+			Collection<Instance> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION));
+			map.get(AnnotationType.OPERATOR).override(set.map.get(AnnotationType.OPERATOR), col);
 		}
 
 		@Override

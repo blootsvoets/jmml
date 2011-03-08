@@ -9,23 +9,22 @@ import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstanceOperator;
+import eu.mapperproject.xmml.topology.InstancePort;
 import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
 public class TaskGraph {
 	private final PTGraph<ProcessIteration, CouplingInstance> graph;
-	private final List<ProcessIteration> pis;
-	private CouplingTopology desc;
+	private CouplingTopology topology;
 	
 	public TaskGraph(CouplingTopology topology) {
 		this(topology, false, false);
 	}
 	
 	public TaskGraph(CouplingTopology topology, boolean horizontal, boolean subgraphs) {
-		this.desc = topology;
+		this.topology = topology;
 		this.graph = new PTGraph<ProcessIteration, CouplingInstance>(true);
-		this.pis = descriptionToIteration(topology.getInstances());
 	}
 
 	
@@ -36,14 +35,13 @@ public class TaskGraph {
 	}
 	
 	private void computeGraph() {
-		TaskGraphState state = new TaskGraphState(this.desc);
+		TaskGraphState state = new TaskGraphState(this.topology);
+		List<ProcessIteration> initProcs = descriptionToIteration(topology.getInitialInstances());
 		
 		// Initialize processes with no initialization
-		for (ProcessIteration pi : pis) {
-			if (pi.getInstance().isInitial()) {
-				state.activate(pi);
-				this.graph.addNode(pi);
-			}
+		for (ProcessIteration pi : initProcs) {
+			state.activate(pi);
+			this.graph.addNode(pi);
 		}
 		
 		// As long as there are active processes, continue building the graph
@@ -74,9 +72,13 @@ public class TaskGraph {
 	 */
 	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi, boolean complete) {
 		SEL ct = complete ? SEL.Of : SEL.Oi;
-		Collection<Coupling> cds = this.desc.getFrom(new InstanceOperator(pi.getInstance(), ct));
+		Collection<Coupling> cds = this.topology.getFrom(new InstanceOperator(pi.getInstance(), ct));
 		
 		for (Coupling cd : cds) {
+			if (pi.firstLoop() && topology.needsInitInstances(cd.getTo())) {
+				cd = cd.copyWithToOperator(SEL.finit);
+			}
+
 			this.calculateTo(pi, cd, state);
 		}
 		

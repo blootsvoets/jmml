@@ -4,6 +4,7 @@
 package eu.mapperproject.xmml.topology;
 
 import eu.mapperproject.xmml.definitions.Port;
+import eu.mapperproject.xmml.definitions.Submodel.SEL;
 
 /**
  * The port of an instance
@@ -43,5 +44,10 @@ public class InstancePort {
 	@Override
 	public String toString() {
 		return this.instance.getId() + "." + this.port.getId();
+	}
+
+	/** Set the receiving operator */
+	public void setInstanceOperator(SEL op) {
+		
 	}
 }

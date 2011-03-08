@@ -30,11 +30,21 @@ public class InstanceOperator {
 	public int hashCode() {
 		return (this.operator == null ? 0 : this.operator.hashCode()) ^ this.instance.getId().hashCode();
 	}
+	
+	@Override
+	public String toString() {
+		return this.instance.getId() + "(" + this.operator + ")";
+	}
 
 	/**
 	 * Get the operator
 	 */
 	public SEL getOperator() {
 		return this.operator;
+	}
+	
+	/** Get the instance */
+	public Instance getInstance() {
+		return this.instance;
 	}
 }

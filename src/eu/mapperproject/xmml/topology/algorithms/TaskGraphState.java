@@ -1,6 +1,7 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,7 +14,6 @@ import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstanceOperator;
-import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.PTList;
 
 /**
@@ -54,8 +54,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		if (to == null) {
 			throw new IllegalArgumentException("To activate a next state with coupling instance " + ci + ", the next may not be null.");
 		}
-
-		return (activateIfNeeded(to,  ci.getCoupling()) ? to : null);
+		return (activateIfNeeded(to, ci.getCoupling()) ? to : null);
 	}
 	
 	/** Tries to initialize a processiteration from a stateful transition. If this succeeds, the
@@ -128,8 +127,16 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			else if (pi.instanceCompleted()) {
 				return true;
 			}
-				
-			for (Coupling cd : topology.getTo(new InstanceOperator(pi.getInstance(), receivingType))) {
+			
+			Instance inst = pi.getInstance();
+			Collection<Coupling> cs;
+			if (pi.initializing() && topology.needsInitInstances(inst)) {
+				cs = topology.needsInitCouplings(inst);
+			}
+			else {
+				cs = topology.getTo(new InstanceOperator(inst, receivingType));
+			}
+			for (Coupling cd : cs) {
 				if (!cds.contains(cd)) {
 					if (print) System.out.println(pi + " is missing: " + cd);
 					return false;
@@ -159,7 +166,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		@Override
 		public ProcessIteration next() {
 			ProcessIteration pi = activeProcesses.remove(activeProcesses.size() - 1);
-			System.out.println("TaskGraphState(" + pi + ") " + activeProcesses.toString() + ":" + snoozingProcesses);
+			//System.out.println("TaskGraphState(" + pi + ") " + activeProcesses.toString() + ":" + snoozingProcesses);
 			return pi;
 		}
 		
