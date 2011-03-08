@@ -21,15 +21,6 @@ public class Annotation<T> {
 		this(tp, new Trace<T>(), 0);
 	}
 
-	/** Create an Annotation with a counter of the given object, but without any information on peer objects */
-	public Annotation(AnnotationType tp, T pd, int counter) {
-		this.counter = counter;
-		this.type = tp;
-
-		this.t = new Trace<T>();
-		this.t.put(pd, counter);
-	}
-	
 	/** Create an Annotation with a count and information on peer objects */
 	private Annotation(AnnotationType tp, Trace<T> trace, int counter) {
 		this.t = trace;
@@ -67,7 +58,7 @@ public class Annotation<T> {
 		
 		return new Annotation<T>(this.type, trace, c);
 	}
-
+	
 	/** Create a new Annotation with as counter the current iteration of the given peer object */
 	public Annotation<T> reset(T pd) {
 		Trace<T> trace = new Trace<T>(this.t);
@@ -101,6 +92,11 @@ public class Annotation<T> {
 	/** Get the type of annotation */
 	public AnnotationType getType() {
 		return this.type;
+	}
+	
+	/** Get a copy of the current annotation */
+	public Annotation<T> copy() {
+		return new Annotation<T>(this.type, new Trace<T>(this.t), this.counter);
 	}
 
 	@Override

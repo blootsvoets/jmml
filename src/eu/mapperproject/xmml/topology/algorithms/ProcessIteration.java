@@ -1,5 +1,8 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
@@ -7,28 +10,31 @@ import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 
 public class ProcessIteration {
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
-	Annotation<Instance> iter, inst, oper;
-	private AnnotationSet givenAnnot, currentAnnot;
+	private final AnnotationSet givenAnnot, annot;
 	private Instance instance;
 	private boolean isfinal;
+	private boolean stateFinished, initFinished;
 	
 	public enum ProgressType {
-		OPERATOR, ITERATION, INSTANCE, CURRENT;
+		NEXT, RESET, INSTANCE, ITERATION;
 	}
 	
 	public ProcessIteration(Instance pd) {
-		this(pd, new Annotation<Instance>(AnnotationType.ITERATION), new Annotation<Instance>(AnnotationType.INSTANCE), new Annotation<Instance>(AnnotationType.OPERATOR));
+		this(pd, null);
 	}
 	
-	ProcessIteration(Instance pd, Annotation<Instance> it, Annotation<Instance> nt, Annotation<Instance> op) {
+	ProcessIteration(Instance pd, AnnotationSet annot) {
 		this.instance = pd;
-		it.setSubject(pd);
-		nt.setSubject(pd);
-		op.setSubject(pd);
-		this.iter = it;
-		this.inst = nt;
-		this.oper = op;
+		if (annot == null) {
+			annot = new AnnotationSet();
+			annot.setSubject(pd);
+			annot.applySubject();
+		}
+		this.annot = annot;
+		this.givenAnnot = new AnnotationSet(this.annot);
 		this.isfinal = false;
+		this.stateFinished = false;
+		this.initFinished = false;
 	}
 	
 	public boolean isFinal() {
@@ -44,11 +50,11 @@ public class ProcessIteration {
 	}
 	
 	public boolean instanceCompleted() {
-		return this.oper.getCounter() == SEL.Of.ordinal();
+		return this.annot.operatorEq(SEL.Of);
 	}
 	
 	public boolean loopCompleted() {
-		return this.instance.isCompleted(this.iter.getCounter()) && (this.oper.getCounter() >= SEL.S.ordinal());
+		return this.instance.isCompleted(annot.getIteration()) && (!this.annot.operatorLE(SEL.B));
 	}
 	
 	public Instance getInstance() {
@@ -56,11 +62,11 @@ public class ProcessIteration {
 	}
 	
 	public boolean firstInstance() {
-		return this.inst.getCounter() == 0;
+		return this.annot.getInstance() == 0;
 	}
 	
 	public boolean initializing() {
-		return this.oper.getCounter() == SEL.finit.ordinal();
+		return this.annot.operatorEq(SEL.finit);
 	}
 	
 	public boolean needsState() {
@@ -68,13 +74,13 @@ public class ProcessIteration {
 	}
 	
 	public SEL receivingType() {
-		SEL op = SEL.values()[this.oper.getCounter()];
+		SEL op = this.givenAnnot.getOperator();
 		if (op.isReceiving()) return op;
 		else return null;
 	}
 
 	public SEL getCouplingType() {
-		return SEL.values()[this.oper.getCounter()];
+		return this.givenAnnot.getOperator();
 	}
 	
 	public ProcessIteration nextStep() {
@@ -85,6 +91,19 @@ public class ProcessIteration {
 		return this.progress(ProgressType.INSTANCE);
 	}
 
+	/**
+	 * Merge an annotationset with the current annotation sets
+	 */
+	public void merge(AnnotationSet key) {
+		if (this.initFinished) {
+			throw new IllegalStateException("Can not add more initialization information after processiteration has sent information.");
+		}
+
+		this.annot.merge(key);
+		this.givenAnnot.merge(key);
+	}
+
+	
 	public ProcessIteration nextIteration(Coupling pd) {
 		if (this.instance.equals(pd.getTo())) {
 			throw new IllegalArgumentException("In a progression that is an internal iteration, an coupling may not be specified.");
@@ -94,12 +113,6 @@ public class ProcessIteration {
 	
 	public ProcessIteration nextInstance(Coupling pd) {
 		return this.progress(pd, ProgressType.INSTANCE);
-	}
-		
-	public void merge(ProcessIteration pi) {
-		iter.merge(pi.iter);
-		inst.merge(pi.inst);
-		oper.merge(pi.oper);
 	}
 
 	public CouplingInstance calculateCouplingInstance(Coupling cd) {
@@ -117,80 +130,80 @@ public class ProcessIteration {
 	}
 
 	private ProcessIteration progress(ProgressType instance) {		
+		if (this.stateFinished) {
+			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
+		}
+		this.stateFinished = true;
+		this.initFinished = true;
+
 		Instance pd = this.instance;
 		
-		Annotation<Instance> it, nt, op;
-
+		AnnotationSet set = new AnnotationSet(this.annot);
 		switch (instance) {
 			case ITERATION:
-				nt = this.inst.current(pd);
-
-				if (this.oper.getCounter() == SEL.Of.ordinal()) {
-					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.iter);
+				if (this.annot.operatorEq(SEL.Of)) {
+					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getInstance());
 				}
 
 				// Loop until the end condition is met
-				if (this.oper.current(pd).getCounter() < SEL.S.ordinal() || pd.isCompleted(this.iter.current(pd).getCounter())) {
-					op = this.oper.next(pd);
-					it = this.iter.current(pd);
+				if (this.annot.operatorLE(SEL.B) || pd.isCompleted(set.getIteration())) {
+					set.next(AnnotationType.OPERATOR);
 				}
 				else {
-					op = this.oper.set(pd, SEL.Oi.ordinal());
-					it = this.iter.next(pd);
+					set.setOperater(SEL.Oi);
+					set.next(AnnotationType.ITERATION);
 				}
 				break;
 			case INSTANCE:
-				nt = this.inst.next(pd);
-				it = this.iter.reset(pd);
-				op = this.oper.reset(pd);
+				set.next(AnnotationType.INSTANCE);
+				set.reset(AnnotationType.ITERATION);
+				set.reset(AnnotationType.OPERATOR);
 				break;
 			default:
-				throw new IllegalArgumentException("Only OPERATOR, ITERATION, PREVIOUS, INSTANCE and COPY operations are allowed for instance progress.");
+				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
-		
-		ProcessIteration pnext = cache.getIteration(pd, it, nt, op);
-		pnext.iter.merge(it);
-		pnext.inst.merge(nt);
-		pnext.oper.merge(op);
-		return pnext;
+
+		set.applySubject();
+
+		return cache.getIteration(pd, set);
 	}
 	
 	private ProcessIteration progress(Coupling cd, ProgressType instance) {		
-		Instance pd = cd.getTo();
-		
-		Annotation<Instance> it, nt, op;
+		if (this.stateFinished) {
+			throw new IllegalStateException("Can not progress to another processiteration " + cd + " if the state has already progressed.");
+		}
+		this.initFinished = true;
+
+		Instance pd = cd.getTo();		
+		AnnotationSet set = new AnnotationSet(this.givenAnnot);
+		set.setSubject(pd);
 
 		switch (instance) {
 			case ITERATION:
-				int opnum = cd.getToOperator().getOperatorNum();
-				if (opnum >= this.oper.current(pd).getCounter()) {
-					it = this.iter.current(pd); 
+				SEL op = cd.getToOperator().getOperator();
+				if (op == SEL.Of) {
+					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + set.getIteration());
 				}
-				else {
-					it = this.iter.next(pd);
-				}
-				op = this.oper.set(pd, opnum);
 
-				if (op.getCounter() == SEL.Of.ordinal()) {
-					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + it);
+				if (!set.operatorLE(op)) {
+					set.next(AnnotationType.ITERATION);
 				}
-				nt = this.inst.current(pd);
+
+				set.setOperater(op);
 				break;
 			case INSTANCE:
-				nt = this.inst.next(pd);
-				System.out.println(nt);
-				it = this.iter.reset(pd);
-				op = this.oper.set(pd, cd.getToOperator().getOperatorNum());
+				set.next(AnnotationType.INSTANCE);
+				set.reset(AnnotationType.ITERATION);
+				set.setOperater(cd.getToOperator().getOperator());
 				break;
 			default:
-				throw new IllegalArgumentException("Only OPERATOR, ITERATION, PREVIOUS, INSTANCE and COPY operations are allowed for instance progress.");
+				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
 		
-		ProcessIteration pnext = cache.getIteration(pd, it, nt, op);
-		pnext.iter.merge(it);
-		pnext.inst.merge(nt);
-		pnext.oper.merge(op);
-		return pnext;
+		set.applySubject();
+		this.annot.merge(set);
+
+		return cache.getIteration(pd, set);
 	}
 	
 	@Override
@@ -198,14 +211,14 @@ public class ProcessIteration {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		ProcessIteration other = (ProcessIteration)o;
 		
-		return this.instance.equals(other.instance) && inst.equals(other.inst) && iter.equals(other.iter) && oper.equals(other.oper);
+		return this.instance.equals(other.instance) && this.givenAnnot.equals(other.givenAnnot);
 	}
 
 	@Override
 	public String toString() {
 		String ret = instance.getId();
 		
-		return ret + givenAnnot;
+		return ret + givenAnnot.counterString();
 	}
 	
 	@Override
@@ -214,58 +227,123 @@ public class ProcessIteration {
 		return hashCode;
 	}
 	
-	private static class AnnotationSet {
-		private Annotation<Instance> inst;
-		private Annotation<Instance> iter;
-		private Annotation<Instance> oper;
+	class AnnotationSet {
+		private final Map<AnnotationType,Annotation<Instance>> map;
+		private Instance inst;
 
+		/** Create a new empty annotationset */
+		AnnotationSet() {
+			this(new Annotation<Instance>(AnnotationType.INSTANCE), new Annotation<Instance>(AnnotationType.ITERATION), new Annotation<Instance>(AnnotationType.OPERATOR));
+		}
+
+		/** Apply the current counter to the trace of each annotation */
+		public void applySubject() {
+			for (Annotation<Instance> an : this.map.values()) {
+				an.setSubject(this.inst);
+			}
+		}
+
+		/** Create a copy of given annotationset */
+		AnnotationSet(AnnotationSet old) {
+			this(old.map.get(AnnotationType.INSTANCE).copy(), old.map.get(AnnotationType.ITERATION).copy(), old.map.get(AnnotationType.OPERATOR).copy());
+			this.inst = old.inst;
+		}
+
+		/** Create an annotationset consisting of given annotations */
 		AnnotationSet(Annotation<Instance> inst, Annotation<Instance> iter, Annotation<Instance> oper) {
 			if (!iter.getType().equals(AnnotationType.ITERATION) || !inst.getType().equals(AnnotationType.INSTANCE) || !oper.getType().equals(AnnotationType.OPERATOR)) {
 				throw new IllegalArgumentException("AnnotationSet initialized with wrong Annotation types");
 			}
 
-			this.inst = inst;
-			this.iter = iter;
-			this.oper = oper;
+			this.map = new EnumMap<AnnotationType, Annotation<Instance>>(AnnotationType.class);
+			this.map.put(AnnotationType.ITERATION, iter);
+			this.map.put(AnnotationType.INSTANCE, inst);
+			this.map.put(AnnotationType.OPERATOR, oper);
+			this.inst = instance;
 		}
 		
 		/** Current operator. */
 		SEL getOperator() {
-			return SEL.values()[this.oper.getCounter()];
+			return SEL.values()[this.map.get(AnnotationType.OPERATOR).getCounter()];
+		}
+		
+		/** Get the value of the current iteration */
+		int getIteration() {
+			return this.map.get(AnnotationType.ITERATION).getCounter();
+		}
+		
+		/** Get the value of the current iteration */
+		int getInstance() {
+			return this.map.get(AnnotationType.INSTANCE).getCounter();
+		}
+
+		/** Current operator is less than or equal to the given operator. */
+		boolean operatorLE(SEL op) {
+			return this.map.get(AnnotationType.OPERATOR).getCounter() <= op.ordinal();
 		}
 		
 		/** Current operator is larger than or equal to the given operator. */
-		boolean operatorLE(SEL op) {
-			return this.oper.getCounter() >= op.ordinal();
-		}
-
-		/** Current operator is larger than or equal to the given operator. */
 		boolean operatorEq(SEL op) {
-			return this.oper.getCounter() == op.ordinal();
+			return this.map.get(AnnotationType.OPERATOR).getCounter() == op.ordinal();
+		}
+		
+		/** Set the operater */
+		void setOperater(SEL op) {
+			this.map.put(AnnotationType.OPERATOR, this.map.get(AnnotationType.OPERATOR).set(this.inst, op.ordinal()));
+		}
+		
+		/** Go to the next value of the requested annotation */
+		void next(AnnotationType at) {
+			this.map.put(at, this.map.get(at).next(inst));
+		}
+		
+		/** Reset the value of the requested annotation */
+		void reset(AnnotationType at) {
+			this.map.put(at, this.map.get(at).reset(inst));
+		}
+		
+		/** Let the current instance be the subject of the annotation set */
+		void setSubject(Instance inst) {
+			for (Map.Entry<AnnotationType,Annotation<Instance>> an : this.map.entrySet()) {
+				map.put(an.getKey(), an.getValue().current(inst));
+			}
+			this.inst = inst;
+		}
+		
+		/** Merge the given set with the current one */
+		public void merge(AnnotationSet set) {
+			for (Map.Entry<AnnotationType,Annotation<Instance>> an : this.map.entrySet()) {
+				an.getValue().merge(set.map.get(an.getKey()));
+			}
 		}
 
 		@Override
 		public int hashCode() {
-			int hashCode = this.inst.hashCode();
-			hashCode = 31*hashCode + this.iter.hashCode();
-			hashCode = 31*hashCode + this.oper.hashCode();
-			return hashCode;
+			return this.map.hashCode();
 		}
 		
 		@Override
 		public boolean equals(Object o) {
 			if (o == null || !this.getClass().equals(o.getClass())) return false;
 			AnnotationSet as = (AnnotationSet)o;
-			return this.inst.equals(as.inst) && this.iter.equals(as.iter) && this.oper.equals(as.oper);
+			return this.map.equals(as.map);
 		}
 		
 		@Override
 		public String toString() {
+			return this.map.values().toString();
+		}
+		
+		/**
+		 * Show a counter of this annotation set
+		 */
+		String counterString() {
 			String ret = "";
-			if (this.inst.getCounter() > 0) {
-				ret += this.inst.counterString();
+			Annotation<Instance> inst = this.map.get(AnnotationType.INSTANCE);
+			if (inst.getCounter() > 0) {
+				ret += inst.counterString();
 			}
-			ret += "(" + this.iter.counterString() + "," + SEL.values()[this.oper.getCounter()] +  ")";
+			ret += "(" + this.map.get(AnnotationType.ITERATION).counterString() + "," + this.getOperator() +  ")";
 			return ret;
 		}
 	}

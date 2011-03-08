@@ -57,7 +57,7 @@ public class XMMLDocument {
 	
 	public static void main(String[] args) {
 		try {
-			XMMLDocument doc = new XMMLDocumentImporter().parse(new File("/Users/jborgdo1/Desktop/isr_test.xmml"));
+			XMMLDocument doc = new XMMLDocumentImporter().parse(new File("/Users/jborgdo1/Desktop/canal.xmml"));
 			doc.export(GraphType.TASK, "/Users/jborgdo1/Desktop/graphXmml.dot", "/Users/jborgdo1/Desktop/graphXmml.pdf");
 		} catch (ValidityException e) {
 			// TODO Auto-generated catch block

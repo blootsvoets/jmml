@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.mapperproject.xmml.topology.Instance;
+import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.AnnotationSet;
 import eu.mapperproject.xmml.util.PTList;
 
 /**
@@ -16,23 +17,23 @@ import eu.mapperproject.xmml.util.PTList;
  * @author Joris Borgdorff
  */
 public class ProcessIterationCache {
-	private Map<String, Map<int[], ProcessIteration>> processIterations;
+	private Map<String, Map<AnnotationSet, ProcessIteration>> processIterations;
 
 	public ProcessIterationCache() {
-		processIterations = new HashMap<String, Map<int[], ProcessIteration>>();
+		processIterations = new HashMap<String, Map<AnnotationSet, ProcessIteration>>();
 	}
 
-	public ProcessIteration getIteration(Instance instance,
-			Annotation<Instance> iter, Annotation<Instance> inst,
-			Annotation<Instance> oper) {
+	public ProcessIteration getIteration(Instance instance, AnnotationSet key) {
 		
-		Map<int[], ProcessIteration> instMap = PTList.getMap(instance.getId(), processIterations);
-		int[] key = { iter.getCounter(), inst.getCounter(), oper.getCounter() };
+		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getId(), processIterations);
 
 		ProcessIteration pi = instMap.get(key);
 		if (pi == null) {
-			pi = new ProcessIteration(instance, iter, inst, oper);
+			pi = new ProcessIteration(instance, key);
 			instMap.put(key, pi);
+		}
+		else {
+			pi.merge(key);
 		}
 
 		return pi;

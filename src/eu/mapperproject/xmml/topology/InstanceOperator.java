@@ -19,11 +19,6 @@ public class InstanceOperator {
 		this.operator = operator;
 	}
 	
-	/** Get the number of the operator, currently the ordinal */
-	public int getOperatorNum() {
-		return this.operator.ordinal();
-	}
-	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
