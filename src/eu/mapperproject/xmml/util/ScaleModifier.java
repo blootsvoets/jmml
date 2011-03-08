@@ -20,6 +20,8 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 
 	public final static ScaleModifier BIT = new ScaleModifier(1, 8, Dimension.DATA);
 	
+	public final static ScaleModifier DECI = new ScaleModifier(-1);
+	public final static ScaleModifier CENTI = new ScaleModifier(-2);
 	public final static ScaleModifier MILLI = new ScaleModifier(-3);
 	public final static ScaleModifier MICRO = new ScaleModifier(-6);
 	public final static ScaleModifier NANO = new ScaleModifier(-9);
@@ -29,6 +31,8 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	public final static ScaleModifier ZEPTO = new ScaleModifier(-21);
 	public final static ScaleModifier YOCTO = new ScaleModifier(-24);
 
+	public final static ScaleModifier DECA = new ScaleModifier(1);
+	public final static ScaleModifier HECTO = new ScaleModifier(2);
 	public final static ScaleModifier KILO = new ScaleModifier(3);
 	public final static ScaleModifier MEGA = new ScaleModifier(6);
 	public final static ScaleModifier GIGA = new ScaleModifier(9);
@@ -193,13 +197,13 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	static {
 		ScaleModifier[] objects = {
 				MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
-				KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA,
-				MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO
+				DECA, HECTO, KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA,
+				DECI, CENTI, MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO
 			};
 		String[][] names = {
 				{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"months", "month"}, {"years", "year", "yrs", "yr"},
-				{"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"},
-				{"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"}
+				{"deca", "da"}, {"hecto", "h"}, {"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"},
+				{"deci", "d"}, {"centi", "c"}, {"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"}
 			};
 		scaleTokens = MultiStringParseToken.createTokens(objects, names);
 		
