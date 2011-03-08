@@ -90,4 +90,11 @@ public class Submodel implements Identifiable {
 	public boolean isStateful() {
 		return this.stateful != Optional.NO && this.stateful != null;
 	}
+
+	/**
+	 * Whether the submodel starts at the beginning of the model
+	 */
+	public boolean isInitial() {
+		return this.initial;
+	}
 }

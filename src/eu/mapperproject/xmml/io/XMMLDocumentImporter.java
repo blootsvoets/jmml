@@ -284,6 +284,11 @@ public class XMMLDocumentImporter {
 			InstancePort from = parseCouplingPort(coupling.getAttributeValue("from"), true, instances);
 			InstancePort to = parseCouplingPort(coupling.getAttributeValue("to"), false, instances);
 			
+			if (from == null || to == null) {
+				logger.warning("Coupling could not be properly parsed, skipping.");
+				continue;
+			}
+			
 			Datatype dfrom = from.getPort().getDatatype(), dto = to.getPort().getDatatype();
 			List<Filter> filters = parseFilters(coupling.getChildElements("filter"), definitions, dfrom, dto, from, to);
 			
@@ -343,6 +348,7 @@ public class XMMLDocumentImporter {
 		return list;
 	}
 
+	/** Parse the from or to port of a coupling */ 
 	private InstancePort parseCouplingPort(String value, boolean from, Map<String, Instance> instances) {
 		String[] id = value.split("\\.");
 		if (id.length != 2) {
@@ -396,9 +402,10 @@ public class XMMLDocumentImporter {
 			}
 			
 			String domainStr = instance.getAttributeValue("domain");
-			Domain domain = domainStr == null ? null : Domain.parseDomain(domainStr, domains);
+			Domain domain = domainStr == null ? Domain.MULTIPLE : Domain.parseDomain(domainStr, domains);
+			
 			String initialStr = instance.getAttributeValue("init");
-			boolean initial = initialStr == null ? false : initialStr.equals("yes");
+			boolean initial = initialStr == null ? submodel.isInitial() : initialStr.equals("yes");
 
 			ScaleParser parser = new ScaleParser(id, submodel.getScaleMap());
 			parser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
