@@ -1,11 +1,6 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
-import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.graph.Edge;
 
 /**
@@ -13,20 +8,20 @@ import eu.mapperproject.xmml.util.graph.Edge;
  * @author Joris Borgdorff
  *
  */
-public class CouplingInstance implements Edge<ProcessIteration> {
-	private ProcessIteration from;
-	private ProcessIteration to;
+public class CouplingInstance<T> implements Edge<T> {
+	private T from;
+	private T to;
 	private Coupling coupling;
 	
 	/** Create an instance of a coupling between one process iteration and another */
-	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
+	public CouplingInstance(T from, T to, Coupling cd) {
 		this.coupling = cd;
 		this.from = from;
 		this.to = to;
 	}
 	
 	/** Create an instance of a state coupling between one process iteration the next */
-	public CouplingInstance(ProcessIteration from, ProcessIteration to) {
+	public CouplingInstance(T from, T to) {
 		this(from, to, null);
 	}
 	
@@ -43,16 +38,25 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 		if (o == null || this.getClass().equals(o.getClass())) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
-		return this.from.equals(ci.from) && this.to.equals(ci.to);
+		return this.from.equals(ci.from) && this.to.equals(ci.to) && this.coupling.equals(ci.coupling);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 37 * hash + (this.from != null ? this.from.hashCode() : 0);
+		hash = 37 * hash + (this.to != null ? this.to.hashCode() : 0);
+		hash = 37 * hash + (this.coupling != null ? this.coupling.hashCode() : 0);
+		return hash;
 	}
 	
 	@Override
-	public ProcessIteration getFrom() {
+	public T getFrom() {
 		return this.from;
 	}
 
 	@Override
-	public ProcessIteration getTo() {
+	public T getTo() {
 		return this.to;
 	}
 
