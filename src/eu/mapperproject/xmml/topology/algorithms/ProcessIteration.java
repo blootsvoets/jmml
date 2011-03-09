@@ -270,7 +270,7 @@ public class ProcessIteration {
 			this.map.put(AnnotationType.INSTANCE, inst);
 			this.instCounter = inst.getCounter();
 			this.map.put(AnnotationType.OPERATOR, oper);
-			this.op = SEL.values()[oper.getCounter()];
+			this.op = SEL.get(oper.getCounter());
 			this.inst = instance;
 		}
 		
@@ -328,7 +328,7 @@ public class ProcessIteration {
 					this.instCounter = an.getCounter();
 					break;
 				case OPERATOR:
-					this.op = SEL.values()[an.getCounter()];
+					this.op = SEL.get(an.getCounter());
 					break;
 			}
 		}

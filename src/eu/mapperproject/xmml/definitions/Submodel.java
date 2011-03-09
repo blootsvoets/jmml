@@ -26,6 +26,7 @@ public class Submodel implements Identifiable {
 		Of(true);
 		
 		private boolean sending;
+		private final static SEL values[] = SEL.values();
 		
 		private SEL(boolean send) {
 			this.sending = send;
@@ -38,6 +39,11 @@ public class Submodel implements Identifiable {
 		/** Whether the operator may receive data */
 		public boolean isReceiving() {
 			return !this.sending;
+		}
+
+		/** Get the SEL corresponding to their ordinal */
+		public static SEL get(int i) {
+			return values[i];
 		}
 	}
 	private Map<String,Port> in;
