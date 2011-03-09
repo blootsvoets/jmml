@@ -51,7 +51,7 @@ public class PTList {
 	public static <P,Q> Collection<Q> getSet(P key, Map<P, Collection<Q>> map) {
 		Collection<Q> nm = map.get(key);
 		if (nm == null) {
-			nm = new ArrayList<Q>();
+			nm = new ArrayList<Q>(5);
 			map.put(key, nm);
 		}
 		return nm;		

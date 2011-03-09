@@ -12,15 +12,17 @@ import java.util.List;
 public class Trace<T extends Numbered> {
 	private int[] trace;
 	private final List<T> objects;
+	private int size;
 
 	public Trace() {
-		int size = 10;
-		this.trace = new int[size];
+		int initsize = 10;
+		this.trace = new int[initsize];
 		this.objects = new ArrayList<T>();
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < initsize; i++) {
 			this.trace[i] = -1;
 			this.objects.add(null);
+			this.size = 0;
 		}
 	}
 
@@ -29,6 +31,7 @@ public class Trace<T extends Numbered> {
 		this.trace = new int[t.trace.length];
 		System.arraycopy(t.trace, 0, this.trace, 0, this.trace.length);
 		this.objects = t.objects;
+		this.size = t.size;
 	}
 
 	/** Add an index to an object */
@@ -50,6 +53,7 @@ public class Trace<T extends Numbered> {
 			this.trace = tmp;
 		}
 		if (this.trace[num] == -1) {
+			this.size++;
 			while (this.objects.size() <= num) {
 				this.objects.add(null);
 			}
@@ -59,9 +63,9 @@ public class Trace<T extends Numbered> {
 
 	/** Merges the values of the given trace with the current trace, choosing the largest of the values */
 	public List<Collection<T>> merge(Trace<T> t) {
-		List<Collection<T>> ret = new ArrayList<Collection<T>>();
-		Collection<T> eq = new ArrayList<T>();
-		Collection<T> gt = new ArrayList<T>();
+		List<Collection<T>> ret = new ArrayList<Collection<T>>(2);
+		Collection<T> eq = new ArrayList<T>((this.size + 1) / 2);
+		Collection<T> gt = new ArrayList<T>(Math.max(1, (t.size - this.size) + (this.size + 1) / 2));
 		ret.add(eq);
 		ret.add(gt);
 
@@ -69,12 +73,12 @@ public class Trace<T extends Numbered> {
 
 		for (int i = 0; i < len; i++) {
 			if (t.trace[i] >= this.trace[i] && t.trace[i] > -1) {
-				this.trace[i] = t.trace[i];
 				T o = t.objects.get(i);
-				this.objects.set(i, o);
-
 				if (t.trace[i] == this.trace[i]) eq.add(o);
 				else gt.add(o);
+
+				this.trace[i] = t.trace[i];
+				this.objects.set(i, o);
 			}
 		}
 		if (t.trace.length > this.trace.length) {
@@ -157,8 +161,9 @@ public class Trace<T extends Numbered> {
 	/** Removes and thus uninstantiates given object from this trace */
 	public void reset(T o) {
 		int num = o.getNumber();
-		if (this.trace.length >= num) {
-			this.trace[o.getNumber()] = -1;
+		if (this.trace.length >= num && this.trace[num] != -1) {
+			this.trace[num] = -1;
+			this.size--;
 		}
 	}
 

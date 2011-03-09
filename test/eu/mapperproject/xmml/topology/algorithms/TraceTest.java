@@ -1,7 +1,11 @@
 package eu.mapperproject.xmml.topology.algorithms;
 import eu.mapperproject.xmml.util.Numbered;
+import java.util.Collection;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +20,16 @@ public class TraceTest {
 		public int getNumber() {
 			return this.num;
 		}
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || !this.getClass().equals(o.getClass())) return false;
+			return this.num == ((Int)o).num;
+		}
 
+		@Override
+		public int hashCode() {
+			return this.num;
+		}
 	}
 
 	private Trace<Int> traceEmpty, traceEmpty1, traceEmpty2;
@@ -78,6 +91,32 @@ public class TraceTest {
 	public void mergeWithput() {
 		traceEmpty1.put(one, 1);
 		traceEmpty2.put(two, 2);
+		List<Collection<Int>> col = traceEmpty1.merge(traceEmpty2);
+		assertTrue(col.get(0).isEmpty());
+		assertSame(1, col.get(1).size());
+		assertEquals(two, col.get(1).iterator().next());
+
+		traceEmpty.put(one, 1);
+		traceEmpty.put(two, 2);
+		
+		assertEquals(traceEmpty, traceEmpty1);
+
+		traceEmpty2.put(two, 3);
+		col = traceEmpty1.merge(traceEmpty2);
+		assertSame(1, col.get(1).size());
+		traceEmpty.put(two, 3);
+
+		assertEquals(traceEmpty, traceEmpty1);
+
+		col = traceEmpty1.merge(traceEmpty2);
+		assertSame(1, col.get(0).size());
+		assertEquals(two, col.get(0).iterator().next());
+	}
+
+	@Test
+	public void override() {
+		traceEmpty1.put(one, 1);
+		traceEmpty2.put(two, 2);
 		traceEmpty1.merge(traceEmpty2);
 		
 		traceEmpty.put(one, 1);
@@ -85,7 +124,7 @@ public class TraceTest {
 		
 		assertEquals(traceEmpty, traceEmpty1);
 	}
-	
+
 	@Test
 	public void reset() {
 		traceEmpty.put(one, 2);

@@ -22,7 +22,7 @@ public class ProcessIteration {
 	private boolean stateFinished, initFinished;
 	
 	public enum ProgressType {
-		NEXT, RESET, INSTANCE, ITERATION;
+		INSTANCE, ITERATION;
 	}
 	
 	public ProcessIteration(Instance pd) {
@@ -237,8 +237,8 @@ public class ProcessIteration {
 	class AnnotationSet {
 		private final Map<AnnotationType,Annotation<Instance>> map;
 		private Instance inst;
-                private int iterCounter, instCounter;
-                private SEL op;
+        private int iterCounter, instCounter;
+        private SEL op;
 
 		/** Create a new empty annotationset */
 		AnnotationSet() {
@@ -254,7 +254,7 @@ public class ProcessIteration {
 
 		/** Create a copy of given annotationset */
 		AnnotationSet(AnnotationSet old) {
-			this(old.map.get(AnnotationType.INSTANCE).copy(), old.map.get(AnnotationType.ITERATION).copy(), old.map.get(AnnotationType.OPERATOR).copy());
+			this(old.map.get(AnnotationType.INSTANCE), old.map.get(AnnotationType.ITERATION), old.map.get(AnnotationType.OPERATOR));
 			this.inst = old.inst;
 		}
 
@@ -266,11 +266,11 @@ public class ProcessIteration {
 
 			this.map = new EnumMap<AnnotationType, Annotation<Instance>>(AnnotationType.class);
 			this.map.put(AnnotationType.ITERATION, iter);
-                        this.iterCounter = iter.getCounter();
+			this.iterCounter = iter.getCounter();
 			this.map.put(AnnotationType.INSTANCE, inst);
-                        this.instCounter = inst.getCounter();
+			this.instCounter = inst.getCounter();
 			this.map.put(AnnotationType.OPERATOR, oper);
-                        this.op = SEL.values()[oper.getCounter()];
+			this.op = SEL.values()[oper.getCounter()];
 			this.inst = instance;
 		}
 		
@@ -301,7 +301,7 @@ public class ProcessIteration {
 		
 		/** Set the operater */
 		void setOperater(SEL op) {
-                        this.op = op;
+			this.op = op;
 			this.map.put(AnnotationType.OPERATOR, this.map.get(AnnotationType.OPERATOR).set(this.inst, op.ordinal()));
 		}
 		
@@ -352,17 +352,17 @@ public class ProcessIteration {
 
 		@Override
 		public int hashCode() {
-                        int hashCode = this.instCounter;
-                        hashCode = 31*hashCode + this.iterCounter;
-                        hashCode = 31*hashCode + this.op.ordinal();
-                        return hashCode;
+			int hashCode = this.instCounter;
+			hashCode = 31 * hashCode + this.iterCounter;
+			hashCode = 31 * hashCode + this.op.ordinal();
+			return hashCode;
 		}
 		
 		@Override
 		public boolean equals(Object o) {
-                        if (this == o) return true;
+			if (this == o) return true;
 			if (o == null || !this.getClass().equals(o.getClass())) return false;
-                        AnnotationSet as = (AnnotationSet)o;
+			AnnotationSet as = (AnnotationSet) o;
 			return this.instCounter == as.instCounter && this.iterCounter == as.iterCounter && this.op == as.op;
 		}
 		
