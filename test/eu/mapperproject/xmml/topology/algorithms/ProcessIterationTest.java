@@ -37,9 +37,9 @@ public class ProcessIterationTest {
 		Submodel sbbas = new Submodel(new ModelMetadata("basic", null, null, null), null, null, null, null, false, null, null);
 		Submodel sboth = new Submodel(new ModelMetadata("other", null, null, null), null, null, null, null, false, null, null);
 		
-		Instance pdBasicz = new Instance("basicz", sbbasz, d, false, scaleOther);
-		Instance pdBasic = new Instance("basic", sbbas, d, false, scales);
-		Instance pdOther = new Instance("other", sboth, d, false, scales);
+		Instance pdBasicz = new Instance(1, "basicz", sbbasz, d, false, scaleOther);
+		Instance pdBasic = new Instance(2, "basic", sbbas, d, false, scales);
+		Instance pdOther = new Instance(3, "other", sboth, d, false, scales);
 		
 		cdBasicz2basicz = new Coupling(null, new InstancePort(pdBasicz, new Port("out", SEL.Of, null, null)), new InstancePort(pdBasicz, new Port("in", SEL.finit, null, null)), null);
 		cdBasic2other = new Coupling(null, new InstancePort(pdBasic, new Port("out", SEL.Of, null, null)), new InstancePort(pdOther, new Port("in", SEL.finit, null, null)), null);

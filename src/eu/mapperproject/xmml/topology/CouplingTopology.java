@@ -82,6 +82,11 @@ public class CouplingTopology {
 	public Collection<Instance> getInstances() {
 		return this.instances.values();
 	}
+
+	/** Get number of instances */
+	public int getInstanceCount() {
+		return this.instances.size();
+	}
 	
 	/** Get all instances that are initially active */
 	public Collection<Instance> getInitialInstances() {

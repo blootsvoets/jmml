@@ -200,11 +200,11 @@ public class XMMLDocumentImporter {
 			Optional stateful = MultiStringParseToken.findObject(submodel.getAttributeValue("stateful"), MultiStringParseToken.optionalTokens);
 			Optional interactive = MultiStringParseToken.findObject(submodel.getAttributeValue("interactive"), MultiStringParseToken.optionalTokens);
 			
-			ScaleParser parser = new ScaleParser(meta.getId());
-			parser.parseElements(submodel.getChildElements("timescale"), Dimension.TIME);
-			parser.parseElements(submodel.getChildElements("spacescale"), Dimension.LENGTH);
-			parser.parseElements(submodel.getChildElements("otherscale"), Dimension.OTHER);
-			ScaleMap scales = parser.getScaleMap();
+			ScaleParser scParser = new ScaleParser(meta.getId());
+			scParser.parseElements(submodel.getChildElements("timescale"), Dimension.TIME);
+			scParser.parseElements(submodel.getChildElements("spacescale"), Dimension.LENGTH);
+			scParser.parseElements(submodel.getChildElements("otherscale"), Dimension.OTHER);
+			ScaleMap scales = scParser.getScaleMap();
 
 			Element ports = submodel.getFirstChildElement("ports");
 			Map<String, Port> in = parsePorts(ports.getChildElements("in"), true, datatypes);
@@ -311,7 +311,7 @@ public class XMMLDocumentImporter {
 			if (type == Filter.Type.CONVERTER && dfrom != null && dto != null) {
 				Converter c = definitions.getConverter(name);
 				if (c != null) {
-					if (!c.getFrom().equals(from)) {
+					if (!c.getFrom().equals(dfrom)) {
 						logger.warning("converter '" + c.getId() + "' in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' but is listed as a filter for that datatype");
 					}
 					else {
@@ -341,7 +341,7 @@ public class XMMLDocumentImporter {
 			}
 			list.add(new Filter(name, type, scale, factor));
 		}
-		if (tmpto != null && to != null && !tmpto.equals(to)) {
+		if (tmpto != null && to != null && !tmpto.equals(dto)) {
 			logger.warning("list of converters in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' to datatype '" + dto.getId() + "' but to datatype '" + tmpto.getId() + "' instead");
 		}
 		
@@ -407,13 +407,14 @@ public class XMMLDocumentImporter {
 			String initialStr = instance.getAttributeValue("init");
 			boolean initial = initialStr == null ? submodel.isInitial() : initialStr.equals("yes");
 
-			ScaleParser parser = new ScaleParser(id, submodel.getScaleMap());
-			parser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
-			parser.parseElements(instance.getChildElements("spacescale"), Dimension.LENGTH);
-			parser.parseElements(instance.getChildElements("otherscale"), Dimension.OTHER);
-			ScaleMap scales = parser.getScaleMap();
+			ScaleParser scParser = new ScaleParser(id, submodel.getScaleMap());
+			scParser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
+			scParser.parseElements(instance.getChildElements("spacescale"), Dimension.LENGTH);
+			scParser.parseElements(instance.getChildElements("otherscale"), Dimension.OTHER);
+			ScaleMap scales = scParser.getScaleMap();
 
-			map.put(id, new Instance(id, submodel, domain, initial, scales));
+			int num = map.size();
+			map.put(id, new Instance(num, id, submodel, domain, initial, scales));
 		}
 		return map;
 	}

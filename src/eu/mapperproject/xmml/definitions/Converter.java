@@ -29,23 +29,18 @@ public class Converter implements Identifiable, Edge<Datatype> {
 		this.src = src;
 	}
 
-	/**
-	 * @return the datatype that the converter converts from
-	 */
+
+	@Override
 	public Datatype getFrom() {
 		return this.from;
 	}
 
-	/**
-	 * @return the datatype that the converter converts to
-	 */
+	@Override
 	public Datatype getTo() {
 		return to;
 	}
 
-	/**
-	 * @return the id
-	 */
+	@Override
 	public String getId() {
 		return id;
 	}

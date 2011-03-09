@@ -17,9 +17,11 @@ public class Instance implements Identifiable, Domainable {
 	private boolean initial;
 	private boolean isfinal;
 	private final ScaleMap scales;
+	private final int num;
 
-	public Instance(String id, Submodel submodel, Domain domain,
+	public Instance(int num, String id, Submodel submodel, Domain domain,
 			boolean initial, ScaleMap scales) {
+		this.num = num;
 		this.id = id;
 		this.submodel = submodel;
 		this.domain = domain;
@@ -35,11 +37,15 @@ public class Instance implements Identifiable, Domainable {
 		return this.submodel;
 	}
 
-	/**
-	 * @return the id
-	 */
+
+	@Override
 	public String getId() {
 		return id;
+	}
+
+	/** Get the absolute instance number */
+	public int getNumber() {
+		return this.num;
 	}
 
 	/* (non-Javadoc)
@@ -95,19 +101,19 @@ public class Instance implements Identifiable, Domainable {
 	
 	@Override
 	public int hashCode() {
-		return this.id.hashCode();
+		return this.num;
 	}
 	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
-		return this.id.equals(((Instance)o).id);
+		return this.num == ((Instance)o).num;
 	}
 	
 	/** Whether all aspects of this instance equal the other, not just the id */
 	public boolean deepEquals(Object o) {
 		if (!this.equals(o)) return false;
 		Instance i = (Instance)o;
-		return this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
+		return this.id.equals(i.id) && this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
 	}
 }
