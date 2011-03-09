@@ -129,8 +129,13 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			}
 			
 			Instance inst = pi.getInstance();
+			boolean needInit = topology.needsInitInstances(inst);
+			if (needInit && pi.finalLoop()) {
+				return true;
+			}
+
 			Collection<Coupling> cs;
-			if (pi.initializing() && topology.needsInitInstances(inst)) {
+			if (needInit && pi.initializing()) {
 				cs = topology.needsInitCouplings(inst);
 			}
 			else {

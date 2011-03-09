@@ -60,8 +60,8 @@ public class ProcessIteration {
 		return this.annot.operatorEq(SEL.Of);
 	}
 	
-	public boolean loopCompleted() {
-		return this.instance.isCompleted(annot.getIteration()) && (!this.annot.operatorLE(SEL.B));
+	public boolean finalLoop() {
+		return this.instance.isCompleted(annot.getIteration()) && !this.annot.operatorEq(SEL.finit);
 	}
 	
 	public Instance getInstance() {
@@ -156,8 +156,8 @@ public class ProcessIteration {
 					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getInstance());
 				}
 
-				// Loop until the end condition is met
-				if (this.annot.operatorLE(SEL.B) || pd.isCompleted(set.getIteration())) {
+				// Loop until the end condition is met or sequentially within the loop
+				if (this.annot.operatorLE(SEL.B) || this.finalLoop()) {
 					set.next(AnnotationType.OPERATOR);
 				}
 				else {
