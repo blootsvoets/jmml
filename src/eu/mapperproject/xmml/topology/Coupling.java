@@ -99,7 +99,7 @@ public class Coupling implements Domainable, Edge<Instance> {
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		Coupling c = (Coupling)o;
-		return ((this.name == null && c.name == null) || this.name.equals(c.name)) && this.from.equals(c.from) && this.to.equals(c.to) && this.filters.equals(c.filters);
+		return ((this.name == null && c.name == null) || this.name.equals(c.name)) && this.from.equals(c.from) && this.to.equals(c.to);
 	}
 	
 	@Override
@@ -107,7 +107,6 @@ public class Coupling implements Domainable, Edge<Instance> {
 		int hashCode = this.name == null ? 0 : this.name.hashCode();
 		hashCode = 31 * hashCode + this.from.hashCode();
 		hashCode = 31 * hashCode + this.to.hashCode();
-		hashCode = 31 * hashCode + this.filters.hashCode();
 		return hashCode;
 	}
 	

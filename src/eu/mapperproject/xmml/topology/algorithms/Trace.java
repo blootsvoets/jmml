@@ -17,8 +17,7 @@ public class Trace<T> {
 
 	/** Constructs an independent trace with the same values as the given one */
 	public Trace(Trace<T> t) {
-		this.map = new HashMap<T, Integer>();
-		this.map.putAll(t.map);
+		this.map = new HashMap<T, Integer>(t.map);
 	}
 
 	/** Add an index to an object */

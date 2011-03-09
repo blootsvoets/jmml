@@ -27,14 +27,14 @@ import eu.mapperproject.xmml.util.PTList;
 public class TaskGraphState implements Iterable<ProcessIteration> {
 	private List<ProcessIteration> activeProcesses;
 	private Set<ProcessIteration> visited;
-	private Map<ProcessIteration,Set<Coupling>> snoozingProcesses;
+	private Map<ProcessIteration,Collection<Coupling>> snoozingProcesses;
 	private Map<Instance,ProcessIteration> states;
 	private CouplingTopology topology;
 
 	public TaskGraphState(CouplingTopology desc) {
 		this.states = new HashMap<Instance,ProcessIteration>();
 		this.activeProcesses = new ArrayList<ProcessIteration>();
-		this.snoozingProcesses = new HashMap<ProcessIteration,Set<Coupling>>();
+		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<Coupling>>();
 		this.visited = new HashSet<ProcessIteration>();
 		this.topology = desc;
 	}
@@ -79,7 +79,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	public void printDeadlock() {
 		if (this.activeProcesses.isEmpty() && !this.snoozingProcesses.isEmpty()) {
 			System.out.println("Deadlock:");
-			for (Map.Entry<ProcessIteration, Set<Coupling>> m : snoozingProcesses.entrySet()) {
+			for (Map.Entry<ProcessIteration, Collection<Coupling>> m : snoozingProcesses.entrySet()) {
 				hasAllCouplings(m.getKey(), m.getValue(), true);
 			}
 		}
@@ -95,11 +95,11 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 * @throws IllegalStateException if the processiteration has already been activated
 	 */
 	private boolean activateIfNeeded(ProcessIteration pi, Coupling next) {
-		if (this.visited.contains(pi)) {
-			throw new IllegalStateException("Revisiting process iteration " + pi + " in coupling " + next);
-		}
+//		if (this.visited.contains(pi)) {
+//			throw new IllegalStateException("Revisiting process iteration " + pi + " in coupling " + next);
+//		}
 
-		Set<Coupling> cis = PTList.getSet(pi, snoozingProcesses);
+		Collection<Coupling> cis = PTList.getSet(pi, snoozingProcesses);
 		if (!cis.contains(next)) {
 			cis.add(next);
 			if (hasAllCouplings(pi, cis, false)) {
@@ -115,7 +115,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	/**
 	 * Whether all incoming couplings of given process have been fulfilled
 	 */
-	private boolean hasAllCouplings(ProcessIteration pi, Set<Coupling> cds, boolean print) {
+	private boolean hasAllCouplings(ProcessIteration pi, Collection<Coupling> cds, boolean print) {
 		SEL receivingType = pi.receivingType();
 		
 		if (receivingType != null) {

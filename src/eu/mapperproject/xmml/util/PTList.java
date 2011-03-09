@@ -1,11 +1,13 @@
 package eu.mapperproject.xmml.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class PTList {
 	public static <P,Q> List<Q> add(P key, Q value, Map<P,List<Q>> map) {
@@ -46,10 +48,10 @@ public class PTList {
 		return list.get(key);
 	}
 	
-	public static <P,Q> Set<Q> getSet(P key, Map<P, Set<Q>> map) {
-		Set<Q> nm = map.get(key);
+	public static <P,Q> Collection<Q> getSet(P key, Map<P, Collection<Q>> map) {
+		Collection<Q> nm = map.get(key);
 		if (nm == null) {
-			nm = new HashSet<Q>();
+			nm = new ArrayList<Q>();
 			map.put(key, nm);
 		}
 		return nm;		

@@ -28,7 +28,7 @@ public class InstanceOperator {
 	
 	@Override
 	public int hashCode() {
-		return (this.operator == null ? 0 : this.operator.hashCode()) ^ this.instance.getId().hashCode();
+		return 31*(this.operator == null ? 0 : this.operator.hashCode()) + this.instance.getId().hashCode();
 	}
 	
 	@Override

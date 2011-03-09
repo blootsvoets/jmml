@@ -12,7 +12,10 @@ import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 public class ProcessIteration {
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
 	private final AnnotationSet givenAnnot, annot;
-	private Instance instance;
+	private final Instance instance;
+        // As equals is the most costly operation in processiteration
+        // this cache was added
+        private final String asString;
 	private boolean isfinal;
 	private boolean stateFinished, initFinished;
 	
@@ -33,6 +36,7 @@ public class ProcessIteration {
 		}
 		this.annot = annot;
 		this.givenAnnot = new AnnotationSet(this.annot);
+                this.asString = this.instance.getId() + this.givenAnnot.counterString();
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
@@ -213,28 +217,26 @@ public class ProcessIteration {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
-		ProcessIteration other = (ProcessIteration)o;
-		
-		return this.instance.equals(other.instance) && this.givenAnnot.equals(other.givenAnnot);
+                if (this == o) return true;
+		if (o == null) return false;
+                return this.asString.equals(o.toString());
 	}
 
 	@Override
 	public String toString() {
-		String ret = instance.getId();
-		
-		return ret + givenAnnot.counterString();
+		return this.asString;
 	}
 	
 	@Override
 	public int hashCode() {
-		int hashCode = this.instance.hashCode();
-		return hashCode;
+		return this.asString.hashCode();
 	}
 	
 	class AnnotationSet {
 		private final Map<AnnotationType,Annotation<Instance>> map;
 		private Instance inst;
+                private int iterCounter, instCounter;
+                private SEL op;
 
 		/** Create a new empty annotationset */
 		AnnotationSet() {
@@ -262,55 +264,78 @@ public class ProcessIteration {
 
 			this.map = new EnumMap<AnnotationType, Annotation<Instance>>(AnnotationType.class);
 			this.map.put(AnnotationType.ITERATION, iter);
+                        this.iterCounter = iter.getCounter();
 			this.map.put(AnnotationType.INSTANCE, inst);
+                        this.instCounter = inst.getCounter();
 			this.map.put(AnnotationType.OPERATOR, oper);
+                        this.op = SEL.values()[oper.getCounter()];
 			this.inst = instance;
 		}
 		
 		/** Current operator. */
 		SEL getOperator() {
-			return SEL.values()[this.map.get(AnnotationType.OPERATOR).getCounter()];
+			return this.op;
 		}
 		
 		/** Get the value of the current iteration */
 		int getIteration() {
-			return this.map.get(AnnotationType.ITERATION).getCounter();
+			return this.iterCounter;
 		}
 		
 		/** Get the value of the current iteration */
 		int getInstance() {
-			return this.map.get(AnnotationType.INSTANCE).getCounter();
+			return this.instCounter;
 		}
 
 		/** Current operator is less than or equal to the given operator. */
 		boolean operatorLE(SEL op) {
-			return this.map.get(AnnotationType.OPERATOR).getCounter() <= op.ordinal();
+			return this.op.ordinal() <= op.ordinal();
 		}
 		
 		/** Current operator is larger than or equal to the given operator. */
 		boolean operatorEq(SEL op) {
-			return this.map.get(AnnotationType.OPERATOR).getCounter() == op.ordinal();
+			return this.op == op;
 		}
 		
 		/** Set the operater */
 		void setOperater(SEL op) {
+                        this.op = op;
 			this.map.put(AnnotationType.OPERATOR, this.map.get(AnnotationType.OPERATOR).set(this.inst, op.ordinal()));
 		}
 		
 		/** Go to the next value of the requested annotation */
 		void next(AnnotationType at) {
-			this.map.put(at, this.map.get(at).next(inst));
+                        Annotation<Instance> next = this.map.get(at).next(inst);
+                        this.updateCounter(next);
 		}
 		
 		/** Reset the value of the requested annotation */
 		void reset(AnnotationType at) {
-			this.map.put(at, this.map.get(at).reset(inst));
+                        Annotation<Instance> reset = this.map.get(at).reset(inst);
+                        this.updateCounter(reset);
 		}
+
+                private void updateCounter(Annotation<Instance> an) {
+                        AnnotationType at = an.getType();
+			this.map.put(at, an);
+                        switch (at) {
+                            case ITERATION:
+                                this.iterCounter = an.getCounter();
+                                break;
+                            case INSTANCE:
+                                this.instCounter = an.getCounter();
+                                break;
+                            case OPERATOR:
+                                this.op = SEL.values()[an.getCounter()];
+                                break;
+                        }
+                }
 		
 		/** Let the current instance be the subject of the annotation set */
 		void setSubject(Instance inst) {
-			for (Map.Entry<AnnotationType,Annotation<Instance>> an : this.map.entrySet()) {
-				map.put(an.getKey(), an.getValue().current(inst));
+			for (Annotation<Instance> an : this.map.values()) {
+                                Annotation<Instance> cur = an.current(inst);
+				this.updateCounter(cur);
 			}
 			this.inst = inst;
 		}
@@ -324,14 +349,18 @@ public class ProcessIteration {
 
 		@Override
 		public int hashCode() {
-			return this.map.hashCode();
+                        int hashCode = this.instCounter;
+                        hashCode = 31*hashCode + this.iterCounter;
+                        hashCode = 31*hashCode + this.op.ordinal();
+                        return hashCode;
 		}
 		
 		@Override
 		public boolean equals(Object o) {
+                        if (this == o) return true;
 			if (o == null || !this.getClass().equals(o.getClass())) return false;
-			AnnotationSet as = (AnnotationSet)o;
-			return this.map.equals(as.map);
+                        AnnotationSet as = (AnnotationSet)o;
+			return this.instCounter == as.instCounter && this.iterCounter == as.iterCounter && this.op == as.op;
 		}
 		
 		@Override
