@@ -9,6 +9,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import java.util.List;
 
 /**
  * An internal graph.
@@ -19,19 +20,26 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 public class PTGraph<T, E extends Edge<T>> {
 	private final boolean directed;
 	private final Collection<E> edges;
-	private final Collection<T> nodes;
+	private final Map<T, List<Collection<E>>> edgesPerNode;
 	private boolean[] hasExtremity;
 	
 	public PTGraph(boolean directed) {
 		this.directed = directed;
 		this.edges = new ArrayList<E>();
-		this.nodes = new ArrayList<T>();
+		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
 		this.hasExtremity = new boolean[] {false, false};
 	}
 	
 	public PTGraph(Graph<T, E> graph, T source, T sink) {
 		this.directed = graph instanceof DirectedGraph;
-		this.nodes = new ArrayList<T>(graph.getVertices());
+		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
+		for (T node : graph.getVertices()) {
+			List<Collection<E>> list = new ArrayList<Collection<E>>(2);
+			list.add(graph.getInEdges(node));
+			list.add(graph.getOutEdges(node));
+			this.edgesPerNode.put(node, list);
+		}
+		
 		this.edges = new ArrayList<E>(graph.getEdges());
 
 		for (Edge<T> e : this.edges) {
@@ -46,11 +54,12 @@ public class PTGraph<T, E extends Edge<T>> {
 		
 	public static <T extends StyledNode & Child<T>> PTGraph<StyledNode, StyledEdge> graphFromTree(Tree<T> tree) {
 		PTGraph<StyledNode, StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(true);
-		
+
 		for (T elem : tree) {
-			graph.nodes.add(elem);
+			graph.addNode(elem);
 			if (!elem.isRoot()) {
-				graph.edges.add(new SimpleStyledEdge(elem.parent(), elem));
+				StyledEdge edge = new SimpleStyledEdge(elem.parent(), elem);
+				graph.addEdge(edge);
 			}
 		}
 		return graph;
@@ -61,10 +70,18 @@ public class PTGraph<T, E extends Edge<T>> {
 	}
 	
 	public boolean isEmpty() {
-		return this.edges.isEmpty() && this.nodes.isEmpty();
+		return this.edges.isEmpty() && this.edgesPerNode.isEmpty();
 	}
 	
+
+	
 	public void addEdge(E e) {
+		List<Collection<E>> list;
+		
+		list = this.addNode(e.getFrom());
+		list.get(1).add(e);
+		list = this.addNode(e.getTo());
+		list.get(0).add(e);
 		this.edges.add(e);
 	}
 	
@@ -78,23 +95,46 @@ public class PTGraph<T, E extends Edge<T>> {
 	
 	private boolean setExtremity(int i, T node) {
 		if (!this.hasExtremity[i]) {
-			this.nodes.add(node);
+			this.addNode(node);
 			this.hasExtremity[i] = true;
 			return true;
 		}
 		return false;
 	}
 
-	public void addNode(T n) {
-		this.nodes.add(n);
+	public List<Collection<E>> addNode(T n) {
+		List<Collection<E>> list = this.edgesPerNode.get(n);
+		if (list == null) {
+			list = new ArrayList<Collection<E>>(2);
+			list.add(new ArrayList<E>(1));
+			list.add(new ArrayList<E>(5));
+			this.edgesPerNode.put(n, list);
+		}
+		return list;
 	}
 	
 	public Collection<E> getEdges() {
 		return this.edges;
 	}
 
+	public Collection<E> getEdgesIn(T node) {
+		return this.getEdges(node).get(0);
+	}
+
+	public Collection<E> getEdgesOut(T node) {
+		return this.getEdges(node).get(1);
+	}
+
+	private List<Collection<E>> getEdges(T node) {
+		List<Collection<E>> list = this.edgesPerNode.get(node);
+		if (list == null) {
+			throw new IllegalArgumentException("Node " + node + " not added to graph");
+		}
+		return list;
+	}
+
 	public Collection<T> getNodes() {
-		return this.nodes;
+		return this.edgesPerNode.keySet();
 	}
 	
 	public Graph<T,Edge<T>> getJungGraph(T source, T sink) {
@@ -106,7 +146,7 @@ public class PTGraph<T, E extends Edge<T>> {
 			graph = new UndirectedSparseGraph<T,Edge<T>>();
 		}
 		
-		for (T n : this.nodes) {
+		for (T n : this.getNodes()) {
 			graph.addVertex(n);
 		}
 		
