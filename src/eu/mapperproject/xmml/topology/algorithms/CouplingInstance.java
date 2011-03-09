@@ -8,20 +8,20 @@ import eu.mapperproject.xmml.util.graph.Edge;
  * @author Joris Borgdorff
  *
  */
-public class CouplingInstance<T> implements Edge<T> {
-	private T from;
-	private T to;
+public class CouplingInstance implements Edge<ProcessIteration> {
+	private ProcessIteration from;
+	private ProcessIteration to;
 	private Coupling coupling;
 	
 	/** Create an instance of a coupling between one process iteration and another */
-	public CouplingInstance(T from, T to, Coupling cd) {
+	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
 		this.coupling = cd;
 		this.from = from;
 		this.to = to;
 	}
 	
 	/** Create an instance of a state coupling between one process iteration the next */
-	public CouplingInstance(T from, T to) {
+	public CouplingInstance(ProcessIteration from, ProcessIteration to) {
 		this(from, to, null);
 	}
 	
@@ -38,25 +38,25 @@ public class CouplingInstance<T> implements Edge<T> {
 		if (o == null || this.getClass().equals(o.getClass())) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
-		return this.from.equals(ci.from) && this.to.equals(ci.to) && this.coupling.equals(ci.coupling);
+		return this.from.equals(ci.from) && this.to.equals(ci.to) && ((this.coupling == null && ci.coupling == null) || this.coupling.equals(ci.coupling));
 	}
 
 	@Override
 	public int hashCode() {
-		int hash = 5;
-		hash = 37 * hash + (this.from != null ? this.from.hashCode() : 0);
-		hash = 37 * hash + (this.to != null ? this.to.hashCode() : 0);
-		hash = 37 * hash + (this.coupling != null ? this.coupling.hashCode() : 0);
+		int hash = 7;
+		hash = 17 * hash + (this.from != null ? this.from.hashCode() : 0);
+		hash = 17 * hash + (this.to != null ? this.to.hashCode() : 0);
+		hash = 17 * hash + (this.coupling != null ? this.coupling.hashCode() : 0);
 		return hash;
 	}
 	
 	@Override
-	public T getFrom() {
+	public ProcessIteration getFrom() {
 		return this.from;
 	}
 
 	@Override
-	public T getTo() {
+	public ProcessIteration getTo() {
 		return this.to;
 	}
 

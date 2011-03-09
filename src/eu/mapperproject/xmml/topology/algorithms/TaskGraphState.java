@@ -49,7 +49,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	}
 		
 	/** Activate a coupling instance by generating the receiving end and calculating and adding that to the process pool */
-	public ProcessIteration activate(CouplingInstance<ProcessIteration> ci) {
+	public ProcessIteration activate(CouplingInstance ci) {
 		ProcessIteration to = ci.getTo();
 		if (to == null) {
 			throw new IllegalArgumentException("To activate a next state with coupling instance " + ci + ", the next may not be null.");

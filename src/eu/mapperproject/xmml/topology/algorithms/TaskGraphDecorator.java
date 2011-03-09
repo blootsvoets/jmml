@@ -17,7 +17,7 @@ import eu.mapperproject.xmml.util.graph.StyledNode;
  * @author Joris Borgdorff
  *
  */
-public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, CouplingInstance<ProcessIteration>> {
+public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, CouplingInstance> {
 	@Override
 	public boolean isDirected() {
 		return true;
@@ -29,7 +29,7 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 	}
 
 	@Override
-	public StyledEdge decorateEdge(CouplingInstance<ProcessIteration> edge,
+	public StyledEdge decorateEdge(CouplingInstance edge,
 			Map<ProcessIteration, StyledNode> nodes) {
 
 		Coupling c = edge.getCoupling();

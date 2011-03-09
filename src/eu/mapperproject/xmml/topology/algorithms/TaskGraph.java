@@ -13,7 +13,7 @@ import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
 public class TaskGraph {
-	private final PTGraph<ProcessIteration, CouplingInstance<ProcessIteration>> graph;
+	private final PTGraph<ProcessIteration, CouplingInstance> graph;
 	private CouplingTopology topology;
 	
 	public TaskGraph(CouplingTopology topology) {
@@ -22,11 +22,11 @@ public class TaskGraph {
 	
 	public TaskGraph(CouplingTopology topology, boolean horizontal, boolean subgraphs) {
 		this.topology = topology;
-		this.graph = new PTGraph<ProcessIteration, CouplingInstance<ProcessIteration>>(true);
+		this.graph = new PTGraph<ProcessIteration, CouplingInstance>(true);
 	}
 
 	
-	public PTGraph<ProcessIteration, CouplingInstance<ProcessIteration>> getGraph() {
+	public PTGraph<ProcessIteration, CouplingInstance> getGraph() {
 		this.computeGraph();
 		
 		return this.graph;
