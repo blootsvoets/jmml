@@ -9,8 +9,6 @@ import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstanceOperator;
-import eu.mapperproject.xmml.topology.InstancePort;
-import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.ProgressType;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
@@ -41,23 +39,27 @@ public class TaskGraph {
 		// Initialize processes with no initialization
 		for (ProcessIteration pi : initProcs) {
 			state.activate(pi);
-			this.graph.addNode(pi);
 		}
 		
 		// As long as there are active processes, continue building the graph
 		for (ProcessIteration pi : state) {
+			this.graph.addNode(pi);
+			
 			boolean complete = pi.instanceCompleted();
-			if (pi.getCouplingType().isSending()) {		
+			// There are only couplings out if the operator can send
+			if (pi.getOperator().isSending()) {
 				boolean hasNext = this.computeNextIteration(state, pi, complete);
-					
+
 				if (complete && !hasNext) {
 					pi.setFinal();
 				}
 			}
-			
+
+			// If complete, add the state of the iteration for later use, if necessary
 			if (complete) {
 				state.addState(pi);
 			}
+			// Otherwise, proceed to the next operator
 			else {
 				this.activateStep(state, pi);
 			}
@@ -89,24 +91,23 @@ public class TaskGraph {
 	private void calculateTo(ProcessIteration from, Coupling cd, TaskGraphState state) {
 		CouplingInstance ci;
 		if (cd.getToOperator().getOperator() == SEL.finit) {
-			ci = state.initInstance(cd);
+			ci = state.tryStateful(cd.getTo());
 			if (ci != null) this.addToGraph(ci, state);
 		}
 		
 		ci = from.calculateCouplingInstance(cd);
-		if (ci != null) this.addToGraph(ci, state);
+		this.addToGraph(ci, state);
 	}
-		
+
+	/** Create an instance of a stateful coupling between one process iteration and the next */
 	private void activateStep(TaskGraphState state, ProcessIteration pi) {
 		ProcessIteration pnext = pi.nextStep();
-		if (pnext != null) {
-			this.addToGraph(new CouplingInstance(pi, pnext), state);
-		}
+		this.addToGraph(new CouplingInstance(pi, pnext), state);
 	}
-	
+
+	/** Add the coupling to the graph and current state */
 	private void addToGraph(CouplingInstance ci, TaskGraphState state) {
-		ProcessIteration active = state.activate(ci);
-		if (active != null) this.graph.addNode(active);
+		state.activate(ci);
 		this.graph.addEdge(ci);		
 	}
 	

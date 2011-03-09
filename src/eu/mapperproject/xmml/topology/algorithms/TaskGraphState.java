@@ -60,10 +60,10 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	/** Tries to initialize a processiteration from a stateful transition. If this succeeds, the
 	 * coupling instance that facilitates this stateful transition is returned
 	 */
-	public CouplingInstance initInstance(Coupling cd) {
+	public CouplingInstance tryStateful(Instance inst) {
 		CouplingInstance ci = null;
-		if (cd.getTo().getSubmodel().isStateful()) {
-			ProcessIteration prev = states.remove(cd.getTo());
+		if (inst.getSubmodel().isStateful()) {
+			ProcessIteration prev = states.remove(inst);
 			if (prev != null) {
 				ProcessIteration next = prev.nextState();
 				ci = new CouplingInstance(prev, next);
@@ -130,10 +130,6 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			
 			Instance inst = pi.getInstance();
 			boolean needInit = topology.needsInitInstances(inst);
-			if (needInit && pi.finalLoop()) {
-				return true;
-			}
-
 			Collection<Coupling> cs;
 			if (needInit && pi.initializing()) {
 				cs = topology.needsInitCouplings(inst);
@@ -151,7 +147,23 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		
 		return true;
 	}
-	
+
+	/** Removes a process that is finalizing and can not get additional input from
+	 * snoozingprocesses and returns it. Returns null if none is found.
+	 */
+	private ProcessIteration removeFinalProcess() {
+		Iterator<ProcessIteration> i = snoozingProcesses.keySet().iterator();
+		while (i.hasNext()) {
+			ProcessIteration pi = i.next();
+			boolean needInit = topology.needsInitInstances(pi.getInstance());
+			if (needInit && pi.finalLoop()) {
+				i.remove();
+				return pi;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public Iterator<ProcessIteration> iterator() {
 		return new StateIterator();
@@ -163,15 +175,28 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	}
 	
 	private class StateIterator implements Iterator<ProcessIteration> {
+		private ProcessIteration finalProcess;
+
 		@Override
 		public boolean hasNext() {
-			return !activeProcesses.isEmpty();
+			if (!activeProcesses.isEmpty()) {
+				return true;
+			}
+			this.finalProcess = removeFinalProcess();
+			return this.finalProcess != null;
 		}
 		
 		@Override
 		public ProcessIteration next() {
-			ProcessIteration pi = activeProcesses.remove(activeProcesses.size() - 1);
-			//System.out.println("TaskGraphState(" + pi + ") " + activeProcesses.toString() + ":" + snoozingProcesses);
+			ProcessIteration pi;
+			if (this.finalProcess != null) {
+				pi = this.finalProcess;
+				this.finalProcess = null;
+			}
+			else {
+				pi = activeProcesses.remove(activeProcesses.size() - 1);
+			}
+
 			return pi;
 		}
 		

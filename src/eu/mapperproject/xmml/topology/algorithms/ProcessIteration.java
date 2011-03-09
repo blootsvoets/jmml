@@ -90,7 +90,7 @@ public class ProcessIteration {
 		else return null;
 	}
 
-	public SEL getCouplingType() {
+	public SEL getOperator() {
 		return this.givenAnnot.getOperator();
 	}
 	
@@ -136,7 +136,6 @@ public class ProcessIteration {
 			pnext = this.nextIteration(cd);
 		}
 		
-		if (pnext == null) return null;
 		return new CouplingInstance(this, pnext, cd);
 	}
 
