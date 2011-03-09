@@ -8,8 +8,10 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
+import java.util.List;
 
 public class ProcessIteration {
+
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
 	private final AnnotationSet givenAnnot, annot;
 	private final Instance instance;
@@ -103,7 +105,7 @@ public class ProcessIteration {
 	/**
 	 * Merge an annotationset with the current annotation sets
 	 */
-	public void merge(AnnotationSet key) {
+	void merge(AnnotationSet key) {
 		if (this.initFinished) {
 			throw new IllegalStateException("Can not add more initialization information after processiteration has sent information.");
 		}
@@ -217,9 +219,9 @@ public class ProcessIteration {
 	
 	@Override
 	public boolean equals(Object o) {
-                if (this == o) return true;
-		if (o == null) return false;
-                return this.asString.equals(o.toString());
+		if (this == o) return true;
+		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		return this.asString.equals(o.toString());
 	}
 
 	@Override
@@ -315,26 +317,26 @@ public class ProcessIteration {
                         this.updateCounter(reset);
 		}
 
-                private void updateCounter(Annotation<Instance> an) {
-                        AnnotationType at = an.getType();
+		private void updateCounter(Annotation<Instance> an) {
+			AnnotationType at = an.getType();
 			this.map.put(at, an);
-                        switch (at) {
-                            case ITERATION:
-                                this.iterCounter = an.getCounter();
-                                break;
-                            case INSTANCE:
-                                this.instCounter = an.getCounter();
-                                break;
-                            case OPERATOR:
-                                this.op = SEL.values()[an.getCounter()];
-                                break;
-                        }
-                }
+			switch (at) {
+				case ITERATION:
+					this.iterCounter = an.getCounter();
+					break;
+				case INSTANCE:
+					this.instCounter = an.getCounter();
+					break;
+				case OPERATOR:
+					this.op = SEL.values()[an.getCounter()];
+					break;
+			}
+		}
 		
 		/** Let the current instance be the subject of the annotation set */
 		void setSubject(Instance inst) {
 			for (Annotation<Instance> an : this.map.values()) {
-                                Annotation<Instance> cur = an.current(inst);
+				Annotation<Instance> cur = an.current(inst);
 				this.updateCounter(cur);
 			}
 			this.inst = inst;
@@ -343,8 +345,9 @@ public class ProcessIteration {
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
 			map.get(AnnotationType.INSTANCE).merge(set.map.get(AnnotationType.INSTANCE));
-			Collection<Instance> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION));
-			map.get(AnnotationType.OPERATOR).override(set.map.get(AnnotationType.OPERATOR), col);
+			List<Collection<Instance>> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION));
+			map.get(AnnotationType.OPERATOR).merge(set.map.get(AnnotationType.OPERATOR), col.get(0));
+			map.get(AnnotationType.OPERATOR).override(set.map.get(AnnotationType.OPERATOR), col.get(1));
 		}
 
 		@Override
@@ -373,9 +376,9 @@ public class ProcessIteration {
 		 */
 		String counterString() {
 			String ret = "";
-			Annotation<Instance> inst = this.map.get(AnnotationType.INSTANCE);
-			if (inst.getCounter() > 0) {
-				ret += inst.counterString();
+			Annotation<Instance> an = this.map.get(AnnotationType.INSTANCE);
+			if (an.getCounter() > 0) {
+				ret += an.counterString();
 			}
 			ret += "(" + this.map.get(AnnotationType.ITERATION).counterString() + "," + this.getOperator() +  ")";
 			return ret;

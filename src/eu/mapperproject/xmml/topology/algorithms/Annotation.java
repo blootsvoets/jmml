@@ -1,6 +1,8 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import eu.mapperproject.xmml.util.Numbered;
 import java.util.Collection;
+import java.util.List;
 
 /** An Annotation keeps a counter of an object and last known counters of peer objects.
  *
@@ -8,7 +10,7 @@ import java.util.Collection;
  *
  * @author Joris Borgdorff
  */
-public class Annotation<T> {
+public class Annotation<T extends Numbered> {
 	protected final Trace<T> t;
 	protected final AnnotationType type;
 	protected final int counter;
@@ -83,7 +85,7 @@ public class Annotation<T> {
 
 	/** Add all peer information of the given annotation to the current one.
 	 * Returns a collection of objects that actually override the previous trace information */
-	public Collection<T> merge(Annotation<T> an) {
+	public List<Collection<T>> merge(Annotation<T> an) {
 		return this.t.merge(an.t);
 	}
 
@@ -91,6 +93,12 @@ public class Annotation<T> {
 	 * Returns a collection of objects that actually override the previous trace information */
 	public void override(Annotation<T> an, Collection<T> col) {
 		this.t.override(an.t, col);
+	}
+
+	/** Add selected information of the given annotation to the current one.
+	 * Returns a collection of objects that actually override the previous trace information */
+	public void merge(Annotation<T> an, Collection<T> col) {
+		this.t.merge(an.t, col);
 	}
 
 	/** Get the string value of the counter */

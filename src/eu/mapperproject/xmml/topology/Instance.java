@@ -3,13 +3,14 @@ package eu.mapperproject.xmml.topology;
 import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.definitions.ScaleMap;
 import eu.mapperproject.xmml.definitions.Submodel;
+import eu.mapperproject.xmml.util.Numbered;
 
 /**
  * An instance of a submodel, with its own id, domain and scales
  * @author Joris Borgdorff
  *
  */
-public class Instance implements Identifiable, Domainable {
+public class Instance implements Identifiable, Domainable, Numbered {
 
 	private final String id;
 	private final Submodel submodel;
@@ -43,7 +44,7 @@ public class Instance implements Identifiable, Domainable {
 		return id;
 	}
 
-	/** Get the absolute instance number */
+	@Override
 	public int getNumber() {
 		return this.num;
 	}
