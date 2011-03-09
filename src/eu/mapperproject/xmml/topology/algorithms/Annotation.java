@@ -85,8 +85,8 @@ public class Annotation<T extends Numbered> {
 
 	/** Add all peer information of the given annotation to the current one.
 	 * Returns a collection of objects that actually override the previous trace information */
-	public List<Collection<T>> merge(Annotation<T> an) {
-		return this.t.merge(an.t);
+	public List<Collection<T>> merge(Annotation<T> an, boolean track) {
+		return this.t.merge(an.t, track);
 	}
 
 	/** Add selected information of the given annotation to the current one.

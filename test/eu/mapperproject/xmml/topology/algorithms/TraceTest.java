@@ -46,7 +46,7 @@ public class TraceTest {
 	
 	@Test
 	public void mergeBasic() {
-		traceEmpty1.merge(traceEmpty2);
+		traceEmpty1.merge(traceEmpty2, false);
 		assertEquals(traceEmpty, traceEmpty1);
 		assertEquals(traceEmpty, traceEmpty2);
 	}
@@ -91,7 +91,7 @@ public class TraceTest {
 	public void mergeWithput() {
 		traceEmpty1.put(one, 1);
 		traceEmpty2.put(two, 2);
-		List<Collection<Int>> col = traceEmpty1.merge(traceEmpty2);
+		List<Collection<Int>> col = traceEmpty1.merge(traceEmpty2, true);
 		assertTrue(col.get(0).isEmpty());
 		assertSame(1, col.get(1).size());
 		assertEquals(two, col.get(1).iterator().next());
@@ -102,13 +102,13 @@ public class TraceTest {
 		assertEquals(traceEmpty, traceEmpty1);
 
 		traceEmpty2.put(two, 3);
-		col = traceEmpty1.merge(traceEmpty2);
+		col = traceEmpty1.merge(traceEmpty2, true);
 		assertSame(1, col.get(1).size());
 		traceEmpty.put(two, 3);
 
 		assertEquals(traceEmpty, traceEmpty1);
 
-		col = traceEmpty1.merge(traceEmpty2);
+		col = traceEmpty1.merge(traceEmpty2, true);
 		assertSame(1, col.get(0).size());
 		assertEquals(two, col.get(0).iterator().next());
 	}
@@ -117,7 +117,7 @@ public class TraceTest {
 	public void override() {
 		traceEmpty1.put(one, 1);
 		traceEmpty2.put(two, 2);
-		traceEmpty1.merge(traceEmpty2);
+		traceEmpty1.merge(traceEmpty2, false);
 		
 		traceEmpty.put(one, 1);
 		traceEmpty.put(two, 2);

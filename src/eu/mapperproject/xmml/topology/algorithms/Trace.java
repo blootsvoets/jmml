@@ -13,6 +13,13 @@ public class Trace<T extends Numbered> {
 	private int[] trace;
 	private final List<T> objects;
 	private int size;
+	private final static List emptyMerge;
+	static {
+		Collection col = new ArrayList(0);
+		emptyMerge = new ArrayList(2);
+		emptyMerge.add(col);
+		emptyMerge.add(col);
+	}
 
 	public Trace() {
 		int initsize = 10;
@@ -44,10 +51,10 @@ public class Trace<T extends Numbered> {
 	/** Add the given object to the object list, if necessary */
 	private void addObject(T o, int num) {
 		if (this.trace.length <= num) {
-			int size = Math.max(this.trace.length * 2, num + 1);
-			int[] tmp = new int[size];
+			int initsize = Math.max(this.trace.length * 2, num + 1);
+			int[] tmp = new int[initsize];
 			System.arraycopy(this.trace, 0, tmp, 0, this.trace.length);
-			for (int i = this.trace.length; i < size; i++) {
+			for (int i = this.trace.length; i < initsize; i++) {
 				tmp[i] = -1;
 			}
 			this.trace = tmp;
@@ -62,20 +69,27 @@ public class Trace<T extends Numbered> {
 	}
 
 	/** Merges the values of the given trace with the current trace, choosing the largest of the values */
-	public List<Collection<T>> merge(Trace<T> t) {
-		List<Collection<T>> ret = new ArrayList<Collection<T>>(2);
-		Collection<T> eq = new ArrayList<T>((this.size + 1) / 2);
-		Collection<T> gt = new ArrayList<T>(Math.max(1, (t.size - this.size) + (this.size + 1) / 2));
-		ret.add(eq);
-		ret.add(gt);
+	public List<Collection<T>> merge(Trace<T> t, boolean track) {
+		List<Collection<T>> ret = null;
+		Collection<T> eq = null, gt = null;
+
+		if (track) {
+			ret = new ArrayList<Collection<T>>(2);
+			eq = new ArrayList<T>((this.size + 1) / 2);
+			gt = new ArrayList<T>(Math.max(1, (t.size - this.size) + (this.size + 1) / 2));
+			ret.add(eq);
+			ret.add(gt);
+		}
 
 		int len = Math.min(t.trace.length, this.trace.length);
 
 		for (int i = 0; i < len; i++) {
 			if (t.trace[i] >= this.trace[i] && t.trace[i] > -1) {
 				T o = t.objects.get(i);
-				if (t.trace[i] == this.trace[i]) eq.add(o);
-				else gt.add(o);
+				if (track) {
+					if (t.trace[i] == this.trace[i]) eq.add(o);
+					else gt.add(o);
+				}
 
 				this.trace[i] = t.trace[i];
 				this.objects.set(i, o);
@@ -90,12 +104,12 @@ public class Trace<T extends Numbered> {
 					this.trace[i] = t.trace[i];
 					T o = t.objects.get(i);
 					this.addObject(o, i);
-					gt.add(o);
+					if (track) gt.add(o);
 				}
 			}
 		}
 
-		return ret;
+		return track ? ret : emptyMerge;
 	}
 
 	/** Overrides the values of the given trace with the current trace, selected by given collection */

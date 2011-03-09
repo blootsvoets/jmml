@@ -344,8 +344,8 @@ public class ProcessIteration {
 		
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
-			map.get(AnnotationType.INSTANCE).merge(set.map.get(AnnotationType.INSTANCE));
-			List<Collection<Instance>> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION));
+			map.get(AnnotationType.INSTANCE).merge(set.map.get(AnnotationType.INSTANCE), false);
+			List<Collection<Instance>> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION), true);
 			map.get(AnnotationType.OPERATOR).merge(set.map.get(AnnotationType.OPERATOR), col.get(0));
 			map.get(AnnotationType.OPERATOR).override(set.map.get(AnnotationType.OPERATOR), col.get(1));
 		}
