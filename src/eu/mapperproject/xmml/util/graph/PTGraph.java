@@ -117,15 +117,22 @@ public class PTGraph<T, E extends Edge<T>> {
 		return this.edges;
 	}
 
+	public Collection<E> getEdges(T node) {
+		List<Collection<E>> list = this.getEdgesList(node);
+		Collection<E> all = new ArrayList<E>(list.get(0).size() + list.get(1).size());
+		all.addAll(list.get(0)); all.addAll(list.get(1));
+		return all;
+	}
+
 	public Collection<E> getEdgesIn(T node) {
-		return this.getEdges(node).get(0);
+		return this.getEdgesList(node).get(0);
 	}
 
 	public Collection<E> getEdgesOut(T node) {
-		return this.getEdges(node).get(1);
+		return this.getEdgesList(node).get(1);
 	}
 
-	private List<Collection<E>> getEdges(T node) {
+	private List<Collection<E>> getEdgesList(T node) {
 		List<Collection<E>> list = this.edgesPerNode.get(node);
 		if (list == null) {
 			throw new IllegalArgumentException("Node " + node + " not added to graph");
