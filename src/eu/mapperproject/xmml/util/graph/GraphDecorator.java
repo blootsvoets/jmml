@@ -16,4 +16,5 @@ public interface GraphDecorator<T,E extends Edge<T>> {
 	public StyledEdge addSinkEdge(T node, StyledNode snode);
 	public StyledEdge addSourceEdge(T node, StyledNode snode);
 	public StyledEdge decorateEdge(E edge, Map<T, StyledNode> nodes);
+	public StyledNode decorateMissingNode(T node);
 }

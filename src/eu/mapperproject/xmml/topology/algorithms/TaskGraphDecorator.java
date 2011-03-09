@@ -46,6 +46,7 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 		}
 		
 		StyledNode fromNode = nodes.get(from), toNode = nodes.get(to);
+
 		return new EdgeDecorator<CouplingInstance>(edge, style, label, fromNode, toNode);
 	}
 
@@ -63,5 +64,10 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 			return new SimpleStyledEdge(snode, SimpleNode.END);
 		}
 		return null;
+	}
+
+	@Override
+	public StyledNode decorateMissingNode(ProcessIteration node) {
+		return new SimpleNode("Deadlock[" + node + "]", "shape=octagon");
 	}
 }

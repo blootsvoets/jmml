@@ -66,9 +66,7 @@ public class Submodel implements Identifiable {
 		this.interactive = interactive;
 	}
 
-	/**
-	 * @return metadata id
-	 */
+	@Override
 	public String getId() {
 		return meta.getId();
 	}

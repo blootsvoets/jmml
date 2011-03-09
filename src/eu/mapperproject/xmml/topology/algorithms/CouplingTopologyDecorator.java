@@ -80,4 +80,9 @@ public class CouplingTopologyDecorator implements GraphDecorator<Instance, Coupl
 		}
 		return null;
 	}
+
+	@Override
+	public StyledNode decorateMissingNode(Instance node) {
+		return null;
+	}
 }
