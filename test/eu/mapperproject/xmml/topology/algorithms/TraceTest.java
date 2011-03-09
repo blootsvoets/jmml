@@ -30,6 +30,11 @@ public class TraceTest {
 		public int hashCode() {
 			return this.num;
 		}
+
+		@Override
+		public String toString() {
+			return "Int(" + this.num + ")";
+		}
 	}
 
 	private Trace<Int> traceEmpty, traceEmpty1, traceEmpty2;

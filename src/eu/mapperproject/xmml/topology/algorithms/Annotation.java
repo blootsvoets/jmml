@@ -13,7 +13,7 @@ import java.util.List;
 public class Annotation<T extends Numbered> {
 	protected final Trace<T> t;
 	protected final AnnotationType type;
-	protected final int counter;
+	protected int counter;
 
 	/** Type of annotation */
 	public enum AnnotationType {
@@ -38,44 +38,34 @@ public class Annotation<T extends Numbered> {
 	}
 
 	/** Set last-known value of the counter of a peer object to a certain value */
-	public Annotation<T> set(T pd, int c) {
-		Trace<T> trace = new Trace<T>(this.t);
-		trace.put(pd, c);
-		return new Annotation<T>(this.type, trace, c);
+	public void set(T pd, int c) {
+		this.t.put(pd, c);
+		this.counter = c;
 	}
 
 	/** Create a new Annotation with as counter the next iteration of the given peer object */
-	public Annotation<T> next(T pd) {
-		Trace<T> trace = new Trace<T>(this.t);
-		int c = trace.nextInt(pd);
-		return new Annotation<T>(this.type, trace, c);
+	public void next(T pd) {
+		this.counter = this.t.nextInt(pd);
 	}
 
 	/** Create a new Annotation with as counter the current iteration of the given peer object */
-	public Annotation<T> current(T pd) {
-		Trace<T> trace = new Trace<T>(this.t);
-		int c = 0;
+	public void current(T pd) {
+		this.counter = 0;
 
-		if (trace.isInstantiated(pd)) {
-			c = trace.currentInt(pd);
+		if (this.t.isInstantiated(pd)) {
+			this.counter = this.t.currentInt(pd);
 		}
-		
-		return new Annotation<T>(this.type, trace, c);
 	}
 	
 	/** Create a new Annotation with as counter the current iteration of the given peer object */
-	public Annotation<T> reset(T pd) {
-		Trace<T> trace = new Trace<T>(this.t);
-		int c = 0;
-		trace.reset(pd);		
-		return new Annotation<T>(this.type, trace, c);
+	public void reset(T pd) {
+		this.counter = 0;
+		this.t.reset(pd);
 	}
 	
 	/** Create a new Annotation with as counter the previous iteration of the given peer object */
-	public Annotation<T> previous(T pd) {
-		Trace<T> trace = new Trace<T>(this.t);
-		int c = trace.previousInt(pd);
-		return new Annotation<T>(this.type, trace, c);
+	public void previous(T pd) {
+		this.counter = this.t.previousInt(pd);
 	}
 
 	/** Get the current counter value of this annotation */

@@ -34,35 +34,46 @@ public class AnnotationTest {
 	
 	@Test
 	public void nextOrderIndifferent() {
-		anIter1 = anIter1.next(one);
-		anIter1 = anIter1.next(two);
+		anIter1.next(one);
+		anIter1.next(two);
 		
-		anIter2 = anIter2.next(two);
-		anIter2 = anIter2.next(one);
+		anIter2.next(two);
+		anIter2.next(one);
 		assertEquals(anIter1, anIter2);
 	}
 
 	@Test
 	public void currentIndifferent() {
-		anIter1 = anIter1.current(one);
+		anIter1.current(one);
 		assertEquals(anIter2, anIter1);
 	}
 	
 	@Test
 	public void next() {
-		anIter1 = anIter1.next(one);
-		anIter1 = anIter1.next(one);
+		anIter1.next(one);
+		anIter1.next(one);
 		assertEquals(1, anIter1.getCounter());
 		
-		anIter1 = anIter1.next(two);
+		anIter1.next(two);
 		assertEquals(0, anIter1.getCounter());
 	}
 	
 	@Test
 	public void reset() {
-		anIter1 = anIter1.next(one);
-		anIter1 = anIter1.reset(one);
-		anIter1 = anIter1.reset(two);
+		anIter1.next(one);
+		anIter1.reset(one);
+		anIter1.reset(two);
 		assertEquals(anIter2, anIter1);
+	}
+
+	@Test
+	public void copy() {
+		anIter1.next(one);
+		anIter1.next(one);
+		Annotation<Int> an = anIter1.copy();
+		assertEquals(anIter1, an);
+		anIter1.reset(one);
+		anIter1.next(one);
+		assertFalse(anIter1.equals(an));
 	}
 }

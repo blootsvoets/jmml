@@ -1,8 +1,6 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
 import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
 
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
@@ -38,7 +36,7 @@ public class ProcessIteration {
 		}
 		this.annot = annot;
 		this.givenAnnot = new AnnotationSet(this.annot);
-                this.asString = this.instance.getId() + this.givenAnnot.counterString();
+		this.asString = this.instance.getId() + this.givenAnnot.counterString();
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
@@ -234,7 +232,7 @@ public class ProcessIteration {
 	}
 	
 	class AnnotationSet {
-		private final Map<AnnotationType,Annotation<Instance>> map;
+		private Annotation<Instance> anInst, anIter, anOper;
 		private Instance inst;
         private int iterCounter, instCounter;
         private SEL op;
@@ -246,14 +244,14 @@ public class ProcessIteration {
 
 		/** Apply the current counter to the trace of each annotation */
 		public void applySubject() {
-			for (Annotation<Instance> an : this.map.values()) {
-				an.setSubject(this.inst);
+			for (AnnotationType at : AnnotationType.values()) {
+				this.getAnnotation(at).setSubject(this.inst);
 			}
 		}
 
 		/** Create a copy of given annotationset */
 		AnnotationSet(AnnotationSet old) {
-			this(old.map.get(AnnotationType.INSTANCE), old.map.get(AnnotationType.ITERATION), old.map.get(AnnotationType.OPERATOR));
+			this(old.anInst, old.anIter, old.anOper);
 			this.inst = old.inst;
 		}
 
@@ -263,14 +261,9 @@ public class ProcessIteration {
 				throw new IllegalArgumentException("AnnotationSet initialized with wrong Annotation types");
 			}
 
-			this.map = new EnumMap<AnnotationType, Annotation<Instance>>(AnnotationType.class);
-			this.map.put(AnnotationType.ITERATION, iter);
-			this.iterCounter = iter.getCounter();
-			this.map.put(AnnotationType.INSTANCE, inst);
-			this.instCounter = inst.getCounter();
-			this.map.put(AnnotationType.OPERATOR, oper);
-			this.op = SEL.get(oper.getCounter());
-			this.inst = instance;
+			this.updateCounter(inst);
+			this.updateCounter(iter);
+			this.updateCounter(oper);
 		}
 		
 		/** Current operator. */
@@ -301,32 +294,49 @@ public class ProcessIteration {
 		/** Set the operater */
 		void setOperater(SEL op) {
 			this.op = op;
-			this.map.put(AnnotationType.OPERATOR, this.map.get(AnnotationType.OPERATOR).set(this.inst, op.ordinal()));
+			this.anOper.set(this.inst, op.ordinal());
 		}
 		
 		/** Go to the next value of the requested annotation */
 		void next(AnnotationType at) {
-                        Annotation<Instance> next = this.map.get(at).next(inst);
-                        this.updateCounter(next);
+			Annotation<Instance> an = this.getAnnotation(at);
+			an.next(inst);
+			this.updateCounter(an);
 		}
 		
 		/** Reset the value of the requested annotation */
 		void reset(AnnotationType at) {
-                        Annotation<Instance> reset = this.map.get(at).reset(inst);
-                        this.updateCounter(reset);
+			Annotation<Instance> an = this.getAnnotation(at);
+			an.reset(inst);
+			this.updateCounter(an);
+		}
+
+		private Annotation<Instance> getAnnotation(AnnotationType at) {
+			switch (at) {
+				case ITERATION:
+					return this.anIter;
+				case INSTANCE:
+					return this.anInst;
+				case OPERATOR:
+					return this.anOper;
+				default:
+					throw new IllegalArgumentException("AnnotationSet does not recognize AnnotationType " + at);
+			}
 		}
 
 		private void updateCounter(Annotation<Instance> an) {
 			AnnotationType at = an.getType();
-			this.map.put(at, an);
 			switch (at) {
 				case ITERATION:
+					this.anIter = an;
 					this.iterCounter = an.getCounter();
 					break;
 				case INSTANCE:
+					this.anInst = an;
 					this.instCounter = an.getCounter();
 					break;
 				case OPERATOR:
+					this.anOper = an;
 					this.op = SEL.get(an.getCounter());
 					break;
 			}
@@ -334,8 +344,9 @@ public class ProcessIteration {
 		
 		/** Let the current instance be the subject of the annotation set */
 		void setSubject(Instance inst) {
-			for (Annotation<Instance> an : this.map.values()) {
-				Annotation<Instance> cur = an.current(inst);
+			for (AnnotationType at : AnnotationType.values()) {
+				Annotation<Instance> cur = this.getAnnotation(at).copy();
+				cur.current(inst);
 				this.updateCounter(cur);
 			}
 			this.inst = inst;
@@ -343,10 +354,11 @@ public class ProcessIteration {
 		
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
-			map.get(AnnotationType.INSTANCE).merge(set.map.get(AnnotationType.INSTANCE), false);
-			List<Collection<Instance>> col = map.get(AnnotationType.ITERATION).merge(set.map.get(AnnotationType.ITERATION), true);
-			map.get(AnnotationType.OPERATOR).merge(set.map.get(AnnotationType.OPERATOR), col.get(0));
-			map.get(AnnotationType.OPERATOR).override(set.map.get(AnnotationType.OPERATOR), col.get(1));
+			this.anInst.merge(set.anInst, false);
+			List<Collection<Instance>> col = this.anIter.merge(set.anIter, true);
+			// Merge if the iteration was equal, override if it was larger
+			this.anOper.merge(set.anOper, col.get(0));
+			this.anOper.override(set.anOper, col.get(1));
 		}
 
 		@Override
@@ -367,7 +379,7 @@ public class ProcessIteration {
 		
 		@Override
 		public String toString() {
-			return this.map.values().toString();
+			return "[" + this.anInst + ", " + this.anIter + ", " + this.anOper + "]";
 		}
 		
 		/**
@@ -375,11 +387,10 @@ public class ProcessIteration {
 		 */
 		String counterString() {
 			String ret = "";
-			Annotation<Instance> an = this.map.get(AnnotationType.INSTANCE);
-			if (an.getCounter() > 0) {
-				ret += an.counterString();
+			if (this.instCounter > 0) {
+				ret += this.instCounter;
 			}
-			ret += "(" + this.map.get(AnnotationType.ITERATION).counterString() + "," + this.getOperator() +  ")";
+			ret += "(" + this.iterCounter + "," + this.op +  ")";
 			return ret;
 		}
 	}
