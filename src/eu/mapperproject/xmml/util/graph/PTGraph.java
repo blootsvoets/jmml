@@ -112,6 +112,21 @@ public class PTGraph<T, E extends Edge<T>> {
 		}
 		return list;
 	}
+
+	public void removeNode(T n) {
+		Collection<E> list = this.getEdgesIn(n);
+		this.edges.removeAll(list);
+		for (E e : list) {
+			this.getEdgesOut(e.getFrom()).remove(e);
+		}
+		list = this.getEdgesOut(n);
+		this.edges.removeAll(list);
+		for (E e : list) {
+			this.getEdgesIn(e.getTo()).remove(e);
+
+		}
+		this.edgesPerNode.remove(n);
+	}
 	
 	public Collection<E> getEdges() {
 		return this.edges;

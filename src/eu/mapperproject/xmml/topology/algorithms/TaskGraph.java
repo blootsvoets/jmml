@@ -27,12 +27,41 @@ public class TaskGraph {
 
 	
 	public PTGraph<ProcessIteration, CouplingInstance> getGraph() {
-		this.computeGraph();
-		
 		return this.graph;
 	}
 	
-	private void computeGraph() {
+	public void reduceGraph() {
+		Collection<ProcessIteration> nodes = new ArrayList<ProcessIteration>(this.graph.getNodes());
+		for (ProcessIteration pi : nodes) {
+			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
+			Collection<CouplingInstance> outEdges = this.graph.getEdgesOut(pi);
+			int inSize = inEdges.size(), outSize = outEdges.size();
+			CouplingInstance inEdge = null, outEdge = null;
+			if (inSize == 1) inEdge = inEdges.iterator().next();
+			if (outSize == 1) outEdge = outEdges.iterator().next();
+			
+			if (inSize == 1 && outSize == 1 && inEdge.isState() && outEdge.isState()) {
+				this.graph.removeNode(pi);
+				inEdge.setTo(outEdge.getTo());
+				this.graph.addEdge(inEdge);
+			}
+			else if (inSize == 0 && outSize == 1 && outEdge.isState()) {
+				outEdge.getTo().setInitial();
+				this.graph.removeNode(pi);
+			}
+			else if (inSize == 1 && outSize == 0 && inEdge.isState()) {
+				inEdge.getFrom().setFinal();
+				this.graph.removeNode(pi);
+			}
+			else if (outSize == 1 && outEdge.isState()) {
+				ProcessIteration to = outEdge.getTo();
+				to.updateString(null, pi.getIteration() + "-" + to.getIteration(), pi.getOperator() + "-" + to.getOperator());
+				this.graph.removeNode(pi);
+			}
+		}
+	}
+
+	public void computeGraph() {
 		TaskGraphState state = new TaskGraphState(this.topology);
 		List<ProcessIteration> initProcs = descriptionToIteration(topology.getInitialInstances());
 		
@@ -108,7 +137,7 @@ public class TaskGraph {
 	/** Add the coupling to the graph and current state */
 	private void addToGraph(CouplingInstance ci, TaskGraphState state) {
 		state.activate(ci);
-		this.graph.addEdge(ci);		
+		this.graph.addEdge(ci);
 	}
 	
 	public static List<ProcessIteration> descriptionToIteration(Collection<Instance> pds) {

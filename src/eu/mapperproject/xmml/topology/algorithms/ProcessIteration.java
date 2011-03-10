@@ -15,10 +15,10 @@ public class ProcessIteration {
 	private final Instance instance;
         // As equals is the most costly operation in processiteration
         // this cache was added
-        private final String asString;
-	private boolean isfinal;
+        private String asString;
+	private boolean initial, isfinal;
 	private boolean stateFinished, initFinished;
-	
+
 	public enum ProgressType {
 		INSTANCE, ITERATION;
 	}
@@ -40,6 +40,7 @@ public class ProcessIteration {
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
+		this.initial = this.instance.isInitial() && firstInstance() && initializing();
 	}
 	
 	public boolean isFinal() {
@@ -47,11 +48,19 @@ public class ProcessIteration {
 	}
 	
 	public boolean isInitial() {
-		return this.instance.isInitial() && firstInstance() && initializing();
+		return this.initial;
 	}
 	
 	public void setFinal() {
 		this.isfinal = true;
+	}
+
+	public void setInitial() {
+		this.initial = true;
+	}
+
+	int getIteration() {
+		return this.givenAnnot.getIteration();
 	}
 	
 	public boolean instanceCompleted() {
@@ -229,6 +238,16 @@ public class ProcessIteration {
 	@Override
 	public int hashCode() {
 		return this.asString.hashCode();
+	}
+
+	public void updateString(String inst, String iter, String oper) {
+		if (inst == null) {
+			int instNum = this.givenAnnot.getInstance();
+			inst = instNum > 0 ? String.valueOf(instNum) : "";
+		}
+		if (iter == null) iter = String.valueOf(this.givenAnnot.getIteration());
+		if (oper == null) oper = String.valueOf(this.givenAnnot.getOperator());
+		this.asString = this.instance.getId() + inst + "(" + iter + "," + oper + ")";
 	}
 	
 	class AnnotationSet {
