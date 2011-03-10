@@ -29,34 +29,54 @@ public class TaskGraph {
 	public PTGraph<ProcessIteration, CouplingInstance> getGraph() {
 		return this.graph;
 	}
-	
+
+	/** Reduce the graph computed to have no extraneous steps */
 	public void reduceGraph() {
 		Collection<ProcessIteration> nodes = new ArrayList<ProcessIteration>(this.graph.getNodes());
+		ProcessIteration to, from;
+
 		for (ProcessIteration pi : nodes) {
 			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
 			Collection<CouplingInstance> outEdges = this.graph.getEdgesOut(pi);
+
 			int inSize = inEdges.size(), outSize = outEdges.size();
+
 			CouplingInstance inEdge = null, outEdge = null;
 			if (inSize == 1) inEdge = inEdges.iterator().next();
 			if (outSize == 1) outEdge = outEdges.iterator().next();
 			
-			if (inSize == 1 && outSize == 1 && inEdge.isState() && outEdge.isState()) {
+			if (inSize == 1 && outSize == 1 && inEdge.isStep() && outEdge.isStep()) {
 				this.graph.removeNode(pi);
-				inEdge.setTo(outEdge.getTo());
+
+				to = outEdge.getTo();
+				inEdge.setTo(to);
 				this.graph.addEdge(inEdge);
+				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
 			}
-			else if (inSize == 0 && outSize == 1 && outEdge.isState()) {
-				outEdge.getTo().setInitial();
+			else if (inSize == 0 && outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
+
+				to = outEdge.getTo();
+				to.setInitial();
+				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
 			}
-			else if (inSize == 1 && outSize == 0 && inEdge.isState()) {
-				inEdge.getFrom().setFinal();
+			else if (inSize == 1 && outSize == 0 && inEdge.isStep()) {
 				this.graph.removeNode(pi);
+
+				from = inEdge.getFrom();
+				from.setFinal();
+				from.updateRange(pi.getToIteration(), pi.getToOperator());
 			}
-			else if (outSize == 1 && outEdge.isState()) {
-				ProcessIteration to = outEdge.getTo();
-				to.updateString(null, pi.getIteration() + "-" + to.getIteration(), pi.getOperator() + "-" + to.getOperator());
+			else if (outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
+
+				to = outEdge.getTo();
+
+				for (CouplingInstance ci : inEdges) {
+					ci.setTo(to);
+					this.graph.addEdge(ci);
+				}
+				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
 			}
 		}
 	}
@@ -64,7 +84,8 @@ public class TaskGraph {
 	public void computeGraph() {
 		TaskGraphState state = new TaskGraphState(this.topology);
 		List<ProcessIteration> initProcs = descriptionToIteration(topology.getInitialInstances());
-		
+		int i = 0;
+
 		// Initialize processes with no initialization
 		for (ProcessIteration pi : initProcs) {
 			state.activate(pi);
@@ -72,6 +93,10 @@ public class TaskGraph {
 		
 		// As long as there are active processes, continue building the graph
 		for (ProcessIteration pi : state) {
+			i++;
+			if (i % 10000 == 0) {
+				System.gc();
+			}
 			this.graph.addNode(pi);
 			
 			boolean complete = pi.instanceCompleted();

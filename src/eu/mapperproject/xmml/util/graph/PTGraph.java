@@ -85,11 +85,11 @@ public class PTGraph<T, E extends Edge<T>> {
 		this.edges.add(e);
 	}
 	
-	public boolean setSource(T src) {
+	public final boolean setSource(T src) {
 		return this.setExtremity(0, src);
 	}
 	
-	public boolean setSink(T snk) {
+	public final boolean setSink(T snk) {
 		return this.setExtremity(1, snk);
 	}
 	
@@ -106,8 +106,8 @@ public class PTGraph<T, E extends Edge<T>> {
 		List<Collection<E>> list = this.edgesPerNode.get(n);
 		if (list == null) {
 			list = new ArrayList<Collection<E>>(2);
-			list.add(new ArrayList<E>(1));
-			list.add(new ArrayList<E>(5));
+			list.add(new ArrayList<E>(3));
+			list.add(new ArrayList<E>(3));
 			this.edgesPerNode.put(n, list);
 		}
 		return list;

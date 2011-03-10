@@ -13,11 +13,14 @@ public class ProcessIteration {
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
 	private final AnnotationSet givenAnnot, annot;
 	private final Instance instance;
-        // As equals is the most costly operation in processiteration
-        // this cache was added
-        private String asString;
+	// As equals is the most costly operation in processiteration
+	// this cache was added
+	private String asString;
+	private final String origString;
 	private boolean initial, isfinal;
 	private boolean stateFinished, initFinished;
+	private SEL rangeFromOper, rangeToOper;
+	private int rangeFromIter, rangeToIter;
 
 	public enum ProgressType {
 		INSTANCE, ITERATION;
@@ -37,10 +40,13 @@ public class ProcessIteration {
 		this.annot = annot;
 		this.givenAnnot = new AnnotationSet(this.annot);
 		this.asString = this.instance.getId() + this.givenAnnot.counterString();
+		this.origString = this.asString;
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
 		this.initial = this.instance.isInitial() && firstInstance() && initializing();
+		this.rangeFromIter = this.rangeToIter = this.getIteration();
+		this.rangeFromOper = this.rangeToOper = this.getOperator();
 	}
 	
 	public boolean isFinal() {
@@ -59,7 +65,7 @@ public class ProcessIteration {
 		this.initial = true;
 	}
 
-	int getIteration() {
+	final int getIteration() {
 		return this.givenAnnot.getIteration();
 	}
 	
@@ -74,8 +80,12 @@ public class ProcessIteration {
 	public Instance getInstance() {
 		return this.instance;
 	}
-	
-	public boolean firstInstance() {
+
+	public int getInstanceCounter() {
+		return this.annot.getInstance();
+	}
+
+	public final boolean firstInstance() {
 		return this.annot.getInstance() == 0;
 	}
 
@@ -83,7 +93,7 @@ public class ProcessIteration {
 		return this.annot.getIteration() == 0 && this.annot.operatorLE(SEL.S);
 	}
 	
-	public boolean initializing() {
+	public final boolean initializing() {
 		return this.annot.operatorEq(SEL.finit);
 	}
 	
@@ -97,7 +107,7 @@ public class ProcessIteration {
 		else return null;
 	}
 
-	public SEL getOperator() {
+	public final SEL getOperator() {
 		return this.givenAnnot.getOperator();
 	}
 	
@@ -182,6 +192,10 @@ public class ProcessIteration {
 
 		set.applySubject();
 
+		// Since no more progress may be made, we can free the annotations
+		this.annot.freeAnnotations();
+		this.givenAnnot.freeAnnotations();
+
 		return cache.getIteration(pd, set);
 	}
 	
@@ -227,7 +241,7 @@ public class ProcessIteration {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
-		return this.asString.equals(o.toString());
+		return this.origString.equals(((ProcessIteration)o).origString);
 	}
 
 	@Override
@@ -237,24 +251,66 @@ public class ProcessIteration {
 	
 	@Override
 	public int hashCode() {
-		return this.asString.hashCode();
+		return this.origString.hashCode();
 	}
 
-	public void updateString(String inst, String iter, String oper) {
-		if (inst == null) {
-			int instNum = this.givenAnnot.getInstance();
-			inst = instNum > 0 ? String.valueOf(instNum) : "";
+	public void updateRange(int iter, SEL oper) {
+		if (iter < this.rangeFromIter) {
+			this.rangeFromIter = iter;
+			this.rangeFromOper = oper;
 		}
-		if (iter == null) iter = String.valueOf(this.givenAnnot.getIteration());
-		if (oper == null) oper = String.valueOf(this.givenAnnot.getOperator());
-		this.asString = this.instance.getId() + inst + "(" + iter + "," + oper + ")";
+		else if (iter == this.rangeFromIter && oper.compareTo(this.rangeFromOper) < 0) {
+			this.rangeFromOper = oper;
+		}
+
+		if (iter == this.rangeToIter && oper.compareTo(this.rangeToOper) > 0) {
+			this.rangeToOper = oper;
+		}
+		else if (iter > this.rangeToIter) {
+			this.rangeToIter = iter;
+			this.rangeToOper = oper;
+		}
+
+		String iterStr = null, operStr = null;
+		String instString = this.getInstanceCounter() > 0 ? String.valueOf(this.getInstanceCounter()) : "";
+		if (this.rangeFromIter < this.rangeToIter) {
+			iterStr = this.rangeFromIter + "-" + this.rangeToIter;
+			operStr = this.rangeFromOper + "-" + this.rangeToOper;
+		}
+		else {
+			iterStr = String.valueOf(this.rangeFromIter);
+			if (this.rangeFromOper.compareTo(this.rangeToOper) < 0) {
+				operStr = this.rangeFromOper + "-" + this.rangeToOper;
+			}
+			else {
+				operStr = this.rangeFromOper.toString();
+			}
+		}
+
+		this.asString = this.instance.getId() + instString + "(" + iterStr + "," + operStr + ")";
+	}
+
+	public int getToIteration() {
+		return this.rangeToIter;
+	}
+
+	public SEL getToOperator() {
+		return this.rangeToOper;
+	}
+
+	public int getFromIteration() {
+		return this.rangeFromIter;
+	}
+
+	public SEL getFromOperator() {
+		return this.rangeFromOper;
 	}
 	
 	class AnnotationSet {
 		private Annotation<Instance> anInst, anIter, anOper;
 		private Instance inst;
-        private int iterCounter, instCounter;
-        private SEL op;
+		private int iterCounter, instCounter;
+		private SEL op;
 
 		/** Create a new empty annotationset */
 		AnnotationSet() {
@@ -302,7 +358,7 @@ public class ProcessIteration {
 
 		/** Current operator is less than or equal to the given operator. */
 		boolean operatorLE(SEL op) {
-			return this.op.ordinal() <= op.ordinal();
+			return this.op.compareTo(op) <= 0;
 		}
 		
 		/** Current operator is larger than or equal to the given operator. */
@@ -330,6 +386,7 @@ public class ProcessIteration {
 			this.updateCounter(an);
 		}
 
+		/** Get the annotation of given annotationtype */
 		private Annotation<Instance> getAnnotation(AnnotationType at) {
 			switch (at) {
 				case ITERATION:
@@ -343,6 +400,7 @@ public class ProcessIteration {
 			}
 		}
 
+		/** Update the annotation and counter of the annotation */
 		private void updateCounter(Annotation<Instance> an) {
 			AnnotationType at = an.getType();
 			switch (at) {
@@ -380,6 +438,17 @@ public class ProcessIteration {
 			this.anOper.override(set.anOper, col.get(1));
 		}
 
+		/**
+		 * Removes all annotations, only keeping the counters.
+		 * From this point on, it can not be modified or copied
+		 */
+		public void freeAnnotations() {
+			this.anInst = null;
+			this.anIter = null;
+			this.anOper = null;
+			this.inst = null;
+		}
+
 		@Override
 		public int hashCode() {
 			int hashCode = this.instCounter;
@@ -390,15 +459,18 @@ public class ProcessIteration {
 		
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
 			if (o == null || !this.getClass().equals(o.getClass())) return false;
-			AnnotationSet as = (AnnotationSet) o;
-			return this.instCounter == as.instCounter && this.iterCounter == as.iterCounter && this.op == as.op;
+			return this.instCounter == ((AnnotationSet)o).instCounter && this.iterCounter == ((AnnotationSet)o).iterCounter && this.op == ((AnnotationSet)o).op;
 		}
 		
 		@Override
 		public String toString() {
-			return "[" + this.anInst + ", " + this.anIter + ", " + this.anOper + "]";
+			if (this.anInst == null && this.anInst == null && this.anOper == null) {
+				return "[" + this.anInst + ", " + this.anIter + ", " + this.anOper + "]";
+			}
+			else {
+				return this.counterString();
+			}
 		}
 		
 		/**

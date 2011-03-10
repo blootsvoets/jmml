@@ -26,9 +26,13 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	}
 	
 	public boolean isState() {
-		return this.coupling == null;
+		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() + 1 == to.getInstanceCounter();
 	}
-	
+
+	public boolean isStep() {
+		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() == to.getInstanceCounter();
+	}
+
 	public Coupling getCoupling() {
 		return this.coupling;
 	}
