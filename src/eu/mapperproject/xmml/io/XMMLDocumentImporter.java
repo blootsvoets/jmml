@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import nu.xom.Builder;
@@ -134,7 +135,7 @@ public class XMMLDocumentImporter {
 					}
 				}
 				if (size_formula == null && size_bytes == null) {
-					logger.warning("size estimate of datatype '" + id + "' does not contain a valid size formula or size in bytes. Instead, it contains '" + size_estimate + "'");
+					logger.log(Level.WARNING, "size estimate of datatype ''{0}'' does not contain a valid size formula or size in bytes. Instead, it contains ''{1}''", new Object[]{id, size_estimate});
 				}
 			}
 			map.put(id, new Datatype(id, name, size_formula, size_bytes));
@@ -157,11 +158,11 @@ public class XMMLDocumentImporter {
 			Datatype to = datatypes.get(toData);
 			
 			if (from == null) {
-				logger.warning("converter '" + id + "' contains unknown data type '" + fromData + "' in its from-field and will not be processed");
+				logger.log(Level.WARNING, "converter ''{0}'' contains unknown data type ''{1}'' in its from-field and will not be processed", new Object[]{id, fromData});
 				continue;
 			}
 			if (to == null) {
-				logger.warning("converter '" + id + "' contains unknown data type '" + toData + "' in its to-field and will not be processed");
+				logger.log(Level.WARNING, "converter ''{0}'' contains unknown data type ''{1}'' in its to-field and will not be processed", new Object[]{id, toData});
 				continue;
 			}
 			
@@ -173,7 +174,7 @@ public class XMMLDocumentImporter {
 				String src = requires.getAttributeValue("src");
 				
 				if (reqData == null) {
-					logger.warning("requirement of converter '" + id + "' contains unknown data type '" + reqDataName + "' and will not be considered");
+					logger.log(Level.WARNING, "requirement of converter ''{0}'' contains unknown data type ''{1}'' and will not be considered", new Object[]{id, reqDataName});
 				}
 				else {
 					ret = new Converter(id, from, to, reqName, reqData, src);
@@ -244,7 +245,7 @@ public class XMMLDocumentImporter {
 			SEL operator = SEL.valueOf(port.getAttributeValue("operator"));
 			if ((in && operator.isSending()) || (!in && operator.isReceiving())) {
 				String prefix = in ? " not" : "";
-				logger.warning("port '" + id + "' contains the wrong type of operator for its type, it should" + prefix + " be able to send. This port will be disregarded.");
+				logger.log(Level.WARNING, "port ''{0}'' contains the wrong type of operator for its type, it should{1} be able to send. This port will be disregarded.", new Object[]{id, prefix});
 				continue;
 			}
 			String dataStr = port.getAttributeValue("datatype");
@@ -252,7 +253,7 @@ public class XMMLDocumentImporter {
 			if (dataStr != null) {
 				datatype = datatypes.get(dataStr);
 				if (datatype == null) {
-					logger.warning("port '" + id + "' does not contain a valid datatype but '" + dataStr + "' instead, its datatype will be disregarded");
+					logger.log(Level.WARNING, "port ''{0}'' does not contain a valid datatype but ''{1}'' instead, its datatype will be disregarded", new Object[]{id, dataStr});
 				}
 			}
 			Port.Type state = port.getAttributeValue("type").equals("state") ? Port.Type.STATE : Port.Type.NORMAL;
@@ -312,7 +313,7 @@ public class XMMLDocumentImporter {
 				Converter c = definitions.getConverter(name);
 				if (c != null) {
 					if (!c.getFrom().equals(dfrom)) {
-						logger.warning("converter '" + c.getId() + "' in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' but is listed as a filter for that datatype");
+						logger.log(Level.WARNING, "converter ''{0}'' in conduit from ''{1}'' to ''{2}'' does not convert from datatype ''{3}'' but is listed as a filter for that datatype", new Object[]{c.getId(), from, to, dfrom.getId()});
 					}
 					else {
 						tmpto = c.getTo();
@@ -337,12 +338,12 @@ public class XMMLDocumentImporter {
 			try {
 				factor = Double.parseDouble(filter.getAttributeValue("factor"));
 			} catch (NumberFormatException e) {
-				logger.warning("factor of filter '" + name + "' in conduit from '" + from + "' to '" + to + "' should be a double but could not be parsed and will be ignored");
+				logger.log(Level.WARNING, "factor of filter ''{0}'' in conduit from ''{1}'' to ''{2}'' should be a double but could not be parsed and will be ignored", new Object[]{name, from, to});
 			}
 			list.add(new Filter(name, type, scale, factor));
 		}
 		if (tmpto != null && to != null && !tmpto.equals(dto)) {
-			logger.warning("list of converters in conduit from '" + from + "' to '" + to + "' does not convert from datatype '" + dfrom.getId() + "' to datatype '" + dto.getId() + "' but to datatype '" + tmpto.getId() + "' instead");
+			logger.log(Level.WARNING, "list of converters in conduit from ''{0}'' to ''{1}'' does not convert from datatype ''{2}'' to datatype ''{3}'' but to datatype ''{4}'' instead", new Object[]{from, to, dfrom.getId(), dto.getId(), tmpto.getId()});
 		}
 		
 		return list;
@@ -353,14 +354,14 @@ public class XMMLDocumentImporter {
 		String[] id = value.split("\\.");
 		if (id.length != 2) {
 			String prefix = from ? "sending" : "receiving";
-			logger.warning(prefix + " coupling port '" + value + "' can not be split into an instance name and port name");
+			logger.log(Level.WARNING, "{0} coupling port ''{1}'' can not be split into an instance name and port name", new Object[]{prefix, value});
 			return null;
 		}
 		
 		Instance inst = instances.get(id[0]);
 		if (inst == null) {
 			String prefix = from ? "sending" : "receiving";
-			logger.warning(prefix + " coupling port '" + value + "' does not translate to a submodel instance");
+			logger.log(Level.WARNING, "{0} coupling port ''{1}'' does not translate to a submodel instance", new Object[]{prefix, value});
 			return null;
 		}
 		
@@ -368,7 +369,7 @@ public class XMMLDocumentImporter {
 		Port port = from ? s.getOutPort(id[1]) : s.getInPort(id[1]);
 		if (port == null) {
 			String prefix = from ? "sending" : "receiving";
-			logger.warning("instance '" + id[0] + "' does not have a " + prefix + " port named '" + id[1] + "' for coupling");
+			logger.log(Level.WARNING, "instance ''{0}'' does not have a {1} port named ''{2}'' for coupling", new Object[]{id[0], prefix, id[1]});
 			return null;			
 		}
 		return new InstancePort(inst, port);
@@ -390,14 +391,14 @@ public class XMMLDocumentImporter {
 			String subStr = instance.getAttributeValue("submodel");
 			Submodel submodel = submodels.get(subStr);
 			if (submodel == null) {
-				logger.warning("instance with non-existant submodel '" + subStr + "' is excluded from the topology.");
+				logger.log(Level.WARNING, "instance with non-existant submodel ''{0}'' is excluded from the topology.", subStr);
 				continue;
 			}
 			if (id == null) {
 				id = submodel.getId();
 			}
 			if (map.containsKey(id)) {
-				logger.warning("an instance with id '" + id + "' already exists, a duplicate will not be added");
+				logger.log(Level.WARNING, "an instance with id ''{0}'' already exists, a duplicate will not be added", id);
 				continue;
 			}
 			

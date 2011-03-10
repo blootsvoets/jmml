@@ -3,6 +3,7 @@
  */
 package eu.mapperproject.xmml.io;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import nu.xom.Attribute;
@@ -46,7 +47,7 @@ public class ScaleParser {
 			String id = scale.getAttributeValue("id");
 			if (id == null) id = resolveId(dim);
 			else if (this.orig == null && current.hasScale(id)) {
-				logger.warning("Multiple scales with the same id have been defined in submodel '" + from + "'. Scales should have a unique id per submodel.");
+				logger.log(Level.WARNING, "Multiple scales with the same id have been defined in submodel ''{0}''. Scales should have a unique id per submodel.", from);
 			}
 			
 			// Get information of the original version of this scale, if applicable
@@ -55,7 +56,7 @@ public class ScaleParser {
 			if (this.orig != null) {
 				Scale origScale = this.orig.getScale(id);
 				if (origScale == null) {					
-					logger.warning("In a submodel instance (" + from + "), only scales may be overridden that were already defined in the submodel. Scale '" + id + "' was not previously defined in a submodel.");
+					logger.log(Level.WARNING, "In a submodel instance ({0}), only scales may be overridden that were already defined in the submodel. Scale ''{1}'' was not previously defined in a submodel.", new Object[]{from, id});
 					continue;
 				}
 				origDelta = origScale.getDelta();
@@ -90,12 +91,12 @@ public class ScaleParser {
 		if (dattr != null) {
 			range = new SIRange(SIUnit.parseSIUnit(dattr));
 			if (origFixed && !origRange.isPoint() && !origRange.contains(range)) {
-				logger.warning("Value " + range.getMaximum() + " of scale '" + id + "' of submodel instance '" + from + "' is outside the possible range " + origRange + ", according to its submodels range specification");
+				logger.log(Level.WARNING, "Value {0} of scale ''{1}'' of submodel instance ''{2}'' is outside the possible range {3}, according to its submodels range specification", new Object[]{range.getMaximum(), id, from, origRange});
 			}
 		}
 		else {
 			if (origFixed) {
-				logger.warning("According to scale '" + id + "' of the submodel of '" + from + "' the maximum should be fixed, it has to have a definite value in each of the instances");
+				logger.log(Level.WARNING, "According to scale ''{0}'' of the submodel of ''{1}'' the maximum should be fixed, it has to have a definite value in each of the instances", new Object[]{id, from});
 			}
 			Element eType = scale.getFirstChildElement(type);
 			if (eType == null) {
@@ -114,7 +115,7 @@ public class ScaleParser {
 				range = new SIRange(min, max);
 				if (eType.getAttributeValue("type").equals("variable")) {
 					if (origFixed) {
-						logger.warning("according to scale '" + id + "' of the submodel of '" + from + "' the " + info + " should be fixed, it can not be set to variable afterwards");
+						logger.log(Level.WARNING, "according to scale ''{0}'' of the submodel of ''{1}'' the {2} should be fixed, it can not be set to variable afterwards", new Object[]{id, from, info});
 					}
 					else {
 						this.lastFixed = false;
