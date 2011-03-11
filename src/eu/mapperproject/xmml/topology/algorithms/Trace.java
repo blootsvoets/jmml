@@ -15,9 +15,9 @@ public class Trace<T extends Numbered> {
 	private final List<Collection<T>> merge;
 
 	public Trace() {
-		Collection col1 = new ArrayList(10);
-		Collection col2 = new ArrayList(10);
-		merge = new ArrayList(2);
+		Collection<T> col1 = new ArrayList<T>(10);
+		Collection<T> col2 = new ArrayList<T>(10);
+		merge = new ArrayList<Collection<T>>(2);
 		merge.add(col1);
 		merge.add(col2);
 
