@@ -12,12 +12,12 @@ import java.util.List;
 public class Trace<T extends Numbered> {
 	private int[] trace;
 	private final List<T> objects;
-	private final List<Collection<T>> merge;
+	private final List<List<T>> merge;
 
 	public Trace() {
-		Collection<T> col1 = new ArrayList<T>(10);
-		Collection<T> col2 = new ArrayList<T>(10);
-		merge = new ArrayList<Collection<T>>(2);
+		List<T> col1 = new ArrayList<T>(10);
+		List<T> col2 = new ArrayList<T>(10);
+		merge = new ArrayList<List<T>>(2);
 		merge.add(col1);
 		merge.add(col2);
 
@@ -68,7 +68,7 @@ public class Trace<T extends Numbered> {
 	}
 
 	/** Merges the values of the given trace with the current trace, choosing the largest of the values */
-	public List<Collection<T>> merge(Trace<T> t, boolean track) {
+	public List<List<T>> merge(Trace<T> t, boolean track) {
 		Collection<T> eq = merge.get(0);
 		Collection<T> gt = merge.get(1);
 		eq.clear(); gt.clear();
@@ -107,16 +107,20 @@ public class Trace<T extends Numbered> {
 	}
 
 	/** Overrides the values of the given trace with the current trace, selected by given collection */
-	public void override(Trace<T> t, Collection<T> select) {
-		for (T key : select) {
+	public void override(Trace<T> t, List<T> select) {
+		int len = select.size();
+		for (int i = 0; i < len; i++) {
+			T key = select.get(i);
 			int num = key.getNumber();
 			this.put(key, t.trace[num]);
 		}
 	}
 
 	/** Merges the values of the given trace with the current trace, selected by given collection */
-	public void merge(Trace<T> t, Collection<T> select) {
-		for (T key : select) {
+	public void merge(Trace<T> t, List<T> select) {
+		int len = select.size();
+		for (int i = 0; i < len; i++) {
+			T key = select.get(i);
 			int num = key.getNumber();
 			if (t.trace[num] > this.trace[num]) {
 				this.put(key, t.trace[num]);

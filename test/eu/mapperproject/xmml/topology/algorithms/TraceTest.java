@@ -1,6 +1,5 @@
 package eu.mapperproject.xmml.topology.algorithms;
 import eu.mapperproject.xmml.util.Numbered;
-import java.util.Collection;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -96,7 +95,7 @@ public class TraceTest {
 	public void mergeWithput() {
 		traceEmpty1.put(one, 1);
 		traceEmpty2.put(two, 2);
-		List<Collection<Int>> col = traceEmpty1.merge(traceEmpty2, true);
+		List<List<Int>> col = traceEmpty1.merge(traceEmpty2, true);
 		assertTrue(col.get(0).isEmpty());
 		assertSame(1, col.get(1).size());
 		assertEquals(two, col.get(1).iterator().next());

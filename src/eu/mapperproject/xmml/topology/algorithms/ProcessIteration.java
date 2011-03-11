@@ -1,7 +1,5 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-import java.util.Collection;
-
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
@@ -39,8 +37,9 @@ public class ProcessIteration {
 		}
 		this.annot = annot;
 		this.givenAnnot = new AnnotationSet(this.annot);
-		this.asString = this.instance.getId() + this.givenAnnot.counterString();
-		this.origString = this.asString;
+		String counter = this.givenAnnot.counterString();
+		this.asString = this.instance.getId() + counter;
+		this.origString = this.instance.getNumber() + counter;
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
@@ -441,7 +440,7 @@ public class ProcessIteration {
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
 			this.anInst.merge(set.anInst, false);
-			List<Collection<Instance>> col = this.anIter.merge(set.anIter, true);
+			List<List<Instance>> col = this.anIter.merge(set.anIter, true);
 			// Merge if the iteration was equal, override if it was larger
 			this.anOper.merge(set.anOper, col.get(0));
 			this.anOper.override(set.anOper, col.get(1));
@@ -486,12 +485,16 @@ public class ProcessIteration {
 		 * Show a counter of this annotation set
 		 */
 		String counterString() {
-			String ret = "";
+			StringBuilder sb = new StringBuilder();
 			if (this.instCounter > 0) {
-				ret += this.instCounter;
+				sb.append(this.instCounter);
 			}
-			ret += "(" + this.iterCounter + "," + this.op +  ")";
-			return ret;
+			sb.append('(');
+			sb.append(this.iterCounter);
+			sb.append(',');
+			sb.append(this.op);
+			sb.append(')');
+			return sb.toString();
 		}
 	}
 }

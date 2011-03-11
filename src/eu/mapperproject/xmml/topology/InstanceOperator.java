@@ -23,7 +23,7 @@ public class InstanceOperator {
 	public boolean equals(Object o) {
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		InstanceOperator io = (InstanceOperator)o;
-		return this.operator == io.operator && this.instance.getId().equals(io.instance.getId()); 
+		return this.operator == io.operator && this.instance.getNumber() == io.instance.getNumber();
 	}
 	
 	@Override

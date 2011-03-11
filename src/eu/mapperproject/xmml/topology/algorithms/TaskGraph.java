@@ -34,14 +34,20 @@ public class TaskGraph {
 	public void reduceGraph() {
 		Collection<ProcessIteration> nodes = new ArrayList<ProcessIteration>(this.graph.getNodes());
 		ProcessIteration to = null, from;
+		int i = 0;
 
 		for (ProcessIteration pi : nodes) {
+			i++;
+			if (i % 10000 == 0) {
+				System.out.println("After " + i + " iterations, processing node " + pi + ".");
+			}
 			if (pi.hasDeadlock()) continue;
 			
-			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
 			Collection<CouplingInstance> outEdges = this.graph.getEdgesOut(pi);
-
-			int inSize = inEdges.size(), outSize = outEdges.size();
+			int outSize = outEdges.size();
+			if (outSize > 1) continue;
+			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
+			int inSize = inEdges.size();
 
 			CouplingInstance inEdge = null, outEdge = null;
 			if (inSize == 1) inEdge = inEdges.iterator().next();
@@ -98,7 +104,7 @@ public class TaskGraph {
 		for (ProcessIteration pi : state) {
 			i++;
 			if (i % 10000 == 0) {
-				System.gc();
+				System.out.println("After " + i + " iterations, processing node " + pi + ", which has " + pi.getInstance().getSubmodel().getScaleMap().getTimesteps() + " steps.");
 			}
 			this.graph.addNode(pi);
 			

@@ -9,6 +9,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class PTGraph<T, E extends Edge<T>> {
 	
 	public PTGraph(boolean directed) {
 		this.directed = directed;
-		this.edges = new ArrayList<E>();
+		this.edges = new HashSet<E>();
 		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
 		this.hasExtremity = new boolean[] {false, false};
 	}
@@ -35,12 +36,12 @@ public class PTGraph<T, E extends Edge<T>> {
 		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
 		for (T node : graph.getVertices()) {
 			List<Collection<E>> list = new ArrayList<Collection<E>>(2);
-			list.add(graph.getInEdges(node));
-			list.add(graph.getOutEdges(node));
+			list.add(new HashSet<E>(graph.getInEdges(node)));
+			list.add(new HashSet<E>(graph.getOutEdges(node)));
 			this.edgesPerNode.put(node, list);
 		}
 		
-		this.edges = new ArrayList<E>(graph.getEdges());
+		this.edges = new HashSet<E>(graph.getEdges());
 
 		for (Edge<T> e : this.edges) {
 			if (e.getFrom() == null) {
@@ -106,8 +107,8 @@ public class PTGraph<T, E extends Edge<T>> {
 		List<Collection<E>> list = this.edgesPerNode.get(n);
 		if (list == null) {
 			list = new ArrayList<Collection<E>>(2);
-			list.add(new ArrayList<E>(3));
-			list.add(new ArrayList<E>(3));
+			list.add(new HashSet<E>(6));
+			list.add(new HashSet<E>(5));
 			this.edgesPerNode.put(n, list);
 		}
 		return list;

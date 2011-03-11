@@ -9,15 +9,18 @@ import eu.mapperproject.xmml.util.graph.Edge;
  *
  */
 public class CouplingInstance implements Edge<ProcessIteration> {
-	private ProcessIteration from;
+	private final ProcessIteration from;
 	private ProcessIteration to;
-	private Coupling coupling;
+	private final Coupling coupling;
+	private final int hashCode;
 	
 	/** Create an instance of a coupling between one process iteration and another */
 	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
 		this.coupling = cd;
 		this.from = from;
 		this.to = to;
+		// Pre-compute as an optimization
+		this.hashCode = this.computeHashCode();
 	}
 	
 	/** Create an instance of a state coupling between one process iteration the next */
@@ -39,6 +42,7 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 
 	@Override
 	public boolean equals(Object o) {
+		if (this == o) return true;
 		if (o == null || !this.getClass().equals(o.getClass())) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
@@ -47,6 +51,11 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 
 	@Override
 	public int hashCode() {
+		return this.hashCode;
+	}
+
+	/** Pre-compute a hash code */
+	private int computeHashCode() {
 		int hash = 7;
 		hash = 17 * hash + (this.from != null ? this.from.hashCode() : 0);
 		hash = 17 * hash + (this.to != null ? this.to.hashCode() : 0);

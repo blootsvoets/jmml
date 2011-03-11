@@ -50,6 +50,7 @@ public class Coupling implements Domainable, Edge<Instance> {
 	}
 
 	/** Return the instance where the coupling comes from */ 
+	@Override
 	public Instance getFrom() {
 		return from.getInstance();
 	}
@@ -60,6 +61,7 @@ public class Coupling implements Domainable, Edge<Instance> {
 	}
 
 	/** Return the instance where the coupling goes to */ 
+	@Override
 	public Instance getTo() {
 		return to.getInstance();
 	}
