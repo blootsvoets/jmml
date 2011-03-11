@@ -25,6 +25,9 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 
 	@Override
 	public StyledNode decorateNode(ProcessIteration node) {
+		if (node.hasDeadlock()) {
+			return this.decorateMissingNode(node);
+		}
 		return new NodeDecorator<ProcessIteration>(node, node.toString(), null, new Category(node.getInstance().getDomain()));
 	}
 
@@ -68,6 +71,6 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 
 	@Override
 	public StyledNode decorateMissingNode(ProcessIteration node) {
-		return new SimpleNode("Deadlock[" + node + "]", "shape=octagon");
+		return new SimpleNode("Deadlock[" + node + "]", "shape=octagon,fontcolor=white,style=filled,color=red,fillcolor=red");
 	}
 }

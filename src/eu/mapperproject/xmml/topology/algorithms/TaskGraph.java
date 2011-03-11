@@ -33,9 +33,11 @@ public class TaskGraph {
 	/** Reduce the graph computed to have no extraneous steps */
 	public void reduceGraph() {
 		Collection<ProcessIteration> nodes = new ArrayList<ProcessIteration>(this.graph.getNodes());
-		ProcessIteration to, from;
+		ProcessIteration to = null, from;
 
 		for (ProcessIteration pi : nodes) {
+			if (pi.hasDeadlock()) continue;
+			
 			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
 			Collection<CouplingInstance> outEdges = this.graph.getEdgesOut(pi);
 
@@ -43,12 +45,15 @@ public class TaskGraph {
 
 			CouplingInstance inEdge = null, outEdge = null;
 			if (inSize == 1) inEdge = inEdges.iterator().next();
-			if (outSize == 1) outEdge = outEdges.iterator().next();
-			
+			if (outSize == 1) {
+				outEdge = outEdges.iterator().next();
+				to = outEdge.getTo();
+				if (to.hasDeadlock()) continue;
+			}
+
 			if (inSize == 1 && outSize == 1 && inEdge.isStep() && outEdge.isStep()) {
 				this.graph.removeNode(pi);
 
-				to = outEdge.getTo();
 				inEdge.setTo(to);
 				this.graph.addEdge(inEdge);
 				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
@@ -56,7 +61,6 @@ public class TaskGraph {
 			else if (inSize == 0 && outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
 
-				to = outEdge.getTo();
 				to.setInitial();
 				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
 			}
@@ -65,12 +69,11 @@ public class TaskGraph {
 
 				from = inEdge.getFrom();
 				from.setFinal();
+
 				from.updateRange(pi.getToIteration(), pi.getToOperator());
 			}
 			else if (outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
-
-				to = outEdge.getTo();
 
 				for (CouplingInstance ci : inEdges) {
 					ci.setTo(to);

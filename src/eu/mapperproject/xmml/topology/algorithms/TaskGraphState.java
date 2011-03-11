@@ -121,7 +121,10 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		if (receivingType != null) {
 			if ((pi.needsState() || !pi.initializing()) 
 				&& !cds.contains(null)) {
-				if (print) System.out.println(pi + " is missing silent step");
+				if (print) {
+					System.out.println(pi + " is missing silent step");
+					pi.setDeadlock();
+				}
 				return false;
 			}
 			else if (pi.instanceCompleted()) {
@@ -139,7 +142,10 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			}
 			for (Coupling cd : cs) {
 				if (!cds.contains(cd)) {
-					if (print) System.out.println(pi + " is missing: " + cd);
+					if (print) {
+						System.out.println(pi + " is missing: " + cd);
+						pi.setDeadlock();
+					}
 					return false;
 				}
 			}

@@ -17,7 +17,7 @@ public class ProcessIteration {
 	// this cache was added
 	private String asString;
 	private final String origString;
-	private boolean initial, isfinal;
+	private boolean initial, isfinal, deadlock;
 	private boolean stateFinished, initFinished;
 	private SEL rangeFromOper, rangeToOper;
 	private int rangeFromIter, rangeToIter;
@@ -44,6 +44,7 @@ public class ProcessIteration {
 		this.isfinal = false;
 		this.stateFinished = false;
 		this.initFinished = false;
+		this.deadlock = false;
 		this.initial = this.instance.isInitial() && firstInstance() && initializing();
 		this.rangeFromIter = this.rangeToIter = this.getIteration();
 		this.rangeFromOper = this.rangeToOper = this.getOperator();
@@ -56,6 +57,10 @@ public class ProcessIteration {
 	public boolean isInitial() {
 		return this.initial;
 	}
+
+	public boolean hasDeadlock() {
+		return this.deadlock;
+	}
 	
 	public void setFinal() {
 		this.isfinal = true;
@@ -63,6 +68,10 @@ public class ProcessIteration {
 
 	public void setInitial() {
 		this.initial = true;
+	}
+
+	public void setDeadlock() {
+		this.deadlock = true;
 	}
 
 	final int getIteration() {
