@@ -1,104 +1,58 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-import eu.mapperproject.xmml.util.Numbered;
-import java.util.ArrayList;
+import cern.colt.list.IntArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 /** Keeps track of which index objects had, when last referenced
   * All of the functions 
   */
-public class Trace<T extends Numbered> {
+public class Trace {
 	private int[] trace;
-	private final List<T> objects;
-	private final List<List<T>> merge;
+	private final IntArrayList[] merge;
 
 	public Trace() {
-		List<T> col1 = new ArrayList<T>(10);
-		List<T> col2 = new ArrayList<T>(10);
-		merge = new ArrayList<List<T>>(2);
-		merge.add(col1);
-		merge.add(col2);
+		merge = new IntArrayList[2];
+		merge[0] = new IntArrayList(5);
+		merge[1] = new IntArrayList(5);
 
 		int initsize = 10;
-		this.trace = new int[initsize];
-		this.objects = new ArrayList<T>();
-
-		for (int i = 0; i < initsize; i++) {
-			this.trace[i] = -1;
-			this.objects.add(null);
-		}
+		this.trace = resize(new int[0], initsize);
 	}
 
 	/** Constructs an independent trace with the same values as the given one */
-	public Trace(Trace<T> t) {
-		this.trace = new int[t.trace.length];
-		System.arraycopy(t.trace, 0, this.trace, 0, this.trace.length);
-		this.objects = t.objects;
+	public Trace(Trace t) {
+		this.trace = Arrays.copyOf(t.trace, t.trace.length);
 		this.merge = t.merge;
 	}
 
 	/** Add an index to an object */
-	public void put(T o, int i) {
-		int num = o.getNumber();
-		this.addObject(o, num);
+	public void put(int num, int i) {
+		this.resizeTrace(num);
 		this.trace[num] = i;
 	}
 
-	/** Add the given object to the object list, if necessary */
-	private void addObject(T o, int num) {
-		if (this.trace.length <= num) {
-			int initsize = Math.max(this.trace.length * 2, num + 1);
-			int[] tmp = new int[initsize];
-			System.arraycopy(this.trace, 0, tmp, 0, this.trace.length);
-			for (int i = this.trace.length; i < initsize; i++) {
-				tmp[i] = -1;
-			}
-			this.trace = tmp;
-		}
-		if (this.trace[num] == -1) {
-			while (this.objects.size() <= num) {
-				this.objects.add(null);
-			}
-			if (this.objects.get(num) == null) {
-				this.objects.set(num, o);
-			}
-		}
-	}
-
 	/** Merges the values of the given trace with the current trace, choosing the largest of the values */
-	public List<List<T>> merge(Trace<T> t, boolean track) {
-		Collection<T> eq = merge.get(0);
-		Collection<T> gt = merge.get(1);
+	public IntArrayList[] merge(Trace t) {
+		IntArrayList eq = merge[0], gt = merge[1];
 		eq.clear(); gt.clear();
 
 		int len = Math.min(t.trace.length, this.trace.length);
 
 		for (int i = 0; i < len; i++) {
-			if (t.trace[i] >= this.trace[i] && t.trace[i] > -1) {
-				T o = t.objects.get(i);
-				if (track) {
-					if (t.trace[i] == this.trace[i]) eq.add(o);
-					else gt.add(o);
-				}
-
+			if (t.trace[i] > this.trace[i]) {
+				gt.add(i);
 				this.trace[i] = t.trace[i];
-				if (this.objects.get(i) == null) {
-					this.objects.set(i, o);
-				}
+			}
+			else if (t.trace[i] == this.trace[i] && t.trace[i] > -1) {
+				eq.add(i);
 			}
 		}
 		if (t.trace.length > this.trace.length) {
-			int[] tmp = new int[t.trace.length];
-			System.arraycopy(this.trace, 0, tmp, 0, len);
-			this.trace = tmp;
+			this.resizeTrace(t.trace.length - 1);
+			System.arraycopy(t.trace, len, this.trace, len, t.trace.length - len);
 			for (int i = len; i < t.trace.length; i++) {
-				if (t.trace[i] > -1) {
-					this.trace[i] = t.trace[i];
-					T o = t.objects.get(i);
-					this.addObject(o, i);
-					if (track) gt.add(o);
+				if (this.trace[i] > -1) {
+					gt.add(i);
 				}
 			}
 		}
@@ -107,23 +61,21 @@ public class Trace<T extends Numbered> {
 	}
 
 	/** Overrides the values of the given trace with the current trace, selected by given collection */
-	public void override(Trace<T> t, List<T> select) {
+	public void override(Trace t, IntArrayList select) {
 		int len = select.size();
 		for (int i = 0; i < len; i++) {
-			T key = select.get(i);
-			int num = key.getNumber();
-			this.put(key, t.trace[num]);
+			int num = select.get(i);
+			this.put(num, t.trace[num]);
 		}
 	}
 
 	/** Merges the values of the given trace with the current trace, selected by given collection */
-	public void merge(Trace<T> t, List<T> select) {
+	public void merge(Trace t, IntArrayList select) {
 		int len = select.size();
 		for (int i = 0; i < len; i++) {
-			T key = select.get(i);
-			int num = key.getNumber();
+			int num = select.get(i);
 			if (t.trace[num] > this.trace[num]) {
-				this.put(key, t.trace[num]);
+				this.put(num, t.trace[num]);
 			}
 		}
 	}
@@ -131,9 +83,8 @@ public class Trace<T extends Numbered> {
 	/** Calculates the next value for given object, and sets it in the trace.
 	 * If the object has not been instantiated in this trace, it returns and stores 0.
 	 */
-	public int nextInt(T o) {
-		int num = o.getNumber();
-		this.addObject(o, num);
+	public int nextInt(int num) {
+		this.resizeTrace(num);
 		this.trace[num]++;
 
 		return this.trace[num];
@@ -143,8 +94,7 @@ public class Trace<T extends Numbered> {
 	 * trace yet. Does not change the trace.
 	 * @throws IllegalStateException if the given object is not yet instantiated
 	 */
-	public int currentInt(T o) {
-		int num = o.getNumber();
+	public int currentInt(int num) {
 		if (this.trace.length <= num || this.trace[num] == -1) {
 			throw new IllegalStateException("CurrentInt can only be called if the object is instantiated.");
 		}
@@ -155,8 +105,7 @@ public class Trace<T extends Numbered> {
 	 * trace yet, or in its first iteration.
 	 * @throws IllegalStateException if the given object is not yet instantiated or in its first iteration
 	 */
-	public int previousInt(T o) {
-		int num = o.getNumber();
+	public int previousInt(int num) {
 		if (this.trace.length <= num || this.trace[num] <= 0) {
 			throw new IllegalStateException("Previous can only be called if the object is instantiated and not in the first state.");			
 		}
@@ -165,15 +114,13 @@ public class Trace<T extends Numbered> {
 	}
 
 	/** Returns whether given object has been instantiated in this trace */
-	public boolean isInstantiated(T o) {
-		int num = o.getNumber();
-		return this.trace.length <= num || this.trace[num] != -1;
+	public boolean isInstantiated(int num) {
+		return this.trace.length > num && this.trace[num] != -1;
 	}
 
 	/** Removes and thus uninstantiates given object from this trace */
-	public void reset(T o) {
-		int num = o.getNumber();
-		if (this.trace.length >= num && this.trace[num] != -1) {
+	public void reset(int num) {
+		if (this.trace.length > num && this.trace[num] != -1) {
 			this.trace[num] = -1;
 		}
 	}
@@ -183,7 +130,7 @@ public class Trace<T extends Numbered> {
 		String ret = "{ ";
 		for (int i = 0; i < this.trace.length; i++) {
 			if (this.trace[i] != -1) {
-				ret += this.objects.get(i) + ":" + this.trace[i] + " ";
+				ret += i + ":" + this.trace[i] + " ";
 			}
 		}
 		return ret + "}";
@@ -192,11 +139,40 @@ public class Trace<T extends Numbered> {
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
-		return Arrays.equals(trace, ((Trace<?>)o).trace);
+		return Arrays.equals(trace, ((Trace)o).trace);
 	}
 
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(this.trace);
+	}
+
+	/** Resizes an int array and fills up to a certain size with
+	 * -1. The returned size will be max(2*oldlen+1, maxsize).
+	 * @param input input array, may not be null
+	 * @param maxsize size of the returned array
+	 * @return
+	 */
+	private int[] resize(int[] input, int maxsize) {
+		int oldlen = input.length;
+		int len = oldlen * 2 + 1;
+		if (maxsize >= len) {
+			len = maxsize + 1;
+		}
+		input = Arrays.copyOf(input, len);
+		Arrays.fill(input, -1, oldlen, len);
+
+		return input;
+	}
+
+	/** Resizes the trace array array and fills up to a certain size with
+	 * -1. The new size will be max(2*oldlen+1, index).
+	 * @param index size of the trace array
+	 * @return
+	 */
+	private void resizeTrace(int index) {
+		if (this.trace.length <= index) {
+			this.trace = this.resize(trace, index);
+		}
 	}
 }

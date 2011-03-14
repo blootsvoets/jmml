@@ -1,5 +1,6 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
+import cern.colt.list.IntArrayList;
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
@@ -439,11 +440,11 @@ public class ProcessIteration {
 		
 		/** Merge the given set with the current one */
 		public void merge(AnnotationSet set) {
-			this.anInst.merge(set.anInst, false);
-			List<List<Instance>> col = this.anIter.merge(set.anIter, true);
+			this.anInst.merge(set.anInst);
+			IntArrayList[] col = this.anIter.merge(set.anIter);
 			// Merge if the iteration was equal, override if it was larger
-			this.anOper.merge(set.anOper, col.get(0));
-			this.anOper.override(set.anOper, col.get(1));
+			this.anOper.merge(set.anOper, col[0]);
+			this.anOper.override(set.anOper, col[1]);
 		}
 
 		/**

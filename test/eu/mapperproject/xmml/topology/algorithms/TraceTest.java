@@ -1,6 +1,6 @@
 package eu.mapperproject.xmml.topology.algorithms;
+import cern.colt.list.IntArrayList;
 import eu.mapperproject.xmml.util.Numbered;
-import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -46,110 +46,107 @@ public class TraceTest {
 		}
 	}
 
-	private Trace<Int> traceEmpty, traceEmpty1, traceEmpty2;
-	private Int one, two;
+	private Trace traceEmpty, traceEmpty1, traceEmpty2;
 
 	@Before
 	public void setUp() throws Exception {
-		traceEmpty = new Trace<Int>();
-		traceEmpty1 = new Trace<Int>();
-		traceEmpty2 = new Trace<Int>();
-		one = new Int(1);
-		two = new Int(2);
+		traceEmpty = new Trace();
+		traceEmpty1 = new Trace();
+		traceEmpty2 = new Trace();
 	}
 	
 	@Test
 	public void mergeBasic() {
-		traceEmpty1.merge(traceEmpty2, false);
+		traceEmpty1.merge(traceEmpty2);
 		assertEquals(traceEmpty, traceEmpty1);
 		assertEquals(traceEmpty, traceEmpty2);
 	}
 
 	@Test
 	public void nextAndCurrent() {
-		assertEquals(0, traceEmpty1.nextInt(one));
-		traceEmpty1.put(one, 1);
-		assertEquals(1, traceEmpty1.currentInt(one));
-		assertEquals(0, traceEmpty1.nextInt(two));
-		assertEquals(2, traceEmpty1.nextInt(one));
-		assertEquals(2, traceEmpty1.currentInt(one));
-		assertEquals(0, traceEmpty1.currentInt(two));
-		assertEquals(1, traceEmpty1.nextInt(two));
-		assertEquals(3, traceEmpty1.nextInt(one));
+		assertEquals(0, traceEmpty1.nextInt(1));
+		traceEmpty1.put(1, 1);
+		assertEquals(1, traceEmpty1.currentInt(1));
+		assertEquals(0, traceEmpty1.nextInt(2));
+		assertEquals(2, traceEmpty1.nextInt(1));
+		assertEquals(2, traceEmpty1.currentInt(1));
+		assertEquals(0, traceEmpty1.currentInt(2));
+		assertEquals(1, traceEmpty1.nextInt(2));
+		assertEquals(3, traceEmpty1.nextInt(1));
 	}
 	
 	@Test(expected= IllegalStateException.class)
 	public void empty() {
-		assertFalse(traceEmpty.isInstantiated(one));
-		traceEmpty.currentInt(one);
+		assertFalse(traceEmpty.isInstantiated(1));
+		traceEmpty.currentInt(1);
 	}
 
 	@Test
 	public void overrideput() {
-		traceEmpty.put(one, 3);
-		traceEmpty.put(one, 2);
-		traceEmpty1.put(one, 2);
+		traceEmpty.put(1, 3);
+		traceEmpty.put(1, 2);
+		traceEmpty1.put(1, 2);
 		assertEquals(traceEmpty1, traceEmpty);
 	}
 
 	@Test
 	public void compareputAndNext() {
 		this.nextAndCurrent();
-		traceEmpty.put(two, 1);
-		traceEmpty.put(one, 3);
+		traceEmpty.put(2, 1);
+		traceEmpty.put(1, 3);
 		assertEquals(traceEmpty, traceEmpty1);
 	}
 
 
 	@Test
 	public void mergeWithput() {
-		traceEmpty1.put(one, 1);
-		traceEmpty2.put(two, 2);
-		List<List<Int>> col = traceEmpty1.merge(traceEmpty2, true);
-		assertTrue(col.get(0).isEmpty());
-		assertSame(1, col.get(1).size());
-		assertEquals(two, col.get(1).iterator().next());
+		traceEmpty1.put(1, 1);
+		traceEmpty2.put(2, 2);
+		IntArrayList[] col = traceEmpty1.merge(traceEmpty2);
+		assertTrue(col[0].isEmpty());
+		assertSame(1, col[1].size());
+		assertEquals(2, col[1].get(0));
 
-		traceEmpty.put(one, 1);
-		traceEmpty.put(two, 2);
+		traceEmpty.put(1, 1);
+		traceEmpty.put(2, 2);
 		
 		assertEquals(traceEmpty, traceEmpty1);
 
-		traceEmpty2.put(two, 3);
-		col = traceEmpty1.merge(traceEmpty2, true);
-		assertSame(1, col.get(1).size());
-		traceEmpty.put(two, 3);
+		traceEmpty2.put(2, 3);
+		col = traceEmpty1.merge(traceEmpty2);
+		assertSame(1, col[1].size());
+		traceEmpty.put(2, 3);
 
 		assertEquals(traceEmpty, traceEmpty1);
 
-		col = traceEmpty1.merge(traceEmpty2, true);
-		assertSame(1, col.get(0).size());
-		assertEquals(two, col.get(0).iterator().next());
+		col = traceEmpty1.merge(traceEmpty2);
+		assertSame(1, col[0].size());
+		assertEquals(2, col[0].get(0));
 	}
 
 	@Test
 	public void override() {
-		traceEmpty1.put(one, 1);
-		traceEmpty2.put(two, 2);
-		traceEmpty1.merge(traceEmpty2, false);
+		traceEmpty1.put(1, 1);
+		traceEmpty2.put(2, 2);
+		traceEmpty1.merge(traceEmpty2);
 		
-		traceEmpty.put(one, 1);
-		traceEmpty.put(two, 2);
+		traceEmpty.put(1, 1);
+		traceEmpty.put(2, 2);
 		
 		assertEquals(traceEmpty, traceEmpty1);
 	}
 
 	@Test
 	public void reset() {
-		traceEmpty.put(one, 2);
-		traceEmpty.reset(one);
-		assertEquals(0, traceEmpty.nextInt(one));
+		traceEmpty.put(1, 2);
+		traceEmpty.reset(1);
+		assertEquals(0, traceEmpty.nextInt(1));
 	}
 	
 	@Test
 	public void independentConstructor() {
-		Trace<Int> t = new Trace<Int>(traceEmpty);
-		t.put(one, 1);
+		Trace t = new Trace(traceEmpty);
+		t.put(1, 1);
 		assertFalse(t.equals(traceEmpty));
 	}
 }
