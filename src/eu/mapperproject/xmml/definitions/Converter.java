@@ -21,7 +21,7 @@ public class Converter implements Identifiable, Edge<Datatype> {
 	}
 
 	public Converter(String id, Datatype from, Datatype to, String reqName, Datatype reqData, String src) {
-		if (this.id == null || from == null || to == null) {
+		if (id == null || from == null || to == null) {
 			throw new IllegalArgumentException("for a converter no parameters of id, from or to may be null");
 		}
 		this.id = id;

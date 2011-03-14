@@ -14,6 +14,9 @@ public class ModelMetadata implements Identifiable {
 	private final Version version;
 	
 	public ModelMetadata(String id, String name, String description, Version version) {
+		if (id == null) {
+			throw new IllegalArgumentException("For model metadata, id may not be null.");
+		}
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -54,7 +57,7 @@ public class ModelMetadata implements Identifiable {
 
 	@Override
 	public int hashCode() {
-		return (this.id != null ? this.id.hashCode() : 0);
+		return this.id.hashCode();
 	}
 
 	@Override

@@ -486,7 +486,7 @@ public class ProcessIteration {
 		 * Show a counter of this annotation set
 		 */
 		String counterString() {
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder(20);
 			if (this.instCounter > 0) {
 				sb.append(this.instCounter);
 			}

@@ -160,7 +160,7 @@ public class Trace {
 			len = maxsize + 1;
 		}
 		input = Arrays.copyOf(input, len);
-		Arrays.fill(input, -1, oldlen, len);
+		Arrays.fill(input, oldlen, len, -1);
 
 		return input;
 	}

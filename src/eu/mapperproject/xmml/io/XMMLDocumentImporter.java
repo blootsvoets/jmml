@@ -156,13 +156,21 @@ public class XMMLDocumentImporter {
 			Datatype from = datatypes.get(fromData);
 			String toData = converter.getAttributeValue("to");
 			Datatype to = datatypes.get(toData);
-			
+
 			if (from == null) {
 				logger.log(Level.WARNING, "converter ''{0}'' contains unknown data type ''{1}'' in its from-field and will not be processed", new Object[]{id, fromData});
 				continue;
 			}
 			if (to == null) {
 				logger.log(Level.WARNING, "converter ''{0}'' contains unknown data type ''{1}'' in its to-field and will not be processed", new Object[]{id, toData});
+				continue;
+			}
+			if (id == null) {
+				id = from + "2" + to;
+				logger.log(Level.WARNING, "converter from ''{0}'' to ''{1}'' should have an id, using ''{2}'' as an id", new Object[]{from, to, id});
+			}
+			if (map.containsKey(id)) {
+				logger.log(Level.WARNING, "converter with id ''{}'' already exists; skipping", id);
 				continue;
 			}
 			

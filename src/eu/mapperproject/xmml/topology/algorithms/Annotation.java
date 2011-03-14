@@ -2,7 +2,6 @@ package eu.mapperproject.xmml.topology.algorithms;
 
 import cern.colt.list.IntArrayList;
 import eu.mapperproject.xmml.util.Numbered;
-import java.util.List;
 
 /** An Annotation keeps a counter of an object and last known counters of peer objects.
  *
