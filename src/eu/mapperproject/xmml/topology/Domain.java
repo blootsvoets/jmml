@@ -67,7 +67,7 @@ public class Domain implements Child<Domain> {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		Domain other = (Domain)o;
 		return this.name.equals(other.name) && ((this.parent == null && other.parent == null) || this.parent.equals(other.parent));
 	}

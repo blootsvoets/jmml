@@ -248,7 +248,7 @@ public class ProcessIteration {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		return this.origString.equals(((ProcessIteration)o).origString);
 	}
 
@@ -467,7 +467,7 @@ public class ProcessIteration {
 		
 		@Override
 		public boolean equals(Object o) {
-			if (o == null || !this.getClass().equals(o.getClass())) return false;
+			if (o == null || getClass() != o.getClass()) return false;
 			return this.instCounter == ((AnnotationSet)o).instCounter && this.iterCounter == ((AnnotationSet)o).iterCounter && this.op == ((AnnotationSet)o).op;
 		}
 		

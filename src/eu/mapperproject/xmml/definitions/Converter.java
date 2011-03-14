@@ -21,6 +21,9 @@ public class Converter implements Identifiable, Edge<Datatype> {
 	}
 
 	public Converter(String id, Datatype from, Datatype to, String reqName, Datatype reqData, String src) {
+		if (this.id == null || from == null || to == null) {
+			throw new IllegalArgumentException("for a converter no parameters of id, from or to may be null");
+		}
 		this.id = id;
 		this.from = from;
 		this.to = to;
@@ -43,5 +46,22 @@ public class Converter implements Identifiable, Edge<Datatype> {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || getClass() != obj.getClass()) return false;
+		final Converter other = (Converter) obj;
+		return this.id.equals(other.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.id != null ? this.id.hashCode() : 0;
+	}
+
+	@Override
+	public boolean deepEquals(Object o) {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 }

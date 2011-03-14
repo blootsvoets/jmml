@@ -191,7 +191,7 @@ public class Trace<T extends Numbered> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		return Arrays.equals(trace, ((Trace<?>)o).trace);
 	}
 

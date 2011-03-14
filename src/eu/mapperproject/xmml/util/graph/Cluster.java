@@ -53,7 +53,7 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Styled
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		Cluster<?,?> c = (Cluster<?,?>)o;
 		return this.name.equals(c.name) && this.category.equals(c.category);
 	}

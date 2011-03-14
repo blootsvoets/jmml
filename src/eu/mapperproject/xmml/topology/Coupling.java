@@ -99,7 +99,7 @@ public class Coupling implements Domainable, Edge<Instance> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		Coupling c = (Coupling)o;
 		return ((this.name == null && c.name == null) || this.name.equals(c.name)) && this.from.equals(c.from) && this.to.equals(c.to);
 	}

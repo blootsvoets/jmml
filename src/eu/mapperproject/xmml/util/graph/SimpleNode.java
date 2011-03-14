@@ -42,7 +42,7 @@ public class SimpleNode implements StyledNode {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		return this.getName().equals(((StyledNode)o).getName());
 	}
 	

@@ -68,7 +68,7 @@ public class Category implements Child<Category>, StyledNode {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		Category c = (Category)o;
 		return this.name.equals(c.name) && Arrays.deepEquals(this.ancenstorNames, c.ancenstorNames);
 	}

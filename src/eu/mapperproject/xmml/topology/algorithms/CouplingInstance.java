@@ -43,7 +43,7 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
 		return this.from.equals(ci.from) && this.to.equals(ci.to) && ((this.coupling == null && ci.coupling == null) || this.coupling.equals(ci.coupling));

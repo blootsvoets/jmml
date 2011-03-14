@@ -107,14 +107,15 @@ public class Instance implements Identifiable, Domainable, Numbered {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		return this.num == ((Instance)o).num;
 	}
 	
 	/** Whether all aspects of this instance equal the other, not just the id */
+	@Override
 	public boolean deepEquals(Object o) {
 		if (!this.equals(o)) return false;
 		Instance i = (Instance)o;
-		return this.id.equals(i.id) && this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
+		return this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
 	}
 }

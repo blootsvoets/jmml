@@ -26,15 +26,16 @@ public class Port implements Identifiable {
 	 * @param state
 	 */
 	public Port(String id, SEL operator, Datatype datatype, Type state) {
+		if (id == null || operator == null || datatype == null || state == null) {
+			throw new IllegalArgumentException("For a Port, the id, operator, datatype and state parameter may not be null");
+		}
 		this.id = id;
 		this.operator = operator;
 		this.datatype = datatype;
 		this.type = state;
 	}
 
-	/**
-	 * @return the id
-	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -62,7 +63,7 @@ public class Port implements Identifiable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !this.getClass().equals(o.getClass())) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 		return this.id.equals(((Port)o).id);
 	}
 
@@ -70,7 +71,14 @@ public class Port implements Identifiable {
 	public int hashCode() {
 		return this.id.hashCode();
 	}
-	
+
+	@Override
+	public boolean deepEquals(Object o) {
+		if (!this.equals(o)) return false;
+		final Port p = (Port)o;
+		return this.operator == p.operator && this.datatype.equals(p.datatype) && this.type == p.type;
+	}
+
 	@Override
 	public String toString() {
 		return this.id + "(" + this.operator + ")";

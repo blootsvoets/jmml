@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class TraceTest {
 	static class Int implements Numbered {
-		int num;
+		private final int num;
 		Int(int num) {
 			this.num = num;
 		}
@@ -21,7 +21,7 @@ public class TraceTest {
 		}
 		@Override
 		public boolean equals(Object o) {
-			if (o == null || !this.getClass().equals(o.getClass())) return false;
+			if (o == null || getClass() != o.getClass()) return false;
 			return this.num == ((Int)o).num;
 		}
 
@@ -33,6 +33,16 @@ public class TraceTest {
 		@Override
 		public String toString() {
 			return "Int(" + this.num + ")";
+		}
+
+		@Override
+		public String getId() {
+			return String.valueOf(this.num);
+		}
+
+		@Override
+		public boolean deepEquals(Object o) {
+			return this.equals(o);
 		}
 	}
 

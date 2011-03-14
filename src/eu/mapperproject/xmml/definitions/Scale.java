@@ -101,4 +101,21 @@ public class Scale implements Identifiable {
 	public boolean hasMaxFixed() {
 		return maxFixed;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || getClass() != obj.getClass()) return false;
+		return this.id.equals(((Scale)obj).id);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
+
+	@Override
+	public boolean deepEquals(Object o) {
+
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 }

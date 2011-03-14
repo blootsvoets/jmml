@@ -46,14 +46,14 @@ public class Submodel implements Identifiable {
 			return values[i];
 		}
 	}
-	private Map<String,Port> in;
-	private Map<String,Port> out;
-	private ScaleMap scales;
-	private Map<String,Param> params;
-	private ModelMetadata meta;
-	private boolean initial;
-	private Optional stateful;
-	private Optional interactive;
+	private final Map<String,Port> in;
+	private final Map<String,Port> out;
+	private final ScaleMap scales;
+	private final Map<String,Param> params;
+	private final ModelMetadata meta;
+	private final boolean initial;
+	private final Optional stateful;
+	private final Optional interactive;
 	
 	public Submodel(ModelMetadata meta, ScaleMap scales, Map<String,Port> in, Map<String,Port> out, Map<String,Param> params, boolean initial, Optional stateful, Optional interactive) {
 		this.meta = meta;
@@ -100,5 +100,29 @@ public class Submodel implements Identifiable {
 	 */
 	public boolean isInitial() {
 		return this.initial;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		return this.meta.equals(((Submodel)o).meta);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.meta.hashCode();
+	}
+
+	@Override
+	public boolean deepEquals(Object o) {
+		if (!this.equals(o)) return false;
+		final Submodel sub = (Submodel)o;
+		return (this.in == null ? sub.in == null : this.in.equals(sub.in))
+			&& (this.out == null ? sub.out == null : this.out.equals(sub.out))
+			&& (this.scales == null ? sub.scales == null : this.scales.equals(sub.scales))
+			&& (this.params == null ? sub.params == null : this.params.equals(sub.params))
+			&& this.initial == sub.initial
+			&& this.stateful == sub.stateful
+			&& this.interactive == sub.interactive;
 	}
 }

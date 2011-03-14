@@ -20,9 +20,7 @@ public class ModelMetadata implements Identifiable {
 		this.version = version;
 	}
 
-	/**
-	 * @return the id of the model
-	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -46,5 +44,25 @@ public class ModelMetadata implements Identifiable {
 	 */
 	public Version getVersion() {
 		return version;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		return this.id.equals(((ModelMetadata)o).id);
+	}
+
+	@Override
+	public int hashCode() {
+		return (this.id != null ? this.id.hashCode() : 0);
+	}
+
+	@Override
+	public boolean deepEquals(Object o) {
+		if (!this.equals(o)) return false;
+		ModelMetadata md = (ModelMetadata)o;
+		return this.name.equals(md.name)
+				&& ((this.description == null && md.description == null) || this.description.equals(md.description))
+				&& ((this.version == null && md.version == null) || this.version.equals(md.version));
 	}
 }
