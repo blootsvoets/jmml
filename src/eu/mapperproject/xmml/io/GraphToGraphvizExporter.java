@@ -58,56 +58,77 @@ public class GraphToGraphvizExporter {
 		Runtime.getRuntime().exec(new String[] {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()}).waitFor();
 	}
 	
-	private String edgeTemplate(StyledEdge e, boolean directed) {
+	private void edgeTemplate(StringBuilder edge, StyledEdge e, boolean directed) {
+		edge.append(tab);
+		edge.append('"'); edge.append(e.getFrom()); edge.append('"');
+		edge.append(directed ? "->" : "--");
+		edge.append('"');
+		edge.append(e.getTo());
+		edge.append('"');
+
 		String label = e.getLabel();
 		String style = e.getStyle();
-		String properties = "";
-		
-		if (this.edgeLabel && label != null) properties += "label=\"" + label + "\"";
-		if (style != null) {
-			if (properties.length() > 0) properties += ", ";
-			properties += style;
-		}
-		if (properties.length() > 0) {
-			properties = " [" + properties + ']';
-		}
-		
-		String arrow = directed ? "->" : "--";
 
-		return lne("\"" + e.getFrom() + "\" " + arrow + " \"" + e.getTo() + "\"" + properties);
+		if ((this.edgeLabel && label != null) || style != null) {
+			edge.append('[');
+			if (this.edgeLabel && label != null) {
+				edge.append("label=\"");
+				edge.append(label);
+				edge.append('"');
+				if (style != null) edge.append(',');
+			}
+			if (style != null) {
+				edge.append(style);
+			}
+			edge.append(']');
+		}
+
+		edge.append(";\n");
 	}
 	
 	
-	private String nodeTemplate(StyledNode n) {
+	private void nodeTemplate(StringBuilder node, StyledNode n) {
 		String style = n.getStyle();
-		String properties = style == null ? "" : " [" + style + "]";
-		
-		return lne("\"" + n.getName() + "\"" + properties);
+		node.append(tab);
+		node.append('"');
+		node.append(n.getName());
+		node.append('"');
+		if (style != null) {
+			node.append('[');
+			node.append(style);
+			node.append(']');
+		}
+		node.append(";\n");
 	}
 		
 	private String clusterContents(Cluster<StyledNode, StyledEdge> c, Tree<Cluster<StyledNode, StyledEdge>> clusters) {
-		String ret = "";
+		StringBuilder ret = new StringBuilder();
 		PTGraph<StyledNode, StyledEdge> g = c.getGraph();
 		if (g != null) {
 			for (StyledNode n : g.getNodes()) {
-				ret += this.nodeTemplate(n);
+				this.nodeTemplate(ret, n);
 			}
 
 			for (StyledEdge e : g.getEdges()) {
-				ret += this.edgeTemplate(e, g.isDirected());
+				this.edgeTemplate(ret, e, g.isDirected());
 			}
 		}
 
 		for (Cluster<StyledNode, StyledEdge> subc : clusters.getChildren(c)) {
-			ret += ln("subgraph \"cluster_" + subc.getName() + "\" {");
+			ret.append("subgraph \"cluster_");
+			ret.append(subc.getName());
+			ret.append("\" {\n");
 			tab.increase();
-			ret += lne("label=\"" + subc.getName() + "\",labeljust=l") + lne(subc.getStyle());
-			ret += clusterContents(subc, clusters);
+			ret.append(tab); ret.append("label=\"");
+			ret.append(subc.getName());
+			ret.append("\",labeljust=l"); ret.append(";\n");
+			ret.append(tab); ret.append(subc.getStyle()); ret.append(";\n");
+			ret.append(clusterContents(subc, clusters));
 			tab.decrease();
-			ret += ln("}") + ln();
+			ret.append(tab); ret.append("}\n\n");
 		}
 		
-		return ret;
+		return ret.toString();
 	}
 	
 	private String graphContents(PTGraph<StyledNode, StyledEdge> input) {
@@ -131,26 +152,14 @@ public class GraphToGraphvizExporter {
 		tab.increase();
 		
 		if (this.horizontal) {
-			ret += lne("rankdir=\"LR\"");
+			ret += tab + "rankdir=\"LR\";\n";
 		}
 
 		ret += this.graphContents(input);
 		
 		tab.decrease();
-		ret += ln("}");
+		ret += tab + "}\n";
 		
 		return ret;
-	}
-	
-	private String lne(String line) {
-		return tab + line + ";";
-	}
-	
-	private String ln(String line) {
-		return tab + line;
-	}
-
-	private String ln() {
-		return "\n";
 	}
 }
