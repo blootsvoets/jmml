@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.mapperproject.xmml.topology.Instance;
-import eu.mapperproject.xmml.topology.algorithms.ProcessIteration.AnnotationSet;
 import eu.mapperproject.xmml.util.PTList;
 
 /**
@@ -23,7 +22,7 @@ public class ProcessIterationCache {
 		processIterations = new HashMap<String, Map<AnnotationSet, ProcessIteration>>();
 	}
 
-	public ProcessIteration getIteration(Instance instance, AnnotationSet key) {
+	ProcessIteration getIteration(Instance instance, AnnotationSet key) {
 		
 		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getId(), processIterations);
 

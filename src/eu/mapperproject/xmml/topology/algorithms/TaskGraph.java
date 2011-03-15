@@ -62,13 +62,13 @@ public class TaskGraph {
 
 				inEdge.setTo(to);
 				this.graph.addEdge(inEdge);
-				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
+				to.updateRange(pi, true);
 			}
 			else if (inSize == 0 && outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
 
 				to.setInitial();
-				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
+				to.updateRange(pi, true);
 			}
 			else if (inSize == 1 && outSize == 0 && inEdge.isStep()) {
 				this.graph.removeNode(pi);
@@ -76,7 +76,7 @@ public class TaskGraph {
 				from = inEdge.getFrom();
 				from.setFinal();
 
-				from.updateRange(pi.getToIteration(), pi.getToOperator());
+				from.updateRange(pi, false);
 			}
 			else if (outSize == 1 && outEdge.isStep()) {
 				this.graph.removeNode(pi);
@@ -85,7 +85,7 @@ public class TaskGraph {
 					ci.setTo(to);
 					this.graph.addEdge(ci);
 				}
-				to.updateRange(pi.getFromIteration(), pi.getFromOperator());
+				to.updateRange(pi, true);
 			}
 		}
 	}
