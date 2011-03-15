@@ -26,29 +26,22 @@ public class ProcessIterationRange {
 		if (range == null) {
 			range = new Range(this.iter, this.oper);
 		}
-		int it;
-		SEL op;
+		final int it;
 		if (min) {
 			it = pirange.getFromIteration();
-			op = pirange.getFromOperator();
 			if (it < range.rangeFromIter) {
 				range.rangeFromIter = it;
-				range.rangeFromOper = op;
 			}
-			else if (it == range.rangeFromIter && op.compareTo(range.rangeFromOper) < 0) {
-				range.rangeFromOper = op;
-			}
+
+			range.rangeFromOper = pirange.getFromOperator();
 		}
 		else {
 			it = pirange.getToIteration();
-			op = pirange.getToOperator();
-			if (range.rangeToIter < it) {
+			if (it > range.rangeToIter) {
 				range.rangeToIter = it;
-				range.rangeToOper = op;
 			}
-			else if (range.rangeToIter == it && range.rangeToOper.compareTo(op) < 0) {
-				range.rangeToOper = op;
-			}
+
+			range.rangeToOper = pirange.getToOperator();
 		}
 	}
 
@@ -108,17 +101,12 @@ public class ProcessIterationRange {
 		}
 
 		void appendRange(StringBuilder sb) {
-			boolean iterLess = rangeFromIter < rangeToIter;
 			sb.append(rangeFromIter);
-			if (iterLess) {
+			if (rangeFromIter < rangeToIter) {
 				sb.append('-'); sb.append(rangeToIter);
 			}
 			sb.append(',');
-			sb.append(rangeFromOper);
-
-			if (iterLess || rangeFromOper.compareTo(rangeToOper) < 0) {
-				sb.append('-'); sb.append(rangeToOper);
-			}
+			sb.append(rangeFromOper); sb.append('-'); sb.append(rangeToOper);
 		}
 	}
 }

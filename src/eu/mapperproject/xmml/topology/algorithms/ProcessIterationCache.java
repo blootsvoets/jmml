@@ -37,4 +37,8 @@ public class ProcessIterationCache {
 
 		return pi;
 	}
+
+	void remove(Instance instance, AnnotationSet key) {
+		processIterations.get(instance.getId()).remove(key);
+	}
 }

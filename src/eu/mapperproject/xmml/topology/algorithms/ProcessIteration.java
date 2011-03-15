@@ -231,6 +231,7 @@ public class ProcessIteration {
 		set.applySubject();
 		if (this.annot == null) {
 			this.annot = new AnnotationSet(this.givenAnnot);
+			cache.remove(this.instance, this.givenAnnot);
 		}
 		this.annot.merge(set);
 
