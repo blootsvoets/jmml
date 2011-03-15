@@ -16,6 +16,9 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	
 	/** Create an instance of a coupling between one process iteration and another */
 	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
+		if (from == null || to == null) {
+			throw new IllegalArgumentException("Coupling instance may not go from or to null");
+		}
 		this.coupling = cd;
 		this.from = from;
 		this.to = to;
@@ -27,15 +30,25 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	public CouplingInstance(ProcessIteration from, ProcessIteration to) {
 		this(from, to, null);
 	}
-	
+
+	/**
+	 * Whether this coupling instance represents a state transfered from one instance of a processiteration to the next
+	 */
 	public boolean isState() {
 		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() + 1 == to.getInstanceCounter();
 	}
 
+	/**
+	 * Whether this coupling instance represents a step from one operator of a processiteration to the next
+	 */
 	public boolean isStep() {
 		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() == to.getInstanceCounter();
 	}
 
+	/**
+	 * Get the coupling associated to this coupling instance. If this couplinginstance
+	 * represents a state or step null is returned.
+	 */
 	public Coupling getCoupling() {
 		return this.coupling;
 	}
@@ -46,7 +59,9 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 		if (o == null || getClass() != o.getClass()) return false;
 		CouplingInstance ci = (CouplingInstance)o;
 		
-		return this.from.equals(ci.from) && this.to.equals(ci.to) && ((this.coupling == null && ci.coupling == null) || this.coupling.equals(ci.coupling));
+		return this.from.equals(ci.from)
+			&& this.to.equals(ci.to)
+			&& (this.coupling == null ? ci.coupling == null : this.coupling.equals(ci.coupling));
 	}
 
 	@Override
@@ -57,8 +72,8 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	/** Pre-compute a hash code */
 	private int computeHashCode() {
 		int hash = 7;
-		hash = 17 * hash + (this.from != null ? this.from.hashCode() : 0);
-		hash = 17 * hash + (this.to != null ? this.to.hashCode() : 0);
+		hash = 17 * hash + this.from.hashCode();
+		hash = 17 * hash + this.to.hashCode();
 		hash = 17 * hash + (this.coupling != null ? this.coupling.hashCode() : 0);
 		return hash;
 	}
@@ -73,8 +88,15 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 		return this.to;
 	}
 
-	/** Set the receiving end of the coupling */
+	/**
+	 * Set the receiving end of the coupling
+	 * @param p Receiving processiteration
+	 * @throws IllegalArgumentException if p is null
+	 */
 	public void setTo(ProcessIteration p) {
+		if (p == null) {
+			throw new IllegalArgumentException("Receiving end of coupling instance " + this + " may not be set to null");
+		}
 		this.to = p;
 	}
 
