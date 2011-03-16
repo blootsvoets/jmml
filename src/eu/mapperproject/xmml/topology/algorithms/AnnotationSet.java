@@ -3,7 +3,6 @@ package eu.mapperproject.xmml.topology.algorithms;
 import cern.colt.list.IntArrayList;
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Instance;
-import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 
 /**
  * Maintain a set of annotations, for instances, iterations and operators
@@ -12,26 +11,27 @@ import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
  * @author Joris Borgdorff
  */
 class AnnotationSet {
-	private Annotation<Instance> anInst, anIter, anOper;
-	private Instance inst;
+	private int cInst, cIter;
+	private SEL cOper;
+	private Trace anInst, anIter, anOper;
+	private int instNum;
 
 	/** Create a new empty annotationset */
 	AnnotationSet() {
-		this(new Annotation<Instance>(AnnotationType.INSTANCE), new Annotation<Instance>(AnnotationType.ITERATION), new Annotation<Instance>(AnnotationType.OPERATOR));
+		this(0, new Trace(), 0, new Trace(), SEL.finit, new Trace());
 	}
 
 	/** Create a copy of given annotationset */
 	AnnotationSet(AnnotationSet old) {
-		this(old.anInst, old.anIter, old.anOper);
-		this.inst = old.inst;
+		this(old.cInst, old.anInst, old.cIter, old.anIter, old.cOper, old.anOper);
+		this.instNum = old.instNum;
 	}
 
 	/** Create an annotationset consisting of given annotations */
-	AnnotationSet(Annotation<Instance> inst, Annotation<Instance> iter, Annotation<Instance> oper) {
-		if (!iter.getType().equals(AnnotationType.ITERATION) || !inst.getType().equals(AnnotationType.INSTANCE) || !oper.getType().equals(AnnotationType.OPERATOR)) {
-			throw new IllegalArgumentException("AnnotationSet initialized with wrong Annotation types");
-		}
-
+	private AnnotationSet(int cinst, Trace inst, int citer, Trace iter, SEL coper, Trace oper) {
+		this.cIter = citer;
+		this.cInst = cinst;
+		this.cOper = coper;
 		this.anInst = inst;
 		this.anIter = iter;
 		this.anOper = oper;
@@ -39,79 +39,72 @@ class AnnotationSet {
 
 	/** Current operator. */
 	SEL getOperator() {
-		return SEL.get(this.anOper.getCounter());
+		return cOper;
 	}
 
 	/** Get the value of the current iteration */
 	int getIteration() {
-		return this.anIter.getCounter();
+		return cIter;
 	}
 
 	/** Get the value of the current iteration */
 	int getInstance() {
-		return this.anInst.getCounter();
+		return cInst;
 	}
 
 	/** Set the operater */
 	void setOperater(SEL op) {
-		this.anOper.set(this.inst, op.ordinal());
+		cOper = op;
+		anOper.put(instNum, op.ordinal());
 	}
 
 	/** Go to the next value of the requested annotation */
-	void next(AnnotationType at) {
-		Annotation<Instance> an = this.getAnnotation(at);
-		an.next(inst);
+	void nextInstance() {
+		cInst = anInst.nextInt(instNum);
+	}
+
+	/** Go to the next value of the requested annotation */
+	void nextIteration() {
+		cIter = anIter.nextInt(instNum);
+	}
+
+	/** Go to the next value of the requested annotation */
+	void nextOperator() {
+		cOper = SEL.get(anOper.nextInt(instNum));
 	}
 
 	/** Reset the value of the requested annotation */
-	void reset(AnnotationType at) {
-		Annotation<Instance> an = this.getAnnotation(at);
-		an.reset(inst);
+	void resetIteration() {
+		anIter.put(instNum, 0);
+		cIter = 0;
 	}
 
-	/** Get the annotation of given annotationtype */
-	private Annotation<Instance> getAnnotation(AnnotationType at) {
-		switch (at) {
-			case ITERATION:
-				return this.anIter;
-			case INSTANCE:
-				return this.anInst;
-			case OPERATOR:
-				return this.anOper;
-			default:
-				throw new IllegalArgumentException("AnnotationSet does not recognize AnnotationType " + at);
-		}
-	}
-
-	/** Update the annotation and counter of the annotation */
-	private void updateCounter(Annotation<Instance> an) {
-		switch (an.getType()) {
-			case ITERATION:
-				this.anIter = an;
-				break;
-			case INSTANCE:
-				this.anInst = an;
-				break;
-			case OPERATOR:
-				this.anOper = an;
-				break;
-		}
+	/** Reset the value of the requested annotation */
+	void resetOperator() {
+		anOper.put(instNum, 0);
+		cOper = SEL.finit;
 	}
 
 	/** Let the current instance be the subject of the annotation set */
 	void setSubject(Instance inst) {
-		for (AnnotationType at : AnnotationType.values()) {
-			Annotation<Instance> cur = this.getAnnotation(at).copy();
-			cur.current(inst);
-			this.updateCounter(cur);
-		}
-		this.inst = inst;
+		instNum = inst.getNumber();
+		
+		anInst = new Trace(anInst);
+		anIter = new Trace(anIter);
+		anOper = new Trace(anOper);
+
+		cInst = traceCurrent(anInst);
+		cIter = traceCurrent(anIter);
+		cOper = SEL.get(traceCurrent(anOper));
 	}
 
-	/** Apply the current counter to the trace of each annotation */
-	public void applySubject() {
-		for (AnnotationType at : AnnotationType.values()) {
-			this.getAnnotation(at).setSubject(this.inst);
+	private int traceCurrent(Trace t) {
+		if (t.isInstantiated(instNum)) {
+			return t.currentInt(instNum);
+		}
+		else {
+			t.put(instNum, 0);
+			return 0;
 		}
 	}
 
@@ -128,22 +121,44 @@ class AnnotationSet {
 	public boolean equals(Object obj) {
 		if (obj == null || getClass() != obj.getClass()) return false;
 		final AnnotationSet other = (AnnotationSet) obj;
-		return (this.anInst.getCounter() == other.anInst.getCounter())
-			&& (this.anIter.getCounter() == other.anIter.getCounter())
-			&& (this.anOper.getCounter() == other.anOper.getCounter());
+		return (this.cInst == other.cInst)
+			&& (this.cIter == other.cIter)
+			&& (this.cOper == other.cOper);
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = 3;
-		hash = 23 * hash + this.anInst.getCounter();
-		hash = 23 * hash + this.anIter.getCounter();
-		hash = 23 * hash + this.anOper.getCounter();
+		hash = 23 * hash + cInst;
+		hash = 23 * hash + cIter;
+		hash = 23 * hash + cOper.ordinal();
 		return hash;
 	}
 
 	@Override
 	public String toString() {
-		return "[" + this.anInst + ", " + this.anIter + ", " + this.anOper + "]";
+		return "[" + anInst + ", " + anIter + ", " + anOper + "]";
+	}
+
+	/** Remove the traces from the AnnotationSet */
+	public void freeTraces() {
+		this.anInst = null;
+		this.anIter = null;
+		this.anOper = null;
+	}
+
+	/** Append a string of this counter to a StringBuilder.
+	 * @param sb StringBuilder to append to.
+	 * @param completely if true, add the entire counter, otherwise just the instance counter
+	 */
+	public void appendToStringBuilder(StringBuilder sb, boolean completely) {
+		if (cInst > 0) {
+			sb.append(cInst);
+		}
+		if (!completely) return;
+		
+		sb.append('(');
+		sb.append(cIter); sb.append(','); sb.append(cOper);
+		sb.append(')');
 	}
 }

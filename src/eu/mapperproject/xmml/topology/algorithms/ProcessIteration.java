@@ -3,7 +3,6 @@ package eu.mapperproject.xmml.topology.algorithms;
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
-import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 
 /**
  * A process iteration represents one single operator executing of a single submodel
@@ -13,15 +12,16 @@ import eu.mapperproject.xmml.topology.algorithms.Annotation.AnnotationType;
 public class ProcessIteration {
 
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
-	private AnnotationSet givenAnnot, annot;
+	private final AnnotationSet annot;
+	private AnnotationSet annotOut;
 	private final Instance instance;
 	// As equals is the most costly operation in processiteration
 	// this cache was added
 	private String asString;
 	private final String origString;
 	private boolean initial, isfinal, deadlock;
-	private final ProcessIterationRange range;
-	private final int instCounter;
+	private ProcessIterationRange range;
+	private boolean stateProgressed;
 
 	public enum ProgressType {
 		INSTANCE, ITERATION;
@@ -36,18 +36,17 @@ public class ProcessIteration {
 		if (annot == null) {
 			annot = new AnnotationSet();
 			annot.setSubject(pd);
-			annot.applySubject();
 		}
-		this.givenAnnot = annot;
-		this.annot = null;
-		this.range = new ProcessIterationRange(annot.getIteration(), annot.getOperator());
-		this.instCounter = annot.getInstance();
-
+		this.annot = annot;
+		this.annotOut = null;
+		this.range = null;
+		
 		this.isfinal = false;
 		this.deadlock = false;
 		this.initial = this.instance.isInitial() && firstInstance() && initializing();
 		this.asString = this.updateString(true);
 		this.origString = this.updateString(false);
+		this.stateProgressed = false;
 	}
 	
 	public boolean isFinal() {
@@ -75,24 +74,24 @@ public class ProcessIteration {
 	}
 
 	public final SEL getOperator() {
-		return this.range.getOperator();
+		return this.annot.getOperator();
 	}
 
 
 	public final int getIteration() {
-		return this.range.getIteration();
+		return this.annot.getIteration();
 	}
 	
 	public int getInstanceCounter() {
-		return this.instCounter;
+		return this.annot.getInstance();
 	}
 
 	public boolean instanceCompleted() {
-		return this.range.getOperator() == SEL.Of;
+		return this.annot.getOperator() == SEL.Of;
 	}
 	
 	public boolean finalLoop() {
-		return this.instance.isCompleted(range.getIteration()) && this.range.getOperator() != SEL.finit;
+		return this.instance.isCompleted(annot.getIteration()) && annot.getOperator() != SEL.finit;
 	}
 	
 	public Instance getInstance() {
@@ -100,15 +99,15 @@ public class ProcessIteration {
 	}
 
 	public final boolean firstInstance() {
-		return this.instCounter == 0;
+		return this.annot.getInstance() == 0;
 	}
 
 	public boolean firstLoop() {
-		return this.range.getIteration() == 0 && this.range.getOperator().compareTo(SEL.S) <= 0;
+		return this.annot.getIteration() == 0 && this.annot.getOperator().compareTo(SEL.S) <= 0;
 	}
 	
 	public final boolean initializing() {
-		return this.range.getOperator() == SEL.finit;
+		return this.annot.getOperator() == SEL.finit;
 	}
 	
 	public boolean needsState() {
@@ -116,7 +115,7 @@ public class ProcessIteration {
 	}
 	
 	public SEL receivingType() {
-		SEL op = this.givenAnnot.getOperator();
+		SEL op = this.annot.getOperator();
 		if (op.isReceiving()) return op;
 		else return null;
 	}
@@ -154,54 +153,53 @@ public class ProcessIteration {
 	}
 
 	private ProcessIteration progress(ProgressType instance) {		
-		if (this.givenAnnot == null) {
+		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
 		}
+		this.stateProgressed = true;
 
 		Instance pd = this.instance;
 		
-		AnnotationSet set = new AnnotationSet(this.annot == null ? this.givenAnnot : this.annot);
+		AnnotationSet set = new AnnotationSet(this.annotOut == null ? this.annot : this.annotOut);
 		switch (instance) {
 			case ITERATION:
-				SEL currentOp = this.range.getOperator();
+				SEL currentOp = this.annot.getOperator();
 				if (currentOp == SEL.Of) {
-					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getInstance());
+					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annotOut.getInstance());
 				}
 
 				// Loop until the end condition is met or sequentially within the loop
 				if (currentOp.compareTo(SEL.S) < 0 || this.finalLoop()) {
-					set.next(AnnotationType.OPERATOR);
+					set.nextOperator();
 				}
 				else {
 					set.setOperater(SEL.Oi);
-					set.next(AnnotationType.ITERATION);
+					set.nextIteration();
 				}
 				break;
 			case INSTANCE:
-				set.next(AnnotationType.INSTANCE);
-				set.reset(AnnotationType.ITERATION);
-				set.reset(AnnotationType.OPERATOR);
+				set.nextInstance();
+				set.resetIteration();
+				set.resetOperator();
 				break;
 			default:
 				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
 
-		set.applySubject();
-
 		// Since no more progress may be made, we can free the annotations
-		this.annot = null;
-		this.givenAnnot = null;
+		this.annotOut = null;
+		this.annot.freeTraces();
 
 		return cache.getIteration(pd, set);
 	}
 	
 	private ProcessIteration progress(Coupling cd, ProgressType instance) {		
-		if (this.givenAnnot == null) {
+		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another processiteration " + cd + " if the state has already progressed.");
 		}
 		
 		Instance pd = cd.getTo();		
-		AnnotationSet set = new AnnotationSet(this.givenAnnot);
+		AnnotationSet set = new AnnotationSet(this.annot);
 		set.setSubject(pd);
 		SEL nextOp = cd.getToOperator().getOperator();
 		
@@ -214,26 +212,25 @@ public class ProcessIteration {
 				SEL currentOp = set.getOperator();
 
 				if (currentOp.compareTo(nextOp) >= 0) {
-					set.next(AnnotationType.ITERATION);
+					set.nextIteration();
 				}
 
 				set.setOperater(nextOp);
 				break;
 			case INSTANCE:
-				set.next(AnnotationType.INSTANCE);
-				set.reset(AnnotationType.ITERATION);
+				set.nextInstance();
+				set.resetIteration();
 				set.setOperater(nextOp);
 				break;
 			default:
 				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
 		
-		set.applySubject();
-		if (this.annot == null) {
-			this.annot = new AnnotationSet(this.givenAnnot);
-			cache.remove(this.instance, this.givenAnnot);
+		if (this.annotOut == null) {
+			this.annotOut = new AnnotationSet(this.annot);
+			cache.remove(this.instance, this.annot);
 		}
-		this.annot.merge(set);
+		this.annotOut.merge(set);
 
 		return cache.getIteration(pd, set);
 	}
@@ -259,14 +256,24 @@ public class ProcessIteration {
 	 * Merge an annotationset with the current annotation sets
 	 */
 	void merge(AnnotationSet key) {
-		if (this.annot != null) {
+		if (this.annotOut != null) {
 			throw new IllegalStateException("Can not add more initialization information after processiteration has sent information.");
 		}
-		this.givenAnnot.merge(key);
+		this.annot.merge(key);
 	}
 
 	public void updateRange(ProcessIteration pi, boolean min) {
-		this.range.updateRange(pi.range, min);
+		if (range == null) {
+			range = new ProcessIterationRange(annot.getIteration(), annot.getOperator());
+		}
+
+		int it; SEL op;
+		if (pi.range == null) {
+			this.range.updateRange(pi.annot.getIteration(), pi.annot.getOperator(), min);
+		}
+		else {
+			this.range.updateRange(pi.range, min);
+		}
 
 		this.asString = this.updateString(true);
 	}
@@ -275,10 +282,13 @@ public class ProcessIteration {
 		String id = useId ? this.instance.getId() : String.valueOf(this.instance.getNumber());
 		StringBuilder sb = new StringBuilder(id.length() + 30);
 		sb.append(id);
-		if (this.instCounter > 0) {
-			sb.append(this.instCounter);
+		if (this.range == null) {
+			this.annot.appendToStringBuilder(sb, true);
 		}
-		this.range.appendToStringBuilder(sb);
+		else {
+			this.annot.appendToStringBuilder(sb, false);
+			this.range.appendToStringBuilder(sb);
+		}
 		return sb.toString();
 	}
 }

@@ -12,65 +12,38 @@ import eu.mapperproject.xmml.definitions.Submodel.SEL;
  * @author Joris Borgdorff
  */
 public class ProcessIterationRange {
-	private Range range;
-	private final int iter;
-	private final SEL oper;
+	private SEL rangeFromOper, rangeToOper;
+	private int rangeFromIter, rangeToIter;
 
 	public ProcessIterationRange(int iter, SEL oper) {
-		this.range = null;
-		this.iter = iter;
-		this.oper = oper;
+		rangeFromIter = rangeToIter = iter;
+		rangeFromOper = rangeToOper = oper;
 	}
 
-	public void updateRange(ProcessIterationRange pirange, boolean min) {
-		if (range == null) {
-			range = new Range(this.iter, this.oper);
-		}
-		final int it;
+	public void updateRange(ProcessIterationRange range, boolean min) {
 		if (min) {
-			it = pirange.getFromIteration();
-			if (it < range.rangeFromIter) {
-				range.rangeFromIter = it;
-			}
-
-			range.rangeFromOper = pirange.getFromOperator();
+			this.updateRange(range.rangeFromIter, range.rangeFromOper, min);
 		}
 		else {
-			it = pirange.getToIteration();
-			if (it > range.rangeToIter) {
-				range.rangeToIter = it;
-			}
-
-			range.rangeToOper = pirange.getToOperator();
+			this.updateRange(range.rangeToIter, range.rangeToOper, min);
 		}
 	}
 
-	public int getIteration() {
-		return this.iter;
-	}
+	public void updateRange(int it, SEL op, boolean min) {
+		if (min) {
+			if (it < rangeFromIter) {
+				rangeFromIter = it;
+			}
 
-	public SEL getOperator() {
-		return this.oper;
-	}
+			rangeFromOper = op;
+		}
+		else {
+			if (it > rangeToIter) {
+				rangeToIter = it;
+			}
 
-	private int getToIteration() {
-		if (range == null) return iter;
-		return range.rangeToIter;
-	}
-
-	private SEL getToOperator() {
-		if (range == null) return oper;
-		return range.rangeToOper;
-	}
-
-	private int getFromIteration() {
-		if (range == null) return iter;
-		return range.rangeFromIter;
-	}
-
-	private SEL getFromOperator() {
-		if (range == null) return oper;
-		return range.rangeFromOper;
+			rangeToOper = op;
+		}
 	}
 
 	@Override
@@ -80,33 +53,15 @@ public class ProcessIterationRange {
 		return sb.toString();
 	}
 
+	/** Append a the counter of this range to given StringBuilder */
 	public void appendToStringBuilder(StringBuilder sb) {
 		sb.append('(');
-		if (range == null) {
-			sb.append(iter); sb.append(','); sb.append(oper);
+		sb.append(rangeFromIter);
+		if (rangeFromIter < rangeToIter) {
+			sb.append('-'); sb.append(rangeToIter);
 		}
-		else {
-			range.appendRange(sb);
-		}
+		sb.append(',');
+		sb.append(rangeFromOper); sb.append('-'); sb.append(rangeToOper);
 		sb.append(')');
-	}
-
-	private static class Range {
-		private SEL rangeFromOper, rangeToOper;
-		private int rangeFromIter, rangeToIter;
-
-		Range(int iter, SEL oper) {
-			rangeFromIter = rangeToIter = iter;
-			rangeFromOper = rangeToOper = oper;
-		}
-
-		void appendRange(StringBuilder sb) {
-			sb.append(rangeFromIter);
-			if (rangeFromIter < rangeToIter) {
-				sb.append('-'); sb.append(rangeToIter);
-			}
-			sb.append(',');
-			sb.append(rangeFromOper); sb.append('-'); sb.append(rangeToOper);
-		}
 	}
 }
