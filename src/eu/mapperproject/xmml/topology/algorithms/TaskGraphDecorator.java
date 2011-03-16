@@ -3,10 +3,9 @@ package eu.mapperproject.xmml.topology.algorithms;
 import java.util.Map;
 
 import eu.mapperproject.xmml.topology.Coupling;
+import eu.mapperproject.xmml.util.graph.AnnotatedStyledEdge;
 import eu.mapperproject.xmml.util.graph.Category;
-import eu.mapperproject.xmml.util.graph.EdgeDecorator;
 import eu.mapperproject.xmml.util.graph.GraphDecorator;
-import eu.mapperproject.xmml.util.graph.NodeDecorator;
 import eu.mapperproject.xmml.util.graph.SimpleNode;
 import eu.mapperproject.xmml.util.graph.SimpleStyledEdge;
 import eu.mapperproject.xmml.util.graph.StyledEdge;
@@ -28,7 +27,7 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 		if (node.hasDeadlock()) {
 			return this.decorateMissingNode(node);
 		}
-		return new NodeDecorator<ProcessIteration>(node, node.toString(), null, new Category(node.getInstance().getDomain()));
+		return new SimpleNode(node.toString(), null, new Category(node.getInstance().getDomain()));
 	}
 
 	@Override
@@ -50,7 +49,7 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 		
 		StyledNode fromNode = nodes.get(from), toNode = nodes.get(to);
 
-		return new EdgeDecorator<CouplingInstance>(edge, style, label, fromNode, toNode);
+		return new AnnotatedStyledEdge(fromNode, toNode, style, label);
 	}
 
 	@Override

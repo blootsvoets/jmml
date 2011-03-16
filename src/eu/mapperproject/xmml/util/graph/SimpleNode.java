@@ -8,6 +8,7 @@ package eu.mapperproject.xmml.util.graph;
 public class SimpleNode implements StyledNode {
 	private final String name;
 	private final String style;
+	private final Category category;
 	
 	/** A prototypical start node. */
 	public final static SimpleNode START = new SimpleNode("start", "shape=Mdiamond");
@@ -15,8 +16,13 @@ public class SimpleNode implements StyledNode {
 	public final static SimpleNode END = new SimpleNode("end", "shape=Msquare");
 	
 	public SimpleNode(String name, String style) {
+		this(name, style, Category.NO_CATEGORY);
+	}
+
+	public SimpleNode(String name, String style, Category category) {
 		this.name = name;
 		this.style = style;
+		this.category = category;
 	}
 
 	@Override
@@ -26,7 +32,7 @@ public class SimpleNode implements StyledNode {
 
 	@Override
 	public Category getCategory() {
-		return Category.NO_CATEGORY;
+		return category;
 	}
 
 	@Override

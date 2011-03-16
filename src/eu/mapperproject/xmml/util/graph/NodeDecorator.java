@@ -11,16 +11,14 @@ package eu.mapperproject.xmml.util.graph;
 public class NodeDecorator<T> extends SimpleNode {
 
 	private final T object;
-	private final Category category;
 
 	/** Create a node with an underlying object
 	 * @param name
 	 * @param style
 	 */
 	public NodeDecorator(T object, String name, String style, Category category) {
-		super(name, style);
+		super(name, style, category);
 		this.object = object;
-		this.category = category;
 	}
 
 	/**
@@ -29,10 +27,5 @@ public class NodeDecorator<T> extends SimpleNode {
 	 */
 	public T getObject() {
 		return this.object;
-	}
-
-	@Override
-	public Category getCategory() {
-		return category;
 	}
 }
