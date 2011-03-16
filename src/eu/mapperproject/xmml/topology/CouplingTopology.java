@@ -32,19 +32,23 @@ public class CouplingTopology {
 		this.toCouplings = new HashMap<InstanceOperator,Collection<Coupling>>();
 		this.initialInstances = new ArrayList<Instance>();
 		this.needInitInstances = new HashMap<Instance,Collection<Coupling>>();
-		
+		this.initialize();
+	}
+
+	/** Put the from and to couplings in the right place */
+	private void initialize() {
 		for (Coupling c : couplings) {
 			putCoupling(c, c.getFromOperator(), this.fromCouplings);
 			putCoupling(c, new InstanceOperator(c.getFrom(), null), this.fromCouplings);
 			putCoupling(c, c.getToOperator(), this.toCouplings);
 			putCoupling(c, new InstanceOperator(c.getTo(), null), this.toCouplings);
 		}
-		
+
 		for (Instance i : this.instances.values()) {
 			if (this.getFrom(new InstanceOperator(i, SEL.Of)).isEmpty()) {
 				i.setFinal();
 			}
-			
+
 			Collection<Coupling> allTo = this.getTo(new InstanceOperator(i, null));
 			if (allTo.isEmpty()) {
 				i.setInitial();

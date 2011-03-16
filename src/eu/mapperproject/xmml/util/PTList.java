@@ -3,11 +3,8 @@ package eu.mapperproject.xmml.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class PTList {
 	public static <P,Q> List<Q> add(P key, Q value, Map<P,List<Q>> map) {
