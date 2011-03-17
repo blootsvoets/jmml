@@ -12,7 +12,7 @@ import eu.mapperproject.xmml.topology.Instance;
 public class ProcessIteration {
 
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
-	private final AnnotationSet annot;
+	private AnnotationSet annot;
 	private AnnotationSet annotOut;
 	private final Instance instance;
 	// As equals is the most costly operation in processiteration
@@ -156,11 +156,12 @@ public class ProcessIteration {
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
 		}
-		this.stateProgressed = true;
 
 		Instance pd = this.instance;
-		
-		AnnotationSet set = new AnnotationSet(this.annotOut == null ? this.annot : this.annotOut);
+
+		boolean hasEdgesOut = this.annotOut != null;
+		AnnotationSet set = new AnnotationSet(hasEdgesOut ? this.annotOut : this.annot);
+
 		switch (instance) {
 			case ITERATION:
 				SEL currentOp = this.annot.getOperator();
@@ -186,11 +187,27 @@ public class ProcessIteration {
 				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
 
-		// Since no more progress may be made, we can free the annotations
-		this.annotOut = null;
-		this.annot.freeTraces();
+		set.applySubject();
 
-		return cache.getIteration(pd, set);
+		if (hasEdgesOut || instance == ProgressType.INSTANCE) {
+			// Since no more progress may be made, we can free the annotations
+			this.annotOut = null;
+			this.annot.freeTraces();
+			this.stateProgressed = true;
+
+			return cache.getIteration(pd, set);
+		}
+		else {
+			if (range == null) {
+				range = new ProcessIterationRange(this.annot);
+			}
+			this.range.updateRange(set, false);
+			this.annot = set;
+			cache.putIteration(pd, set, this);
+			this.asString = this.updateString(true);
+
+			return null;
+		}
 	}
 	
 	private ProcessIteration progress(Coupling cd, ProgressType instance) {		
@@ -225,7 +242,9 @@ public class ProcessIteration {
 			default:
 				throw new IllegalArgumentException("Only ITERATION and INSTANCE operations are allowed for instance progress.");
 		}
-		
+
+		set.applySubject();
+
 		if (this.annotOut == null) {
 			this.annotOut = new AnnotationSet(this.annot);
 			cache.remove(this.instance, this.annot);
@@ -264,12 +283,11 @@ public class ProcessIteration {
 
 	public void updateRange(ProcessIteration pi, boolean min) {
 		if (range == null) {
-			range = new ProcessIterationRange(annot.getIteration(), annot.getOperator());
+			range = new ProcessIterationRange(this.annot);
 		}
 
-		int it; SEL op;
 		if (pi.range == null) {
-			this.range.updateRange(pi.annot.getIteration(), pi.annot.getOperator(), min);
+			this.range.updateRange(pi.annot, min);
 		}
 		else {
 			this.range.updateRange(pi.range, min);

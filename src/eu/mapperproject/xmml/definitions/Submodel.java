@@ -45,6 +45,10 @@ public class Submodel implements Identifiable {
 		public static SEL get(int i) {
 			return values[i];
 		}
+
+		public SEL next() {
+			return values[ordinal() + 1];
+		}
 	}
 	private final Map<String,Port> in;
 	private final Map<String,Port> out;

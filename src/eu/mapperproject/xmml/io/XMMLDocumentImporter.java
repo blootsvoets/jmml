@@ -261,7 +261,8 @@ public class XMMLDocumentImporter {
 			if (dataStr != null) {
 				datatype = datatypes.get(dataStr);
 				if (datatype == null) {
-					logger.log(Level.WARNING, "port ''{0}'' does not contain a valid datatype but ''{1}'' instead, its datatype will be disregarded", new Object[]{id, dataStr});
+					logger.log(Level.WARNING, "port ''{0}'' does not contain a valid datatype but ''{1}'' instead, the datatype will be disregarded", new Object[]{id, dataStr});
+					continue;
 				}
 			}
 			Port.Type state = port.getAttributeValue("type").equals("state") ? Port.Type.STATE : Port.Type.NORMAL;

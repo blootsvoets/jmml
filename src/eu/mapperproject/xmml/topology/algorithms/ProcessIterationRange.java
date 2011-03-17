@@ -15,9 +15,9 @@ public class ProcessIterationRange {
 	private SEL rangeFromOper, rangeToOper;
 	private int rangeFromIter, rangeToIter;
 
-	public ProcessIterationRange(int iter, SEL oper) {
-		rangeFromIter = rangeToIter = iter;
-		rangeFromOper = rangeToOper = oper;
+	public ProcessIterationRange(AnnotationSet set) {
+		rangeFromIter = rangeToIter = set.getIteration();
+		rangeFromOper = rangeToOper = set.getOperator();
 	}
 
 	public void updateRange(ProcessIterationRange range, boolean min) {
@@ -29,7 +29,11 @@ public class ProcessIterationRange {
 		}
 	}
 
-	public void updateRange(int it, SEL op, boolean min) {
+	void updateRange(AnnotationSet set, boolean min) {
+		this.updateRange(set.getIteration(), set.getOperator(), min);
+	}
+
+	private void updateRange(int it, SEL op, boolean min) {
 		if (min) {
 			if (it < rangeFromIter) {
 				rangeFromIter = it;

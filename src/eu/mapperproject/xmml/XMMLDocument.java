@@ -116,6 +116,7 @@ public class XMMLDocument {
 	 */
 	public void export(GraphType gt, String dotStr, String pdfStr) {
 		PTGraph<StyledNode, StyledEdge> graph = this.getGraph(gt);
+		System.gc();
 		
 		System.out.println("Exporting graphviz file...");
 
@@ -157,12 +158,7 @@ public class XMMLDocument {
 				tg = new GraphDesigner<ProcessIteration,CouplingInstance>(new TaskGraphDecorator());
 				TaskGraph task = new TaskGraph(this.topology);
 				task.computeGraph();
-				System.gc();
-				task.reduceGraph();
-				System.gc();
 				graph = tg.decorate(task.getGraph());
-				task = null;
-				System.gc();
 				break;
 			default:
 				cg = new GraphDesigner<Instance,Coupling>(new CouplingTopologyDecorator());

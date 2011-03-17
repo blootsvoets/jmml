@@ -24,14 +24,19 @@ public class GraphDesigner<T, E extends Edge<T>> {
 	/** Design a set of nodes and edges such that they can be formed into a graph */
 	public PTGraph<StyledNode,StyledEdge> decorate(Collection<T> ts, Collection<E> es) {
 		Map<T, StyledNode> nodes = new HashMap<T, StyledNode>();
-		Set<StyledNode> missingNodes = new HashSet<StyledNode>();
 		PTGraph<StyledNode,StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(this.decor.isDirected());
+		this.decorateNodes(ts, graph, nodes);
+		this.decorateEdges(es, graph, nodes);
+		return graph;
+	}
 
+	/** Decorate given nodes and add them to the graph and nodes list */
+	protected void decorateNodes(Collection<T> ts, PTGraph<StyledNode, StyledEdge> graph, Map<T, StyledNode> nodes) {
 		for (T t : ts) {
 			StyledNode n = this.decor.decorateNode(t);
 			graph.addNode(n);
 			nodes.put(t, n);
-			
+
 			StyledEdge e = this.decor.addSourceEdge(t, n);
 			if (e != null) {
 				graph.setSource(e.getFrom());
@@ -43,15 +48,18 @@ public class GraphDesigner<T, E extends Edge<T>> {
 				graph.addEdge(e);
 			}
 		}
-		
+	}
+
+	/** Decorate given edges and add them to the graph */
+	protected void decorateEdges(Collection<E> es, PTGraph<StyledNode,StyledEdge> graph, Map<T, StyledNode> nodes) {
+		Set<StyledNode> missingNodes = new HashSet<StyledNode>();
+
 		for (E e : es) {
 			checkMissing(e.getFrom(), nodes, missingNodes, graph);
 			checkMissing(e.getTo(), nodes, missingNodes, graph);
 			StyledEdge ge = this.decor.decorateEdge(e, nodes);
 			graph.addEdge(ge);
 		}
-		
-		return graph;
 	}
 
 	/** Add a missing node to the graph if necessary and return it */

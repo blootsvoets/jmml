@@ -22,8 +22,12 @@ public class ProcessIterationCache {
 		processIterations = new HashMap<String, Map<AnnotationSet, ProcessIteration>>();
 	}
 
+	void putIteration(Instance instance, AnnotationSet key, ProcessIteration value) {
+		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getId(), processIterations);
+		instMap.put(key, value);
+	}
+
 	ProcessIteration getIteration(Instance instance, AnnotationSet key) {
-		
 		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getId(), processIterations);
 
 		ProcessIteration pi = instMap.get(key);

@@ -3,11 +3,9 @@ package eu.mapperproject.xmml.topology.algorithms;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
 import eu.mapperproject.xmml.topology.Coupling;
@@ -25,26 +23,20 @@ import eu.mapperproject.xmml.util.PTList;
  *
  */
 public class TaskGraphState implements Iterable<ProcessIteration> {
-	private List<ProcessIteration> activeProcesses;
-	private Set<ProcessIteration> visited;
-	private Map<ProcessIteration,Collection<Coupling>> snoozingProcesses;
-	private Map<Instance,ProcessIteration> states;
-	private CouplingTopology topology;
+	private final List<ProcessIteration> activeProcesses;
+	private final Map<ProcessIteration,Collection<Coupling>> snoozingProcesses;
+	private final Map<Instance,ProcessIteration> states;
+	private final CouplingTopology topology;
 
 	public TaskGraphState(CouplingTopology desc) {
 		this.states = new HashMap<Instance,ProcessIteration>();
 		this.activeProcesses = new ArrayList<ProcessIteration>();
 		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<Coupling>>();
-		this.visited = new HashSet<ProcessIteration>();
 		this.topology = desc;
 	}
 		
 	/** Activate a processiteration which does not require any input, if possible */
 	public void activate(ProcessIteration init) {
-		if (!init.isInitial()) {
-			throw new IllegalArgumentException("May only activate initial process iterations directly, not " + init);
-		}
-
 		this.activateIfNeeded(init, null);
 	}
 		
@@ -95,16 +87,11 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 * @throws IllegalStateException if the processiteration has already been activated
 	 */
 	private boolean activateIfNeeded(ProcessIteration pi, Coupling next) {
-//		if (this.visited.contains(pi)) {
-//			throw new IllegalStateException("Revisiting process iteration " + pi + " in coupling " + next);
-//		}
-
 		Collection<Coupling> cis = PTList.getSet(pi, snoozingProcesses);
 		if (!cis.contains(next)) {
 			cis.add(next);
 			if (hasAllCouplings(pi, cis, false)) {
 				snoozingProcesses.remove(pi);
-				this.visited.add(pi);
 				activeProcesses.add(pi);
 				return true;
 			}
@@ -119,10 +106,11 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		SEL receivingType = pi.receivingType();
 		
 		if (receivingType != null) {
+			// State or operator step
 			if ((pi.needsState() || !pi.initializing()) 
 				&& !cds.contains(null)) {
 				if (print) {
-					System.out.println(pi + " is missing silent step");
+					System.out.println(pi + " is missing state");
 					pi.setDeadlock();
 				}
 				return false;

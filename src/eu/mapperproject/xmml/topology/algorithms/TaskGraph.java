@@ -30,66 +30,6 @@ public class TaskGraph {
 		return this.graph;
 	}
 
-	/** Reduce the graph computed to have no extraneous steps */
-	public void reduceGraph() {
-		Collection<ProcessIteration> nodes = new ArrayList<ProcessIteration>(this.graph.getNodes());
-		ProcessIteration to = null, from;
-		int i = 0;
-
-		for (ProcessIteration pi : nodes) {
-			i++;
-			if (i % 10000 == 0) {
-				System.out.println("After " + i + " iterations, processing node " + pi + ".");
-			}
-			if (pi.hasDeadlock()) continue;
-			
-			Collection<CouplingInstance> outEdges = this.graph.getEdgesOut(pi);
-			int outSize = outEdges.size();
-			if (outSize > 1) continue;
-			Collection<CouplingInstance> inEdges = this.graph.getEdgesIn(pi);
-			int inSize = inEdges.size();
-
-			CouplingInstance inEdge = null, outEdge = null;
-			if (inSize == 1) inEdge = inEdges.iterator().next();
-			if (outSize == 1) {
-				outEdge = outEdges.iterator().next();
-				to = outEdge.getTo();
-				if (to.hasDeadlock()) continue;
-			}
-
-			if (inSize == 1 && outSize == 1 && inEdge.isStep() && outEdge.isStep()) {
-				this.graph.removeNode(pi);
-
-				inEdge.setTo(to);
-				this.graph.addEdge(inEdge);
-				to.updateRange(pi, true);
-			}
-			else if (inSize == 0 && outSize == 1 && outEdge.isStep()) {
-				this.graph.removeNode(pi);
-
-				to.setInitial();
-				to.updateRange(pi, true);
-			}
-			else if (inSize == 1 && outSize == 0 && inEdge.isStep()) {
-				this.graph.removeNode(pi);
-
-				from = inEdge.getFrom();
-				from.setFinal();
-
-				from.updateRange(pi, false);
-			}
-			else if (outSize == 1 && outEdge.isStep()) {
-				this.graph.removeNode(pi);
-
-				for (CouplingInstance ci : inEdges) {
-					ci.setTo(to);
-					this.graph.addEdge(ci);
-				}
-				to.updateRange(pi, true);
-			}
-		}
-	}
-
 	public void computeGraph() {
 		TaskGraphState state = new TaskGraphState(this.topology);
 		List<ProcessIteration> initProcs = descriptionToIteration(topology.getInitialInstances());
@@ -165,7 +105,12 @@ public class TaskGraph {
 	/** Create an instance of a stateful coupling between one process iteration and the next */
 	private void activateStep(TaskGraphState state, ProcessIteration pi) {
 		ProcessIteration pnext = pi.nextStep();
-		this.addToGraph(new CouplingInstance(pi, pnext), state);
+		if (pnext == null) {
+			state.activate(pi);
+		}
+		else {
+			this.addToGraph(new CouplingInstance(pi, pnext), state);
+		}
 	}
 
 	/** Add the coupling to the graph and current state */

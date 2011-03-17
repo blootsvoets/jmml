@@ -9,8 +9,6 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * An internal graph.
@@ -21,27 +19,21 @@ import java.util.List;
 public class PTGraph<T, E extends Edge<T>> {
 	private final boolean directed;
 	private final Collection<E> edges;
-	private final Map<T, List<Collection<E>>> edgesPerNode;
-	private boolean[] hasExtremity;
+	private final Collection<T> nodes;
+	private final boolean[] hasExtremity;
 	
 	public PTGraph(boolean directed) {
 		this.directed = directed;
-		this.edges = new HashSet<E>();
-		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
-		this.hasExtremity = new boolean[] {false, false};
+		this.edges = new ArrayList<E>();
+		this.nodes = new ArrayList<T>();
+		this.hasExtremity = new boolean[2];
 	}
 	
 	public PTGraph(Graph<T, E> graph, T source, T sink) {
 		this.directed = graph instanceof DirectedGraph;
-		this.edgesPerNode = new HashMap<T, List<Collection<E>>>();
-		for (T node : graph.getVertices()) {
-			List<Collection<E>> list = new ArrayList<Collection<E>>(2);
-			list.add(new HashSet<E>(graph.getInEdges(node)));
-			list.add(new HashSet<E>(graph.getOutEdges(node)));
-			this.edgesPerNode.put(node, list);
-		}
-		
-		this.edges = new HashSet<E>(graph.getEdges());
+		this.nodes = new ArrayList<T>(graph.getVertices());
+		this.edges = new ArrayList<E>(graph.getEdges());
+		this.hasExtremity = new boolean[2];
 
 		for (Edge<T> e : this.edges) {
 			if (e.getFrom() == null) {
@@ -55,12 +47,11 @@ public class PTGraph<T, E extends Edge<T>> {
 		
 	public static <T extends StyledNode & Child<T>> PTGraph<StyledNode, StyledEdge> graphFromTree(Tree<T> tree) {
 		PTGraph<StyledNode, StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(true);
-
+		
 		for (T elem : tree) {
 			graph.addNode(elem);
 			if (!elem.isRoot()) {
-				StyledEdge edge = new SimpleStyledEdge(elem.parent(), elem);
-				graph.addEdge(edge);
+				graph.addEdge(new SimpleStyledEdge(elem.parent(), elem));
 			}
 		}
 		return graph;
@@ -71,18 +62,10 @@ public class PTGraph<T, E extends Edge<T>> {
 	}
 	
 	public boolean isEmpty() {
-		return this.edges.isEmpty() && this.edgesPerNode.isEmpty();
+		return this.edges.isEmpty() && this.nodes.isEmpty();
 	}
 	
-
-	
 	public void addEdge(E e) {
-		List<Collection<E>> list;
-		
-		list = this.addNode(e.getFrom());
-		list.get(1).add(e);
-		list = this.addNode(e.getTo());
-		list.get(0).add(e);
 		this.edges.add(e);
 	}
 	
@@ -103,61 +86,16 @@ public class PTGraph<T, E extends Edge<T>> {
 		return false;
 	}
 
-	public List<Collection<E>> addNode(T n) {
-		List<Collection<E>> list = this.edgesPerNode.get(n);
-		if (list == null) {
-			list = new ArrayList<Collection<E>>(2);
-			list.add(new HashSet<E>(6));
-			list.add(new HashSet<E>(5));
-			this.edgesPerNode.put(n, list);
-		}
-		return list;
-	}
-
-	public void removeNode(T n) {
-		Collection<E> list = this.getEdgesIn(n);
-		this.edges.removeAll(list);
-		for (E e : list) {
-			this.getEdgesOut(e.getFrom()).remove(e);
-		}
-		list = this.getEdgesOut(n);
-		this.edges.removeAll(list);
-		for (E e : list) {
-			this.getEdgesIn(e.getTo()).remove(e);
-
-		}
-		this.edgesPerNode.remove(n);
+	public void addNode(T n) {
+		this.nodes.add(n);
 	}
 	
 	public Collection<E> getEdges() {
 		return this.edges;
 	}
 
-	public Collection<E> getEdges(T node) {
-		List<Collection<E>> list = this.getEdgesList(node);
-		Collection<E> all = new ArrayList<E>(list.get(0).size() + list.get(1).size());
-		all.addAll(list.get(0)); all.addAll(list.get(1));
-		return all;
-	}
-
-	public Collection<E> getEdgesIn(T node) {
-		return this.getEdgesList(node).get(0);
-	}
-
-	public Collection<E> getEdgesOut(T node) {
-		return this.getEdgesList(node).get(1);
-	}
-
-	private List<Collection<E>> getEdgesList(T node) {
-		List<Collection<E>> list = this.edgesPerNode.get(node);
-		if (list == null) {
-			throw new IllegalArgumentException("Node " + node + " not added to graph");
-		}
-		return list;
-	}
-
 	public Collection<T> getNodes() {
-		return this.edgesPerNode.keySet();
+		return this.nodes;
 	}
 	
 	public Graph<T,Edge<T>> getJungGraph(T source, T sink) {
