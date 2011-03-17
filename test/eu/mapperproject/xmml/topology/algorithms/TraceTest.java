@@ -37,7 +37,7 @@ public class TraceTest {
 
 		@Override
 		public String getId() {
-			return String.valueOf(this.num);
+			return Integer.toString(this.num);
 		}
 
 		@Override

@@ -164,7 +164,7 @@ public class Version {
 		@Override
 		public String toString() {
 			if (this.isAny()) return "x";
-			else if (this.isSingle()) return String.valueOf(this.min);
+			else if (this.isSingle()) return Integer.toString(this.min);
 			else return "[" + this.min + "-" + this.max + "]";
 		}
 	}

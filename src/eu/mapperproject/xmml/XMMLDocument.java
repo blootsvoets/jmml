@@ -116,7 +116,6 @@ public class XMMLDocument {
 	 */
 	public void export(GraphType gt, String dotStr, String pdfStr) {
 		PTGraph<StyledNode, StyledEdge> graph = this.getGraph(gt);
-		System.gc();
 		
 		System.out.println("Exporting graphviz file...");
 
@@ -143,30 +142,26 @@ public class XMMLDocument {
 
 	/** Generate a graph of given type */
 	public PTGraph<StyledNode, StyledEdge> getGraph(GraphType gt) {
-		PTGraph<StyledNode, StyledEdge> graph = this.graphMap.get(gt);
+		PTGraph<StyledNode, StyledEdge> graph;
 		GraphDesigner<ProcessIteration, CouplingInstance> tg;
 		GraphDesigner<Instance, Coupling> cg;
 		
-		if (graph == null) {
-			switch (gt) {
-			case DOMAIN:
-				graph = this.getGraph(GraphType.TOPOLOGY);
-				Tree<Cluster<StyledNode, StyledEdge>> clTree = PTGraph.partition(graph);
-				graph = PTGraph.graphFromTree(clTree);
-				break;
-			case TASK:
-				tg = new GraphDesigner<ProcessIteration,CouplingInstance>(new TaskGraphDecorator());
-				TaskGraph task = new TaskGraph(this.topology);
-				task.computeGraph();
-				graph = tg.decorate(task.getGraph());
-				break;
-			default:
-				cg = new GraphDesigner<Instance,Coupling>(new CouplingTopologyDecorator());
-				graph = cg.decorate(topology.getInstances(), topology.getCouplings());
-				break;
-			}
-			
-			this.graphMap.put(gt, graph);
+		switch (gt) {
+		case DOMAIN:
+			graph = this.getGraph(GraphType.TOPOLOGY);
+			Tree<Cluster<StyledNode, StyledEdge>> clTree = PTGraph.partition(graph);
+			graph = PTGraph.graphFromTree(clTree);
+			break;
+		case TASK:
+			tg = new GraphDesigner<ProcessIteration,CouplingInstance>(new TaskGraphDecorator());
+			TaskGraph task = new TaskGraph(this.topology);
+			task.computeGraph();
+			graph = tg.decorate(task.getGraph());
+			break;
+		default:
+			cg = new GraphDesigner<Instance,Coupling>(new CouplingTopologyDecorator());
+			graph = cg.decorate(topology.getInstances(), topology.getCouplings());
+			break;
 		}
 		
 		return graph;

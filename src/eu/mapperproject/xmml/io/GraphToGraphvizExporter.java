@@ -2,7 +2,6 @@ package eu.mapperproject.xmml.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import eu.mapperproject.xmml.util.Indent;
 import eu.mapperproject.xmml.util.graph.Category;
@@ -11,6 +10,11 @@ import eu.mapperproject.xmml.util.graph.StyledEdge;
 import eu.mapperproject.xmml.util.graph.StyledNode;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 import eu.mapperproject.xmml.util.graph.Tree;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Can export a PTGraph to graphviz
@@ -20,6 +24,8 @@ public class GraphToGraphvizExporter {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
 	private final static String DOT_EXEC = "/usr/local/bin/dot";
+	private final static int SB_NODES = 1000;
+	private Writer out;
 	
 	public GraphToGraphvizExporter(boolean cluster, boolean horizontal, boolean edgeLabel) {
 		this.tab = new Indent(4);
@@ -33,23 +39,28 @@ public class GraphToGraphvizExporter {
 	}
 
 	public void export(PTGraph<StyledNode, StyledEdge> input, File f) throws IOException {
-		PrintStream out = null;
+		Writer fout = null;
 		try {
-			out = new PrintStream(f);
-			this.export(input, out);
-			out.close();
+			fout = new OutputStreamWriter(new FileOutputStream(f));
+			this.export(input, fout);
+			fout.close();
 		} finally {
-			if (out != null)
-				out.close();	
+			if (fout != null)
+				fout.close();
 		}
 	}
 
-	public void export(PTGraph<StyledNode, StyledEdge> input, PrintStream out) {
-		out.println(this.convert(input));
+	public void export(PTGraph<StyledNode, StyledEdge> input, Writer out) throws IOException {
+		this.out = out;
+		this.convert(input);
 	}
 
 	public void print(PTGraph<StyledNode, StyledEdge> input) {
-		this.export(input, System.out);
+		try {
+			this.export(input, new OutputStreamWriter(System.out));
+		} catch (IOException ex) {
+			Logger.getLogger(GraphToGraphvizExporter.class.getName()).log(Level.SEVERE, "System.out could not be used for writing", ex);
+		}
 	}
 
 	public void export(PTGraph<StyledNode, StyledEdge> input, File f, File pdf) throws IOException, InterruptedException {
@@ -58,80 +69,95 @@ public class GraphToGraphvizExporter {
 		Runtime.getRuntime().exec(new String[] {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()}).waitFor();
 	}
 	
-	private void edgeTemplate(StringBuilder edge, StyledEdge e, boolean directed) {
-		edge.append(tab);
-		edge.append('"'); edge.append(e.getFrom()); edge.append('"');
-		edge.append(directed ? "->" : "--");
-		edge.append('"');
-		edge.append(e.getTo());
-		edge.append('"');
+	private void edgeTemplate(StringBuilder sb, StyledEdge e, boolean directed) {
+		sb.append(tab);
+		sb.append('"'); sb.append(e.getFrom()); sb.append('"');
+		sb.append(directed ? "->" : "--");
+		sb.append('"');
+		sb.append(e.getTo());
+		sb.append('"');
 
 		String label = e.getLabel();
 		String style = e.getStyle();
 
 		if ((this.edgeLabel && label != null) || style != null) {
-			edge.append('[');
+			sb.append('[');
 			if (this.edgeLabel && label != null) {
-				edge.append("label=\"");
-				edge.append(label);
-				edge.append('"');
-				if (style != null) edge.append(',');
+				sb.append("label=\"");
+				sb.append(label);
+				sb.append('"');
+				if (style != null) sb.append(',');
 			}
 			if (style != null) {
-				edge.append(style);
+				sb.append(style);
 			}
-			edge.append(']');
+			sb.append(']');
 		}
 
-		edge.append(";\n");
+		sb.append(';');
 	}
 	
 	
-	private void nodeTemplate(StringBuilder node, StyledNode n) {
+	private void nodeTemplate(StringBuilder sb, StyledNode n) {
 		String style = n.getStyle();
-		node.append(tab);
-		node.append('"');
-		node.append(n.getName());
-		node.append('"');
+		sb.append(tab);
+		sb.append('"');
+		sb.append(n.getName());
+		sb.append('"');
 		if (style != null) {
-			node.append('[');
-			node.append(style);
-			node.append(']');
+			sb.append('[');
+			sb.append(style);
+			sb.append(']');
 		}
-		node.append(";\n");
+		sb.append(';');
 	}
 		
-	private String clusterContents(Cluster<StyledNode, StyledEdge> c, Tree<Cluster<StyledNode, StyledEdge>> clusters) {
-		StringBuilder ret = new StringBuilder();
+	private void clusterContents(Cluster<StyledNode, StyledEdge> c, Tree<Cluster<StyledNode, StyledEdge>> clusters) throws IOException {
+		StringBuilder sb = new StringBuilder(SB_NODES*30);
 		PTGraph<StyledNode, StyledEdge> g = c.getGraph();
+		int i = 0;
 		if (g != null) {
 			for (StyledNode n : g.getNodes()) {
-				this.nodeTemplate(ret, n);
+				this.nodeTemplate(sb, n);
+				if (SB_NODES == ++i) {
+					print(sb);
+					i = 0;
+				}
 			}
 
+			print(sb);
+			i = 0;
+
 			for (StyledEdge e : g.getEdges()) {
-				this.edgeTemplate(ret, e, g.isDirected());
+				this.edgeTemplate(sb, e, g.isDirected());
+				if ((SB_NODES-1)/3 == ++i) {
+					print(sb);
+					i = 0;
+				}
 			}
+			print(sb);
 		}
 
 		for (Cluster<StyledNode, StyledEdge> subc : clusters.getChildren(c)) {
-			ret.append("subgraph \"cluster_");
-			ret.append(subc.getName());
-			ret.append("\" {\n");
+			sb.append("subgraph \"cluster_");
+			sb.append(subc.getName());
+			sb.append("\" {");
 			tab.increase();
-			ret.append(tab); ret.append("label=\"");
-			ret.append(subc.getName());
-			ret.append("\",labeljust=l"); ret.append(";\n");
-			ret.append(tab); ret.append(subc.getStyle()); ret.append(";\n");
-			ret.append(clusterContents(subc, clusters));
+			sb.append(tab); sb.append("label=\"");
+			sb.append(subc.getName());
+			sb.append("\",labeljust=l"); sb.append(';');
+			sb.append(tab); sb.append(subc.getStyle()); sb.append(";\n");
+			print(sb);
+
+			clusterContents(subc, clusters);
 			tab.decrease();
-			ret.append(tab); ret.append("}\n\n");
+
+			sb.append(tab); sb.append("}\n");
+			print(sb);
 		}
-		
-		return ret.toString();
 	}
 	
-	private String graphContents(PTGraph<StyledNode, StyledEdge> input) {
+	private void graphContents(PTGraph<StyledNode, StyledEdge> input) throws IOException {
 		Tree<Cluster<StyledNode, StyledEdge>> clusters;
 
 		if (this.cluster) {
@@ -142,24 +168,31 @@ public class GraphToGraphvizExporter {
 			clusters.add(new Cluster<StyledNode, StyledEdge>(Category.NO_CATEGORY, input));
 		}
 		
-		return clusterContents(clusters.getRoot(), clusters);
+		clusterContents(clusters.getRoot(), clusters);
 	}
 	
-	public String convert(PTGraph<StyledNode, StyledEdge> input) {
-		String g = input.isDirected() ? "digraph" : "graph";
-
-		String ret = g + " G {";
+	public void convert(PTGraph<StyledNode, StyledEdge> input) throws IOException {
+		StringBuilder sb = new StringBuilder(200);
+		sb.append(input.isDirected() ? "digraph" : "graph");
+		sb.append(" G {");
 		tab.increase();
 		
 		if (this.horizontal) {
-			ret += tab + "rankdir=\"LR\";\n";
+			sb.append(tab);
+			sb.append("rankdir=\"LR\";\n");
 		}
+		print(sb);
 
-		ret += this.graphContents(input);
+		this.graphContents(input);
 		
 		tab.decrease();
-		ret += tab + "}\n";
-		
-		return ret;
+		sb.append(tab);
+		sb.append("}\n");
+		print(sb);
+	}
+
+	private void print(StringBuilder sb) throws IOException {
+		this.out.write(sb.toString());
+		sb.setLength(0);
 	}
 }

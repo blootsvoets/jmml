@@ -25,11 +25,13 @@ public class Submodel implements Identifiable {
 		/** Final observation */
 		Of(true);
 		
-		private boolean sending;
+		private final boolean sending;
+		private final String asString;
 		private final static SEL values[] = SEL.values();
 		
 		private SEL(boolean send) {
 			this.sending = send;
+			this.asString = super.toString();
 		}
 		
 		/** Whether the operator may send data */
@@ -49,7 +51,13 @@ public class Submodel implements Identifiable {
 		public SEL next() {
 			return values[ordinal() + 1];
 		}
+
+		@Override
+		public String toString() {
+			return this.asString;
+		}
 	}
+	
 	private final Map<String,Port> in;
 	private final Map<String,Port> out;
 	private final ScaleMap scales;

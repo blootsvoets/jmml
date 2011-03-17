@@ -5,9 +5,7 @@ package eu.mapperproject.xmml.util.graph;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Takes a graph and designs it with a given decoration
@@ -23,7 +21,7 @@ public class GraphDesigner<T, E extends Edge<T>> {
 	
 	/** Design a set of nodes and edges such that they can be formed into a graph */
 	public PTGraph<StyledNode,StyledEdge> decorate(Collection<T> ts, Collection<E> es) {
-		Map<T, StyledNode> nodes = new HashMap<T, StyledNode>();
+		Map<T, StyledNode> nodes = new HashMap<T, StyledNode>((ts.size() * 3) / 2);
 		PTGraph<StyledNode,StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(this.decor.isDirected());
 		this.decorateNodes(ts, graph, nodes);
 		this.decorateEdges(es, graph, nodes);
@@ -52,28 +50,12 @@ public class GraphDesigner<T, E extends Edge<T>> {
 
 	/** Decorate given edges and add them to the graph */
 	protected void decorateEdges(Collection<E> es, PTGraph<StyledNode,StyledEdge> graph, Map<T, StyledNode> nodes) {
-		Set<StyledNode> missingNodes = new HashSet<StyledNode>();
-
 		for (E e : es) {
-			checkMissing(e.getFrom(), nodes, missingNodes, graph);
-			checkMissing(e.getTo(), nodes, missingNodes, graph);
 			StyledEdge ge = this.decor.decorateEdge(e, nodes);
 			graph.addEdge(ge);
 		}
 	}
 
-	/** Add a missing node to the graph if necessary and return it */
-	private void checkMissing(T t, Map<T, StyledNode> nodes, Set<StyledNode> missingNode, PTGraph<StyledNode,StyledEdge> graph) {
-		if (!nodes.containsKey(t)) {
-			StyledNode missing = this.decor.decorateMissingNode(t);
-			nodes.put(t, missing);
-			if (!missingNode.contains(missing)) {
-				missingNode.add(missing);
-				graph.addNode(missing);
-			}
-		}
-	}
-	
 	/** Redesign a graph such that they can be formed into a styled graph */
 	public PTGraph<StyledNode,StyledEdge> decorate(PTGraph<T,E> graph) {
 		return this.decorate(graph.getNodes(), graph.getEdges());

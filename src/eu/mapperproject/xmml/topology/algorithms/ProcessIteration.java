@@ -297,7 +297,7 @@ public class ProcessIteration {
 	}
 
 	private String updateString(boolean useId) {
-		String id = useId ? this.instance.getId() : String.valueOf(this.instance.getNumber());
+		String id = useId ? this.instance.getId() : Integer.toString(this.instance.getNumber());
 		StringBuilder sb = new StringBuilder(id.length() + 30);
 		sb.append(id);
 		if (this.range == null) {
