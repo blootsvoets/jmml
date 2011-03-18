@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import eu.mapperproject.xmml.topology.Domain;
+import java.util.HashMap;
+import java.util.Map;
 
 /** A hierarchical category that any object can belong to.
  *
@@ -14,14 +16,20 @@ import eu.mapperproject.xmml.topology.Domain;
 public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
 	public final static Category NO_CATEGORY = new Category(Domain.GENERIC.getName(), new String[0]);
+	private final static Map<String[], Category> categories;	
+	static {
+		categories = new HashMap<String[], Category>();
+		categories.put(new String[] {NO_CATEGORY.name}, NO_CATEGORY);
+	}
 
 	private final String[] ancenstorNames;
-	private Category parent;
+	private final Category parent;
 	private final String name;
 	
 	private Category(String name, String[] ancestorNames) {
 		this.name = name;
 		this.ancenstorNames = ancestorNames;
+		this.parent = ancestorNames.length == 0 ? null : getCategory(ancestorNames);
 	}
 
 	public static Category getCategory(Domain dom) {
@@ -40,36 +48,40 @@ public class Category implements Child<Category> {
 			dom = dom.parent();
 			ancestors.add(dom.getName());
 		}
-		if (!ancestors.isEmpty()) {
-			ancestors.add(NO_CATEGORY.name);
-		}
 
 		int len = ancestors.size();
 
-		String[] ancenstorNames = new String[len];
+		String[] theseNames = new String[len + 1];
 		for (int i = 0; i < len; i++) {
-			ancenstorNames[len - i - 1] = ancestors.get(i);
+			theseNames[len - i - 1] = ancestors.get(i);
 		}
-		return new Category(name, ancenstorNames);
+		theseNames[len] = name;
+		return getCategory(theseNames);
+	}
+
+	private static Category getCategory(String[] theseNames) {
+		int len = theseNames.length - 1;
+
+		if (categories.containsKey(theseNames)) {
+			return categories.get(theseNames);
+		}
+		else {
+			String[] ancenstorNames = Arrays.copyOf(theseNames, len);
+			Category c = new Category(theseNames[len], ancenstorNames);
+			categories.put(theseNames, c);
+			return c;
+		}
 	}
 	
 	@Override
 	public boolean isRoot() {
-		return this.ancenstorNames.length == 0;
+		return this.parent == null;
 	}
 	
 	@Override
 	public Category parent() {
 		if (this.isRoot()) {
 			throw new IllegalStateException("Parent of root does not exist.");
-		}
-		
-		if (this.parent == null) {
-			int newLen = this.ancenstorNames.length - 1;
-			String newName = this.ancenstorNames[newLen];
-			String[] newAnc = new String[newLen];
-			System.arraycopy(this.ancenstorNames, 0, newAnc, 0, newLen);
-			this.parent = new Category(newName, newAnc);
 		}
 		
 		return this.parent;
@@ -93,12 +105,17 @@ public class Category implements Child<Category> {
 			return this.name;
 		}
 		else {
-			return super.toString() + "." + this.name;
+			return this.parent.toString() + "." + this.name;
 		}
 	}
 
 	/** Get the name of this category, without parents */
 	public String getName() {
 		return this.name;
+	}
+
+	@Override
+	public int compareTo(Category t) {
+		return this.name.compareTo(t.name);
 	}
 }

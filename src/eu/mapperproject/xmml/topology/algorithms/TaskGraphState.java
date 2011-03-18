@@ -13,6 +13,7 @@ import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstanceOperator;
 import eu.mapperproject.xmml.util.PTList;
+import java.util.TreeMap;
 
 /**
  * Keeps track of the current state in a task graph.
@@ -29,7 +30,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	private final CouplingTopology topology;
 
 	public TaskGraphState(CouplingTopology desc) {
-		this.states = new HashMap<Instance,ProcessIteration>();
+		this.states = new TreeMap<Instance,ProcessIteration>();
 		this.activeProcesses = new ArrayList<ProcessIteration>();
 		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<Coupling>>();
 		this.topology = desc;

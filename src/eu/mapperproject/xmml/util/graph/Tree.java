@@ -54,9 +54,11 @@ public class Tree<T extends Child<T>> implements Iterable<T> {
 				col = new HashSet<T>();
 				this.childMap.put(parent, col);
 			}
-			col.add(t);
+			if (!col.contains(t)) {
+				col.add(t);
+			}
 			
-			add(parent);
+			this.add(parent);
 		}
 	}
 	
@@ -83,6 +85,34 @@ public class Tree<T extends Child<T>> implements Iterable<T> {
 	/** Get the root of the tree */
 	public T getRoot() {
 		return this.root;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(childMap.size() * 50);
+		Collection<T> level = new ArrayList<T>(), nextLevel = new ArrayList<T>(), tmp;
+		level.add(this.getRoot());
+		sb.append(this.getRoot());
+		
+		while (!level.isEmpty()) {
+			sb.append('\n');
+			sb.append('|');
+			for (T parent : level) {
+				for (T child : getChildren(parent)) {
+					nextLevel.add(child);
+					sb.append(child);
+					sb.append(',');
+				}
+				sb.append('|');
+			}
+			
+			tmp = level;
+			level = nextLevel;
+			nextLevel = tmp;
+			nextLevel.clear();
+		}
+		
+		return sb.toString();
 	}
 	
 	/** Get a common ancestor of two child elements, or if equal, return the first node.

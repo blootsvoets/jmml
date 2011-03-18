@@ -40,6 +40,8 @@ import eu.mapperproject.xmml.util.SIUnit;
 import eu.mapperproject.xmml.util.Version;
 import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
 import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Import a xMML file using the XOM library
@@ -389,10 +391,9 @@ public class XMMLDocumentImporter {
 	 * @param submodels
 	 * @return
 	 */
-	private Map<String, Instance> parseInstances(Elements instances,
-			Map<String, Submodel> submodels) {
+	private Map<String, Instance> parseInstances(Elements instances, Map<String, Submodel> submodels) {
 		Map<String, Instance> map = new HashMap<String, Instance>();
-		Map<String, List<Domain>> domains = new HashMap<String, List<Domain>>();
+		Map<String, List<Domain>> domains = new TreeMap<String, List<Domain>>();
 		
 		for (int i = 0; i < instances.size(); i++) {
 			Element instance = instances.get(i);

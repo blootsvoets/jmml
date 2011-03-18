@@ -2,13 +2,13 @@ package eu.mapperproject.xmml.util.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import java.util.TreeMap;
 
 /**
  * An internal graph.
@@ -131,7 +131,7 @@ public class PTGraph<T, E extends Edge<T>> {
 	public static <T, E extends Edge<T>> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph, Categorizer<T,E> categorizer) {
 		Map<Category,PTGraph<T,E>> map = partitionMap(graph, categorizer);
 		Tree<Category> categories = new Tree<Category>(map.keySet());
-		Map<Category,Cluster<T,E>> clusters = new HashMap<Category,Cluster<T,E>>();
+		Map<Category,Cluster<T,E>> clusters = new TreeMap<Category,Cluster<T,E>>();
 		Tree<Cluster<T,E>> tree = new Tree<Cluster<T,E>>();
 		
 		for (Category c : categories) {
@@ -145,12 +145,12 @@ public class PTGraph<T, E extends Edge<T>> {
 			clusters.put(c, cl);
 			tree.add(cl);
 		}
-		
+
 		return tree;
 	}
 	
 	private static <T,E extends Edge<T>> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph, Categorizer<T,E> categorizer) {
-		Map<Category,PTGraph<T,E>> map = new HashMap<Category,PTGraph<T,E>>();
+		Map<Category,PTGraph<T,E>> map = new TreeMap<Category,PTGraph<T,E>>();
 		for (E e : graph.getEdges()) {
 			subgraph(graph, categorizer.categorizeEdge(e), map).addEdge(e);
 		}

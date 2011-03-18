@@ -1,7 +1,7 @@
 package eu.mapperproject.xmml.definitions;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 /**
  * Stores and represents the scales of a submodel (instance)
  * @author Joris Borgdorff
@@ -14,16 +14,16 @@ public class ScaleMap {
 
 	public ScaleMap() {
 		this.time = null;
-		this.space = new HashMap<String, Scale>();
-		this.other = new HashMap<String, Scale>();
-		this.all = new HashMap<String, Scale>();
+		this.space = new TreeMap<String, Scale>();
+		this.other = new TreeMap<String, Scale>();
+		this.all = new TreeMap<String, Scale>();
 	}
 
 	public ScaleMap(Scale time, Map<String, Scale> space, Map<String, Scale> other) {
 		this.time = time;
 		this.space = space;
 		this.other = other;
-		this.all = new HashMap<String, Scale>();
+		this.all = new TreeMap<String, Scale>();
 		this.all.put(time.getId(), time);
 		this.all.putAll(space);
 		this.all.putAll(other);

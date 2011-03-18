@@ -10,7 +10,7 @@ import eu.mapperproject.xmml.util.Numbered;
  * @author Joris Borgdorff
  *
  */
-public class Instance implements Identifiable, Domainable, Numbered {
+public class Instance implements Identifiable, Domainable, Numbered, Comparable<Instance> {
 
 	private final String id;
 	private final Submodel submodel;
@@ -117,5 +117,12 @@ public class Instance implements Identifiable, Domainable, Numbered {
 		if (!this.equals(o)) return false;
 		Instance i = (Instance)o;
 		return this.submodel.equals(i.submodel) && this.domain.equals(i.domain) && this.initial == i.initial && this.isfinal == i.isfinal;
+	}
+
+	@Override
+	public int compareTo(Instance t) {
+		if (this.num > t.num) return 1;
+		else if (this.num < t.num) return -1;
+		else return 0;
 	}
 }

@@ -1,17 +1,17 @@
 package eu.mapperproject.xmml.topology;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import eu.mapperproject.xmml.util.graph.Child;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A natural domain of a process, hierarchically ordered
  * @author Joris Borgdorff
  *
  */
-public class Domain implements Child<Domain> {
+public class Domain implements Child<Domain>, Comparable<Domain> {
 	private final String name;
 	private final Domain parent;
 	
@@ -58,15 +58,18 @@ public class Domain implements Child<Domain> {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.parent.hashCode() ^ this.name.hashCode();
-	}
-	
-	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Domain other = (Domain)o;
 		return this.name.equals(other.name) && (this.parent == null ? other.parent == null : this.parent.equals(other.parent));
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 79 * hash + this.name.hashCode();
+		hash = 79 * hash + (this.parent != null ? this.parent.hashCode() : 0);
+		return hash;
 	}
 	
 	/**
@@ -79,31 +82,40 @@ public class Domain implements Child<Domain> {
 	public static Domain parseDomain(String s, Map<String, List<Domain>> domains) {
 		String[] ss = s.split("\\.");
 		Domain child = Domain.GENERIC, parent = Domain.GENERIC;
-		// Try using existing domains. Once that has failed, it won't work again as their parents did not exist either.
-		boolean useExisting = true;
 		
 		for (int i = 0; i < ss.length; i++) {
 			child = null;
-			List<Domain> list = domains.get(ss[i]);
-			if (list == null) {
-				list = new ArrayList<Domain>();
-				domains.put(ss[i], list);
+
+			// Get all domains that have the same name but might be somewhere else in the hierarchy
+			List<Domain> peers = domains.get(ss[i]);
+			if (peers == null) {
+				peers = new ArrayList<Domain>();
+				domains.put(ss[i], peers);
 			}
-			if (useExisting) {
-				for (Domain d : list) {
-					if (!d.isRoot() && d.parent().equals(parent)) {
-						child = d;
-					}
+
+			// Determine which of the namesakes has the same place in the hierarchy
+			for (Domain peer : peers) {
+				if (!peer.isRoot() && peer.parent().equals(parent)) {
+					child = peer;
+					break;
 				}
 			}
+
+			// If it was not found among its namesakes, create a new domain
 			if (child == null) {
-				if (useExisting) useExisting = false;
 				child = parent.getChild(ss[i]);
+				peers.add(child);
 			}
-			list.add(child);
+
+			// Proceed to the next level
 			parent = child;
 		}
-		
+
 		return child;
+	}
+
+	@Override
+	public int compareTo(Domain t) {
+		return name.compareTo(t.name);
 	}
 }
