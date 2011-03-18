@@ -5,6 +5,6 @@ package eu.mapperproject.xmml.util.graph;
  * @author Joris Borgdorff
  *
  */
-public interface StyledNode extends StyledElement {
+public interface StyledNode extends StyledElement, Categorizable {
 	public String getName();
 }

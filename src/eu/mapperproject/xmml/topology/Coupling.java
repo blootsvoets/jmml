@@ -10,7 +10,7 @@ import eu.mapperproject.xmml.util.graph.Edge;
  * @author Joris Borgdorff
  *
  */
-public class Coupling implements Domainable, Edge<Instance> {
+public class Coupling implements Edge<Instance> {
 	private final String name;
 	private final InstanceOperator from;
 	private final InstanceOperator to;
@@ -39,14 +39,6 @@ public class Coupling implements Domainable, Edge<Instance> {
 		this.from = from;
 		this.to = to;
 		this.filters = filters;
-	}
-	
-	/* (non-Javadoc)
-	 * @see eu.mapperproject.xmml.topology.Domainable#getDomain()
-	 */
-	@Override
-	public Domain getDomain() {
-		return Domain.getDomain(from.getInstance(), to.getInstance());
 	}
 
 	/** Return the instance where the coupling comes from */ 

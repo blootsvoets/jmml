@@ -1,7 +1,5 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-import java.util.Map;
-
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.util.graph.AnnotatedStyledEdge;
 import eu.mapperproject.xmml.util.graph.Category;
@@ -16,23 +14,22 @@ import eu.mapperproject.xmml.util.graph.StyledNode;
  * @author Joris Borgdorff
  *
  */
-public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, CouplingInstance> {
-	@Override
-	public boolean isDirected() {
-		return true;
+public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, CouplingInstance> {
+	public TaskGraphDecorator() {
+		super(true);
 	}
-
+	
 	@Override
 	public StyledNode decorateNode(ProcessIteration node) {
 		if (node.hasDeadlock()) {
 			return this.decorateMissingNode(node);
 		}
-		return new SimpleNode(node.toString(), null, new Category(node.getInstance().getDomain()));
+		return new SimpleNode(node.toString(), null, categorize(node));
 	}
 
 	@Override
 	public StyledEdge decorateEdge(CouplingInstance edge,
-			Map<ProcessIteration, StyledNode> nodes) {
+			StyledNode fromNode, StyledNode toNode) {
 
 		Coupling c = edge.getCoupling();
 		ProcessIteration from = edge.getFrom(), to = edge.getTo();
@@ -46,8 +43,6 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 				label = c.getName();
 			}
 		}
-		
-		StyledNode fromNode = nodes.get(from), toNode = nodes.get(to);
 
 		return new AnnotatedStyledEdge(fromNode, toNode, style, label);
 	}
@@ -71,5 +66,10 @@ public class TaskGraphDecorator implements GraphDecorator<ProcessIteration, Coup
 	@Override
 	public StyledNode decorateMissingNode(ProcessIteration node) {
 		return new SimpleNode("Deadlock[" + node + "]", "shape=octagon,fontcolor=white,style=filled,color=red,fillcolor=red");
+	}
+
+	@Override
+	public Category categorize(ProcessIteration pi) {
+		return Category.getCategory(pi.getInstance().getDomain());
 	}
 }

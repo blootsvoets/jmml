@@ -23,12 +23,16 @@ public class PTGraph<T, E extends Edge<T>> {
 	private final boolean[] hasExtremity;
 	
 	public PTGraph(boolean directed) {
+		this(directed, new ArrayList<T>(), new ArrayList<E>());
+	}
+
+	public PTGraph(boolean directed, Collection<T> nodes, Collection<E> edges) {
 		this.directed = directed;
-		this.edges = new ArrayList<E>();
-		this.nodes = new ArrayList<T>();
+		this.edges = edges;
+		this.nodes = nodes;
 		this.hasExtremity = new boolean[2];
 	}
-	
+
 	public PTGraph(Graph<T, E> graph, T source, T sink) {
 		this.directed = graph instanceof DirectedGraph;
 		this.nodes = new ArrayList<T>(graph.getVertices());
@@ -45,13 +49,13 @@ public class PTGraph<T, E extends Edge<T>> {
 		}
 	}
 		
-	public static <T extends StyledNode & Child<T>> PTGraph<StyledNode, StyledEdge> graphFromTree(Tree<T> tree) {
-		PTGraph<StyledNode, StyledEdge> graph = new PTGraph<StyledNode,StyledEdge>(true);
+	public static <T extends Child<T>> PTGraph<T, Edge<T>> graphFromTree(Tree<T> tree) {
+		PTGraph<T, Edge<T>> graph = new PTGraph<T,Edge<T>>(true);
 		
 		for (T elem : tree) {
 			graph.addNode(elem);
 			if (!elem.isRoot()) {
-				graph.addEdge(new SimpleStyledEdge(elem.parent(), elem));
+				graph.addEdge(new SimpleEdge(elem.parent(), elem));
 			}
 		}
 		return graph;
@@ -63,6 +67,10 @@ public class PTGraph<T, E extends Edge<T>> {
 	
 	public boolean isEmpty() {
 		return this.edges.isEmpty() && this.nodes.isEmpty();
+	}
+
+	public int nodeCount() {
+		return this.nodes.size();
 	}
 	
 	public void addEdge(E e) {
@@ -120,8 +128,8 @@ public class PTGraph<T, E extends Edge<T>> {
 		return graph;
 	}
 	
-	public static <T extends Categorizable, E extends Edge<T> & Categorizable> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph) {
-		Map<Category,PTGraph<T,E>> map = partitionMap(graph);		
+	public static <T, E extends Edge<T>> Tree<Cluster<T,E>> partition(PTGraph<T, E> graph, Categorizer<T,E> categorizer) {
+		Map<Category,PTGraph<T,E>> map = partitionMap(graph, categorizer);
 		Tree<Category> categories = new Tree<Category>(map.keySet());
 		Map<Category,Cluster<T,E>> clusters = new HashMap<Category,Cluster<T,E>>();
 		Tree<Cluster<T,E>> tree = new Tree<Cluster<T,E>>();
@@ -141,19 +149,18 @@ public class PTGraph<T, E extends Edge<T>> {
 		return tree;
 	}
 	
-	private static <T extends Categorizable, E extends Edge<T> & Categorizable> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph) {
+	private static <T,E extends Edge<T>> Map<Category,PTGraph<T,E>> partitionMap(PTGraph<T,E> graph, Categorizer<T,E> categorizer) {
 		Map<Category,PTGraph<T,E>> map = new HashMap<Category,PTGraph<T,E>>();
 		for (E e : graph.getEdges()) {
-			subgraph(graph, e, map).addEdge(e);
+			subgraph(graph, categorizer.categorizeEdge(e), map).addEdge(e);
 		}
 		for (T n : graph.getNodes()) {
-			subgraph(graph, n, map).addNode(n);
+			subgraph(graph, categorizer.categorize(n), map).addNode(n);
 		}
 		return map;
 	}
 	
-	private static <T, E extends Edge<T>> PTGraph<T,E> subgraph(PTGraph<T,E> graph, Categorizable elem, Map<Category, PTGraph<T,E>> map) {
-		Category c = elem.getCategory();
+	private static <T, E extends Edge<T>> PTGraph<T,E> subgraph(PTGraph<T,E> graph, Category c, Map<Category, PTGraph<T,E>> map) {
 		PTGraph<T,E> subg = map.get(c);
 		if (subg == null) {
 			subg = new PTGraph<T,E>(graph.isDirected());

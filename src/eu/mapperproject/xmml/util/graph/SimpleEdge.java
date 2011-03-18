@@ -5,14 +5,12 @@ package eu.mapperproject.xmml.util.graph;
  * @author Joris Borgdorff
  *
  */
-public class SimpleEdge<T> implements Edge<T>, Categorizable {
+public class SimpleEdge<T> implements Edge<T> {
 	private final T from, to;
-	private final Category category;
 	
-	public SimpleEdge(T from, T to, Category category) {
+	public SimpleEdge(T from, T to) {
 		this.from = from;
 		this.to = to;
-		this.category = category;
 	}
 	
 	@Override
@@ -23,10 +21,5 @@ public class SimpleEdge<T> implements Edge<T>, Categorizable {
 	@Override
 	public T getTo() {
 		return to;
-	}
-	
-	@Override
-	public Category getCategory() {
-		return this.category;
 	}
 }

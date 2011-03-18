@@ -19,13 +19,12 @@ import java.util.Map;
 public class Tree<T extends Child<T>> implements Iterable<T> {
 	private final Map<T, Collection<T>> childMap;
 	private T root;
-	private final Collection<T> childless;
+	private final static Collection childless = new ArrayList(0);
 	
 	/** Create an empty tree. */
 	public Tree() {
 		this.root = null;
 		this.childMap = new HashMap<T, Collection<T>>();
-		this.childless = new ArrayList<T>(0);
 	}
 	
 	/** Create a tree with given elements.
@@ -65,7 +64,7 @@ public class Tree<T extends Child<T>> implements Iterable<T> {
 	 * 
 	 * @see add(T t)
 	 */
-	public void addAll(Collection<T> elems) {
+	public final void addAll(Collection<T> elems) {
 		for (T c : elems) {
 			add(c);
 		}
@@ -78,7 +77,7 @@ public class Tree<T extends Child<T>> implements Iterable<T> {
 	 */
 	public Collection<T> getChildren(T elem) {
 		Collection<T> col = childMap.get(elem);
-		return col == null ? this.childless : col;
+		return col == null ? childless : col;
 	}
 	
 	/** Get the root of the tree */

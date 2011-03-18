@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.mapperproject.xmml.util.graph.Child;
-import eu.mapperproject.xmml.util.graph.Tree;
 
 /**
  * A natural domain of a process, hierarchically ordered
@@ -17,7 +16,7 @@ public class Domain implements Child<Domain> {
 	private final Domain parent;
 	
 	/** A generic root domain denoting all domains */
-	public final static Domain MULTIPLE = new Domain("MULTIPLE");
+	public final static Domain GENERIC = new Domain("GENERIC");
 	
 	public Domain(String name) {
 		this(name, null);
@@ -43,20 +42,18 @@ public class Domain implements Child<Domain> {
 		return this.parent;
 	}
 	
-	public static Domain getDomain(Domainable from, Domainable to) {
-		if (from != null && to != null) {
-			return from.getDomain().getCommonDomain(to.getDomain());
-		}
-		return Domain.MULTIPLE;
-	}
-	
-	protected Domain getCommonDomain(Domain other) {
-		Domain d = Tree.getCommonAncestor(this, other);
-		return d == null ? Domain.MULTIPLE : d;
-	}
-	
 	@Override
 	public String toString() {
+		if (this.isRoot()) {
+			return this.name;
+		}
+		else {
+			return this.parent.toString() + "." + this.name;
+		}
+	}
+
+	/** Get the name of this single domain */
+	public String getName() {
 		return this.name;
 	}
 	
@@ -69,7 +66,7 @@ public class Domain implements Child<Domain> {
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Domain other = (Domain)o;
-		return this.name.equals(other.name) && ((this.parent == null && other.parent == null) || this.parent.equals(other.parent));
+		return this.name.equals(other.name) && (this.parent == null ? other.parent == null : this.parent.equals(other.parent));
 	}
 	
 	/**
@@ -81,7 +78,7 @@ public class Domain implements Child<Domain> {
 	 */
 	public static Domain parseDomain(String s, Map<String, List<Domain>> domains) {
 		String[] ss = s.split("\\.");
-		Domain child = Domain.MULTIPLE, parent = Domain.MULTIPLE;
+		Domain child = Domain.GENERIC, parent = Domain.GENERIC;
 		// Try using existing domains. Once that has failed, it won't work again as their parents did not exist either.
 		boolean useExisting = true;
 		

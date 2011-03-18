@@ -113,6 +113,10 @@ public class ProcessIteration {
 	public boolean needsState() {
 		return initializing() && !firstInstance() && instance.getSubmodel().isStateful();
 	}
+
+	public boolean isSingle() {
+		return this.range == null;
+	}
 	
 	public SEL receivingType() {
 		SEL op = this.annot.getOperator();
@@ -171,7 +175,13 @@ public class ProcessIteration {
 
 				// Loop until the end condition is met or sequentially within the loop
 				if (currentOp.compareTo(SEL.S) < 0 || this.finalLoop()) {
-					set.nextOperator();
+					try {
+						set.nextOperator();
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+						System.out.print(this.annot);
+					}
 				}
 				else {
 					set.setOperater(SEL.Oi);

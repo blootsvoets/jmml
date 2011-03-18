@@ -1,7 +1,5 @@
 package eu.mapperproject.xmml.topology.algorithms;
 
-import java.util.Map;
-
 import eu.mapperproject.xmml.topology.Coupling;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.util.graph.AnnotatedStyledEdge;
@@ -17,28 +15,18 @@ import eu.mapperproject.xmml.util.graph.StyledNode;
  * @author Joris Borgdorff
  *
  */
-public class CouplingTopologyDecorator implements GraphDecorator<Instance, Coupling> {
-	@Override
-	public boolean isDirected() {
-		return true;
+public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling> {
+	public CouplingTopologyDecorator() {
+		super(true);
 	}
 
 	@Override
 	public StyledNode decorateNode(Instance node) {
-		return new SimpleNode(node.getId(), "shape=rectangle", new Category(node.getDomain()));
+		return new SimpleNode(node.getId(), "shape=rectangle", Category.getCategory(node.getDomain()));
 	}
 
 	@Override
-	public StyledEdge addSinkEdge(Instance node, StyledNode snode) {
-		if (node.isFinal()) {
-			return new SimpleStyledEdge(snode, SimpleNode.END);
-		}
-		return null;
-	}
-
-	@Override
-	public StyledEdge decorateEdge(Coupling edge,
-			Map<Instance, StyledNode> nodes) {
+	public StyledEdge decorateEdge(Coupling edge, StyledNode from, StyledNode to) {
 		String style = "dir=both arrowtail=";
 		switch (edge.getFromOperator().getOperator()) {
 		case Oi:
@@ -66,9 +54,6 @@ public class CouplingTopologyDecorator implements GraphDecorator<Instance, Coupl
 			style += "vee";
 		}
 		
-		StyledNode from = nodes.get(edge.getFrom());
-		StyledNode to = nodes.get(edge.getTo());
-		
 		return new AnnotatedStyledEdge(from, to, style, edge.getName());
 	}
 
@@ -81,7 +66,15 @@ public class CouplingTopologyDecorator implements GraphDecorator<Instance, Coupl
 	}
 
 	@Override
-	public StyledNode decorateMissingNode(Instance node) {
+	public StyledEdge addSinkEdge(Instance node, StyledNode snode) {
+		if (node.isFinal()) {
+			return new SimpleStyledEdge(snode, SimpleNode.END);
+		}
 		return null;
+	}
+
+	@Override
+	public Category categorize(Instance object) {
+		return Category.getCategory(object.getDomain());
 	}
 }

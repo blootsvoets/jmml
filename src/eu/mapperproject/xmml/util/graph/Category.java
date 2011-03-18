@@ -11,38 +11,46 @@ import eu.mapperproject.xmml.topology.Domain;
  *
  * @author Joris Borgdorff
  */ 
-public class Category implements Child<Category>, StyledNode {
+public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
-	public final static Category NO_CATEGORY = new Category(Domain.MULTIPLE.toString(), new String[0]);
+	public final static Category NO_CATEGORY = new Category(Domain.GENERIC.getName(), new String[0]);
 
 	private final String[] ancenstorNames;
 	private Category parent;
 	private final String name;
 	
-	
 	private Category(String name, String[] ancestorNames) {
 		this.name = name;
 		this.ancenstorNames = ancestorNames;
 	}
-	
-	public Category(Domain dom) {
-		this.name = dom.toString();
-		
+
+	public static Category getCategory(Domain dom) {
+		String name = dom.getName();
+		if (name.equals(NO_CATEGORY.name)) {
+			if (dom.isRoot()) {
+				return NO_CATEGORY;
+			}
+			else {
+				throw new IllegalArgumentException("May not instantiate another version of NO_CATEGORY");
+			}
+		}
+
 		List<String> ancestors = new ArrayList<String>();
 		while (!dom.isRoot()) {
 			dom = dom.parent();
-			ancestors.add(dom.toString());
+			ancestors.add(dom.getName());
 		}
-		if (!this.getName().equals(NO_CATEGORY.getName()) || ancestors.size() != 0) {
-			ancestors.add(NO_CATEGORY.getName());
+		if (!ancestors.isEmpty()) {
+			ancestors.add(NO_CATEGORY.name);
 		}
-		
+
 		int len = ancestors.size();
-		
-		this.ancenstorNames = new String[len];
+
+		String[] ancenstorNames = new String[len];
 		for (int i = 0; i < len; i++) {
-			this.ancenstorNames[len - i - 1] = ancestors.get(i); 
+			ancenstorNames[len - i - 1] = ancestors.get(i);
 		}
+		return new Category(name, ancenstorNames);
 	}
 	
 	@Override
@@ -52,8 +60,9 @@ public class Category implements Child<Category>, StyledNode {
 	
 	@Override
 	public Category parent() {
-		if (this.isRoot())
+		if (this.isRoot()) {
 			throw new IllegalStateException("Parent of root does not exist.");
+		}
 		
 		if (this.parent == null) {
 			int newLen = this.ancenstorNames.length - 1;
@@ -70,28 +79,25 @@ public class Category implements Child<Category>, StyledNode {
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Category c = (Category)o;
-		return this.name.equals(c.name) && Arrays.deepEquals(this.ancenstorNames, c.ancenstorNames);
+		return this.name.equals(c.name) && Arrays.equals(this.ancenstorNames, c.ancenstorNames);
 	}
 	
 	@Override
 	public int hashCode() {
-		return this.name.hashCode() ^ Arrays.deepHashCode(this.ancenstorNames); 
+		return this.name.hashCode() ^ Arrays.hashCode(this.ancenstorNames);
 	}
 
 	@Override
-	public String getStyle() {
-		return null;
+	public String toString() {
+		if (this.isRoot()) {
+			return this.name;
+		}
+		else {
+			return super.toString() + "." + this.name;
+		}
 	}
 
-	@Override
-	public Category getCategory() {
-		return this;
-	}
-
-	/* (non-Javadoc)
-	 * @see eu.mapperproject.xmml.toolkit.graph.Node#getName()
-	 */
-	@Override
+	/** Get the name of this category, without parents */
 	public String getName() {
 		return this.name;
 	}

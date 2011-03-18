@@ -412,7 +412,7 @@ public class XMMLDocumentImporter {
 			}
 			
 			String domainStr = instance.getAttributeValue("domain");
-			Domain domain = domainStr == null ? Domain.MULTIPLE : Domain.parseDomain(domainStr, domains);
+			Domain domain = domainStr == null ? Domain.GENERIC : Domain.parseDomain(domainStr, domains);
 			
 			String initialStr = instance.getAttributeValue("init");
 			boolean initial = initialStr == null ? submodel.isInitial() : initialStr.equals("yes");

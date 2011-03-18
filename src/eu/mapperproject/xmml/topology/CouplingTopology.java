@@ -6,17 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.mapperproject.xmml.definitions.Submodel.SEL;
+import eu.mapperproject.xmml.util.graph.PTGraph;
 
 /**
  * Coupling Topology of a multiscale model
  * @author Joris Borgdorff
  */
 public class CouplingTopology {
-
-	private final Map<String, Instance> instances;
+	private final PTGraph<Instance,Coupling> topology;
 	private final Collection<Instance> initialInstances;
 	private final Map<InstanceOperator,Collection<Coupling>> fromCouplings, toCouplings;
-	private final Collection<Coupling> couplings;
 	private final Map<Instance,Collection<Coupling>> needInitInstances;
 	private final static Collection<Coupling> emptyCollection = new ArrayList<Coupling>(0);
 
@@ -26,8 +25,7 @@ public class CouplingTopology {
 	 */
 	public CouplingTopology(Map<String, Instance> instances,
 			Collection<Coupling> couplings) {
-		this.instances = instances;
-		this.couplings = couplings;
+		this.topology = new PTGraph<Instance,Coupling>(true, instances.values(), couplings);
 		this.fromCouplings = new HashMap<InstanceOperator,Collection<Coupling>>();
 		this.toCouplings = new HashMap<InstanceOperator,Collection<Coupling>>();
 		this.initialInstances = new ArrayList<Instance>();
@@ -37,14 +35,14 @@ public class CouplingTopology {
 
 	/** Put the from and to couplings in the right place */
 	private void initialize() {
-		for (Coupling c : couplings) {
+		for (Coupling c : this.topology.getEdges()) {
 			putCoupling(c, c.getFromOperator(), this.fromCouplings);
 			putCoupling(c, new InstanceOperator(c.getFrom(), null), this.fromCouplings);
 			putCoupling(c, c.getToOperator(), this.toCouplings);
 			putCoupling(c, new InstanceOperator(c.getTo(), null), this.toCouplings);
 		}
 
-		for (Instance i : this.instances.values()) {
+		for (Instance i : this.topology.getNodes()) {
 			if (this.getFrom(new InstanceOperator(i, SEL.Of)).isEmpty()) {
 				i.setFinal();
 			}
@@ -76,20 +74,25 @@ public class CouplingTopology {
 		}
 		cs.add(c);
 	}
+
+	/** Return this topology as a graph */
+	public PTGraph<Instance,Coupling> getGraph() {
+		return this.topology;
+	}
 	
 	/** Get all couplings in the coupling topology */
 	public Collection<Coupling> getCouplings() {
-		return this.couplings;
+		return this.topology.getEdges();
 	}
 
 	/** Get all instances defined in the coupling topology */
 	public Collection<Instance> getInstances() {
-		return this.instances.values();
+		return this.topology.getNodes();
 	}
 
 	/** Get number of instances */
 	public int getInstanceCount() {
-		return this.instances.size();
+		return this.topology.nodeCount();
 	}
 	
 	/** Get all instances that are initially active */

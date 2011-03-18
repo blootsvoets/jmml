@@ -55,31 +55,34 @@ class AnnotationSet {
 	/** Set the operater */
 	void setOperater(SEL op) {
 		cOper = op;
+		anOper.put(instNum, op.ordinal());
 	}
 
 	/** Go to the next value of the requested annotation */
 	void nextInstance() {
-		cInst++;
+		cInst = anInst.nextInt(instNum);
 	}
 
 	/** Go to the next value of the requested annotation */
 	void nextIteration() {
-		cIter++;
+		cIter = anIter.nextInt(instNum);
 	}
 
 	/** Go to the next value of the requested annotation */
 	void nextOperator() {
-		cOper = cOper.next();
+		cOper = SEL.get(anOper.nextInt(instNum));
 	}
 
 	/** Reset the value of the requested annotation */
 	void resetIteration() {
 		cIter = 0;
+		anIter.put(instNum, 0);
 	}
 
 	/** Reset the value of the requested annotation */
 	void resetOperator() {
 		cOper = SEL.finit;
+		anOper.put(instNum, 0);
 	}
 
 	/** Let the current instance be the subject of the annotation set */
@@ -96,13 +99,17 @@ class AnnotationSet {
 	}
 
 	void applySubject() {
-		anInst.put(instNum, cInst);
-		anIter.put(instNum, cIter);
-		anOper.put(instNum, cOper.ordinal());
+		instPut(anInst); instPut(anIter); instPut(anOper);
 	}
 
 	private int traceCurrent(Trace t) {
 		return (t.isInstantiated(instNum) ? t.currentInt(instNum) : 0);
+	}
+
+	private void instPut(Trace t) {
+		if (!t.isInstantiated(instNum)) {
+			t.put(instNum, 0);
+		}
 	}
 
 	/** Merge the given set with the current one */
@@ -134,7 +141,7 @@ class AnnotationSet {
 
 	@Override
 	public String toString() {
-		return "[" + anInst + ", " + anIter + ", " + anOper + "]";
+		return "[ Instance(" + cInst + ")" + anInst + ", Iteration(" + cIter + ")" + anIter + ", Operator(" + cOper + ")" + anOper + "]";
 	}
 
 	/** Remove the traces from the AnnotationSet */

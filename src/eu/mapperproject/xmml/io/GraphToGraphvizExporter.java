@@ -6,6 +6,8 @@ import java.io.IOException;
 import eu.mapperproject.xmml.util.Indent;
 import eu.mapperproject.xmml.util.graph.Category;
 import eu.mapperproject.xmml.util.graph.Cluster;
+import eu.mapperproject.xmml.util.graph.Edge;
+import eu.mapperproject.xmml.util.graph.GraphDecorator;
 import eu.mapperproject.xmml.util.graph.StyledEdge;
 import eu.mapperproject.xmml.util.graph.StyledNode;
 import eu.mapperproject.xmml.util.graph.PTGraph;
@@ -20,29 +22,33 @@ import java.util.logging.Logger;
  * Can export a PTGraph to graphviz
  * @author Joris Borgdorff
  */
-public class GraphToGraphvizExporter {
+public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
 	private final static String DOT_EXEC = "/usr/local/bin/dot";
 	private final static int SB_NODES = 1000;
+	private final GraphDecorator<V, E> decorator;
 	private Writer out;
+	private final PTGraph<V,E> graph;
 	
-	public GraphToGraphvizExporter(boolean cluster, boolean horizontal, boolean edgeLabel) {
+	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph, boolean cluster, boolean horizontal, boolean edgeLabel) {
 		this.tab = new Indent(4);
 		this.cluster = cluster;
 		this.horizontal = horizontal;
 		this.edgeLabel = edgeLabel;
+		this.decorator = decorator;
+		this.graph = graph;
 	}
 	
-	public GraphToGraphvizExporter() {
-		this(false, false, true);
+	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph) {
+		this(decorator, graph, false, false, true);
 	}
 
-	public void export(PTGraph<StyledNode, StyledEdge> input, File f) throws IOException {
+	public void export(File f) throws IOException {
 		Writer fout = null;
 		try {
 			fout = new OutputStreamWriter(new FileOutputStream(f));
-			this.export(input, fout);
+			this.export(fout);
 			fout.close();
 		} finally {
 			if (fout != null)
@@ -50,23 +56,24 @@ public class GraphToGraphvizExporter {
 		}
 	}
 
-	public void export(PTGraph<StyledNode, StyledEdge> input, Writer out) throws IOException {
+	public void export(Writer out) throws IOException {
 		this.out = out;
-		this.convert(input);
+		this.convert();
 	}
 
-	public void print(PTGraph<StyledNode, StyledEdge> input) {
+	public void print() {
 		try {
-			this.export(input, new OutputStreamWriter(System.out));
+			this.export(new OutputStreamWriter(System.out));
 		} catch (IOException ex) {
-			Logger.getLogger(GraphToGraphvizExporter.class.getName()).log(Level.SEVERE, "System.out could not be used for writing", ex);
+			Logger.getLogger(GraphToGraphvizExporter.class.getName()).log(Level.SEVERE, "System.out could not be used for writing: {}", ex);
 		}
 	}
 
-	public void export(PTGraph<StyledNode, StyledEdge> input, File f, File pdf) throws IOException, InterruptedException {
-		this.export(input, f);
+	public void export(File f, File pdf) throws IOException, InterruptedException {
+		this.export(f);
 		System.out.println("Converting to PDF...");
-		Runtime.getRuntime().exec(new String[] {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()}).waitFor();
+		String[] dot = {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()};
+		Runtime.getRuntime().exec(dot).waitFor();
 	}
 	
 	private void edgeTemplate(StringBuilder sb, StyledEdge e, boolean directed) {
@@ -112,13 +119,14 @@ public class GraphToGraphvizExporter {
 		sb.append(';');
 	}
 		
-	private void clusterContents(Cluster<StyledNode, StyledEdge> c, Tree<Cluster<StyledNode, StyledEdge>> clusters) throws IOException {
+	private void clusterContents(Cluster<V,E> c, Tree<Cluster<V,E>> clusters) throws IOException {
 		StringBuilder sb = new StringBuilder(SB_NODES*30);
-		PTGraph<StyledNode, StyledEdge> g = c.getGraph();
+		PTGraph<V,E> g = c.getGraph();
 		int i = 0;
 		if (g != null) {
-			for (StyledNode n : g.getNodes()) {
-				this.nodeTemplate(sb, n);
+			for (V n : g.getNodes()) {
+				StyledNode sn = this.decorator.decorateNode(n);
+				this.nodeTemplate(sb, sn);
 				if (SB_NODES == ++i) {
 					print(sb);
 					i = 0;
@@ -128,8 +136,9 @@ public class GraphToGraphvizExporter {
 			print(sb);
 			i = 0;
 
-			for (StyledEdge e : g.getEdges()) {
-				this.edgeTemplate(sb, e, g.isDirected());
+			for (E e : g.getEdges()) {
+				StyledEdge se = this.decorator.decorateEdge(e, null);
+				this.edgeTemplate(sb, se, g.isDirected());
 				if ((SB_NODES-1)/3 == ++i) {
 					print(sb);
 					i = 0;
@@ -138,7 +147,7 @@ public class GraphToGraphvizExporter {
 			print(sb);
 		}
 
-		for (Cluster<StyledNode, StyledEdge> subc : clusters.getChildren(c)) {
+		for (Cluster<V,E> subc : clusters.getChildren(c)) {
 			sb.append("subgraph \"cluster_");
 			sb.append(subc.getName());
 			sb.append("\" {");
@@ -146,7 +155,7 @@ public class GraphToGraphvizExporter {
 			sb.append(tab); sb.append("label=\"");
 			sb.append(subc.getName());
 			sb.append("\",labeljust=l"); sb.append(';');
-			sb.append(tab); sb.append(subc.getStyle()); sb.append(";\n");
+			sb.append(tab); sb.append("style=dashed; fontcolor=\"dimgray\";\n");
 			print(sb);
 
 			clusterContents(subc, clusters);
@@ -157,23 +166,23 @@ public class GraphToGraphvizExporter {
 		}
 	}
 	
-	private void graphContents(PTGraph<StyledNode, StyledEdge> input) throws IOException {
-		Tree<Cluster<StyledNode, StyledEdge>> clusters;
+	private void graphContents(PTGraph<V,E> input) throws IOException {
+		Tree<Cluster<V,E>> clusters;
 
 		if (this.cluster) {
-			 clusters = PTGraph.partition(input);
+			 clusters = PTGraph.partition(input, decorator);
 		}
 		else {
-			clusters = new Tree<Cluster<StyledNode, StyledEdge>>();
-			clusters.add(new Cluster<StyledNode, StyledEdge>(Category.NO_CATEGORY, input));
+			clusters = new Tree<Cluster<V,E>>();
+			clusters.add(new Cluster<V,E>(Category.NO_CATEGORY, input));
 		}
 		
 		clusterContents(clusters.getRoot(), clusters);
 	}
 	
-	public void convert(PTGraph<StyledNode, StyledEdge> input) throws IOException {
+	public void convert() throws IOException {
 		StringBuilder sb = new StringBuilder(200);
-		sb.append(input.isDirected() ? "digraph" : "graph");
+		sb.append(decorator.isDirected() ? "digraph" : "graph");
 		sb.append(" G {");
 		tab.increase();
 		
@@ -183,7 +192,7 @@ public class GraphToGraphvizExporter {
 		}
 		print(sb);
 
-		this.graphContents(input);
+		this.graphContents(graph);
 		
 		tab.decrease();
 		sb.append(tab);

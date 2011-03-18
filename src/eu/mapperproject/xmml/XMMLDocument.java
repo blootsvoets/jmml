@@ -2,8 +2,6 @@ package eu.mapperproject.xmml;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.logging.Level;
 
 import nu.xom.ParsingException;
@@ -17,14 +15,13 @@ import eu.mapperproject.xmml.topology.CouplingTopology;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.algorithms.CouplingInstance;
 import eu.mapperproject.xmml.topology.algorithms.CouplingTopologyDecorator;
+import eu.mapperproject.xmml.topology.algorithms.DomainDecorator;
 import eu.mapperproject.xmml.topology.algorithms.ProcessIteration;
 import eu.mapperproject.xmml.topology.algorithms.TaskGraph;
 import eu.mapperproject.xmml.topology.algorithms.TaskGraphDecorator;
 import eu.mapperproject.xmml.util.Version;
 import eu.mapperproject.xmml.util.graph.Cluster;
-import eu.mapperproject.xmml.util.graph.GraphDesigner;
-import eu.mapperproject.xmml.util.graph.StyledEdge;
-import eu.mapperproject.xmml.util.graph.StyledNode;
+import eu.mapperproject.xmml.util.graph.Edge;
 import eu.mapperproject.xmml.util.graph.PTGraph;
 import eu.mapperproject.xmml.util.graph.Tree;
 import java.util.logging.Logger;
@@ -49,14 +46,11 @@ import java.util.logging.Logger;
  *
  */
 public class XMMLDocument {
-	private final static Logger logger = Logger.getLogger(XMMLDocument.class.getName());
-	private GraphToGraphvizExporter exporter;
-	private final Map<GraphType, PTGraph<StyledNode, StyledEdge>> graphMap;
-
 	public enum GraphType {
 		DOMAIN, TASK, TOPOLOGY;
 	}
-
+	
+	private final static Logger logger = Logger.getLogger(XMMLDocument.class.getName());
 	private final ModelMetadata model;
 	private final Version xmmlVersion;
 	
@@ -69,11 +63,52 @@ public class XMMLDocument {
 		this.definitions = definitions;
 		this.topology = topology;
 		this.xmmlVersion = xmmlVersion;
-		this.graphMap = new EnumMap<GraphType, PTGraph<StyledNode, StyledEdge>>(GraphType.class);
-		this.exporter = new GraphToGraphvizExporter(false, false, false); 
 	}
-	
-	public static void main(String[] args) {
+
+	/**
+	 * Export a graph of a given type of this document to a dot file
+	 * and make a pdf file out of it.
+	 */
+	public void export(GraphType gt, String dotStr, String pdfStr) throws IOException, InterruptedException {
+		GraphToGraphvizExporter<?,?> exporter;
+		switch (gt) {
+			case DOMAIN:
+				exporter = new GraphToGraphvizExporter(new DomainDecorator(), this.getDomainGraph());
+				break;
+			case TASK:
+				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph());
+				break;
+			default:
+				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), this.topology.getGraph(), true, false, true);
+				break;
+		}
+		
+		System.out.println("Exporting graphviz file...");
+
+		File dot = new File(dotStr);
+		File pdf = new File(pdfStr);
+		
+		exporter.export(dot, pdf);
+		
+		System.out.println("Done.");		
+	}
+
+	/** Generate a task graph */
+	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph() {
+		TaskGraph task = new TaskGraph(this.topology);
+		task.computeGraph();
+		return task.getGraph();
+	}
+
+	/** Generate a domain graph */
+	public PTGraph<Cluster<Instance,Coupling>,Edge<Cluster<Instance,Coupling>>> getDomainGraph() {
+		PTGraph<Instance, Coupling> graph;
+		graph = this.topology.getGraph();
+		Tree<Cluster<Instance,Coupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
+		return PTGraph.graphFromTree(clTree);
+	}
+
+	public static void main(String[] args) throws IOException {
 		// Argument verification
 		if (args.length != 3) {
 			logger.severe("XMMLDocument takes three arguments: an xMML file, a GraphViz dot file to write to and a pdf file for GraphViz to write to");
@@ -96,74 +131,25 @@ public class XMMLDocument {
 		}
 
 		// Generating an XMML document and exporting it
+		XMMLDocument doc = null;
 		try {
-			XMMLDocument doc = new XMMLDocumentImporter().parse(xmml);
-			doc.export(GraphType.TASK, args[1], args[2]);
+			doc = new XMMLDocumentImporter().parse(xmml);
 		} catch (ValidityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParsingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	/** Export a graph of a given type of this document to a dot file
-	 * and make a pdf file out of it.
-	 */
-	public void export(GraphType gt, String dotStr, String pdfStr) {
-		PTGraph<StyledNode, StyledEdge> graph = this.getGraph(gt);
-		
-		System.out.println("Exporting graphviz file...");
-
-		File dot = new File(dotStr);
-		File pdf = new File(pdfStr);
-		
-		try {
-			exporter.export(graph, dot, pdf);
-		} catch (IOException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "The xMML file provided did not contain valid XML: {}", e);
 			System.exit(1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (ParsingException e) {
+			logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
 			System.exit(2);
 		}
 		
-		System.out.println("Done.");		
-	}
-
-	/** Print a graph of a given type to standard out, using GraphViz notation */
-	public void print(GraphType gt) {
-		exporter.print(this.getGraph(gt));
-	}
-
-	/** Generate a graph of given type */
-	public PTGraph<StyledNode, StyledEdge> getGraph(GraphType gt) {
-		PTGraph<StyledNode, StyledEdge> graph;
-		GraphDesigner<ProcessIteration, CouplingInstance> tg;
-		GraphDesigner<Instance, Coupling> cg;
-		
-		switch (gt) {
-		case DOMAIN:
-			graph = this.getGraph(GraphType.TOPOLOGY);
-			Tree<Cluster<StyledNode, StyledEdge>> clTree = PTGraph.partition(graph);
-			graph = PTGraph.graphFromTree(clTree);
-			break;
-		case TASK:
-			tg = new GraphDesigner<ProcessIteration,CouplingInstance>(new TaskGraphDecorator());
-			TaskGraph task = new TaskGraph(this.topology);
-			task.computeGraph();
-			graph = tg.decorate(task.getGraph());
-			break;
-		default:
-			cg = new GraphDesigner<Instance,Coupling>(new CouplingTopologyDecorator());
-			graph = cg.decorate(topology.getInstances(), topology.getCouplings());
-			break;
+		try {
+			doc.export(GraphType.TOPOLOGY, args[1], args[2]);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
+			System.exit(3);
+		} catch (InterruptedException ex) {
+			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
+			System.exit(4);
 		}
-		
-		return graph;
 	}
 }

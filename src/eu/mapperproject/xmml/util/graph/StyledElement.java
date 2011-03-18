@@ -5,7 +5,7 @@ package eu.mapperproject.xmml.util.graph;
  * @author Joris Borgdorff
  *
  */
-public interface StyledElement extends Categorizable {
+public interface StyledElement {
 	/** What style the edge should have */
 	public String getStyle();
 }

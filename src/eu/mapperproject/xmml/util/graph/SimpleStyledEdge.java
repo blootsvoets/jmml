@@ -19,12 +19,6 @@ public class SimpleStyledEdge implements StyledEdge {
 	}
 
 	@Override
-	public Category getCategory() {
-		Category c = Tree.getCommonAncestor(from.getCategory(), to.getCategory());
-		return c == null ? Category.NO_CATEGORY : c;
-	}
-
-	@Override
 	public StyledNode getFrom() {
 		return from;
 	}

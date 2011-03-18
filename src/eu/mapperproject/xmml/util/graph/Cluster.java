@@ -4,7 +4,7 @@ package eu.mapperproject.xmml.util.graph;
  * A hierarchical clustering, based on a category.
  * @author Joris Borgdorff
  */
-public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, StyledNode {
+public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Categorizable {
 	private final Category category;
 	private final PTGraph<T,E> graph;
 	private final Cluster<T,E> parent;
@@ -42,16 +42,6 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Styled
 	}
 
 	@Override
-	public String getStyle() {
-		return "style=dashed; fontcolor=\"dimgray\"";
-	}
-
-	@Override
-	public Category getCategory() {
-		return this.category;
-	}
-	
-	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Cluster<?,?> c = (Cluster<?,?>)o;
@@ -62,9 +52,19 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Styled
 	public int hashCode() {
 		return this.name.hashCode() ^ this.category.hashCode();
 	}
-	
+
 	@Override
+	public String toString() {
+		return this.name;
+	}
+
+	/** Get the name of this cluster */
 	public String getName() {
 		return this.name;
+	}
+
+	@Override
+	public Category getCategory() {
+		return this.category;
 	}
 }
