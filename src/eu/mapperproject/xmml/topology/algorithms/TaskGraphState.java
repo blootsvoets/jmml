@@ -104,9 +104,9 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 * Whether all incoming couplings of given process have been fulfilled
 	 */
 	private boolean hasAllCouplings(ProcessIteration pi, Collection<Coupling> cds, boolean print) {
-		SEL receivingType = pi.receivingType();
+		SEL op = pi.getOperator();
 		
-		if (receivingType != null) {
+		if (op.isReceiving()) {
 			// State or operator step
 			if ((pi.needsState() || !pi.initializing()) 
 				&& !cds.contains(null)) {
@@ -127,7 +127,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 				cs = topology.needsInitCouplings(inst);
 			}
 			else {
-				cs = topology.getTo(new InstanceOperator(inst, receivingType));
+				cs = topology.getTo(new InstanceOperator(inst, op));
 			}
 			for (Coupling cd : cs) {
 				if (!cds.contains(cd)) {

@@ -118,12 +118,6 @@ public class ProcessIteration {
 		return this.range == null;
 	}
 	
-	public SEL receivingType() {
-		SEL op = this.annot.getOperator();
-		if (op.isReceiving()) return op;
-		else return null;
-	}
-
 	public ProcessIteration nextStep() {
 		return this.progress(ProgressType.ITERATION);
 	}

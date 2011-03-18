@@ -16,10 +16,13 @@ import java.util.Map;
 public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
 	public final static Category NO_CATEGORY = new Category(Domain.GENERIC.getName(), new String[0]);
-	private final static Map<String[], Category> categories;	
+	private final static Map<String[], Category> categories;
+	private final static List<Category> categoriesDomain;
 	static {
 		categories = new HashMap<String[], Category>();
 		categories.put(new String[] {NO_CATEGORY.name}, NO_CATEGORY);
+		categoriesDomain = new ArrayList<Category>();
+		categoriesDomain.add(NO_CATEGORY);
 	}
 
 	private final String[] ancenstorNames;
@@ -33,6 +36,14 @@ public class Category implements Child<Category> {
 	}
 
 	public static Category getCategory(Domain dom) {
+		int num = dom.getNumber();
+		while (categoriesDomain.size() <= num) {
+			categoriesDomain.add(null);
+		}
+
+		Category c = categoriesDomain.get(num);
+		if (c != null) return c;
+		
 		String name = dom.getName();
 		if (name.equals(NO_CATEGORY.name)) {
 			if (dom.isRoot()) {
@@ -56,7 +67,10 @@ public class Category implements Child<Category> {
 			theseNames[len - i - 1] = ancestors.get(i);
 		}
 		theseNames[len] = name;
-		return getCategory(theseNames);
+
+		c = getCategory(theseNames);
+		categoriesDomain.set(num, c);
+		return c;
 	}
 
 	private static Category getCategory(String[] theseNames) {

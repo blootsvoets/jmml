@@ -1,5 +1,6 @@
 package eu.mapperproject.xmml.topology;
 
+import eu.mapperproject.xmml.util.Numbered;
 import java.util.Map;
 
 import eu.mapperproject.xmml.util.graph.Child;
@@ -11,25 +12,27 @@ import java.util.List;
  * @author Joris Borgdorff
  *
  */
-public class Domain implements Child<Domain>, Comparable<Domain> {
+public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	private final String name;
 	private final Domain parent;
+	private final int num;
 	
 	/** A generic root domain denoting all domains */
-	public final static Domain GENERIC = new Domain("GENERIC");
+	public final static Domain GENERIC = new Domain(0, "GENERIC");
 	
-	public Domain(String name) {
-		this(name, null);
+	public Domain(int num, String name) {
+		this(num, name, null);
 	}
 	
-	private Domain(String name, Domain parent) {
+	private Domain(int num, String name, Domain parent) {
 		this.parent = parent;
 		this.name = name;
+		this.num = num;
 	}
 	
 	/** Create a new domain which is a child of the current domain */
-	public Domain getChild(String name) {
-		return new Domain(name, this);
+	public Domain getChild(int num, String name) {
+		return new Domain(num, name, this);
 	}
 	
 	@Override
@@ -60,16 +63,12 @@ public class Domain implements Child<Domain>, Comparable<Domain> {
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
-		Domain other = (Domain)o;
-		return this.name.equals(other.name) && (this.parent == null ? other.parent == null : this.parent.equals(other.parent));
+		return this.num == ((Domain)o).num;
 	}
 
 	@Override
 	public int hashCode() {
-		int hash = 7;
-		hash = 79 * hash + this.name.hashCode();
-		hash = 79 * hash + (this.parent != null ? this.parent.hashCode() : 0);
-		return hash;
+		return this.num;
 	}
 	
 	/**
@@ -79,7 +78,7 @@ public class Domain implements Child<Domain>, Comparable<Domain> {
 	 * @param s parseable string
 	 * @param domains a map of previously parsed domains, which can be used as parents. This will be extended with new domains found
 	 */
-	public static Domain parseDomain(String s, Map<String, List<Domain>> domains) {
+	public static Domain parseDomain(String s, int startNum, Map<String, List<Domain>> domains) {
 		String[] ss = s.split("\\.");
 		Domain child = Domain.GENERIC, parent = Domain.GENERIC;
 		
@@ -103,7 +102,7 @@ public class Domain implements Child<Domain>, Comparable<Domain> {
 
 			// If it was not found among its namesakes, create a new domain
 			if (child == null) {
-				child = parent.getChild(ss[i]);
+				child = parent.getChild(startNum++, ss[i]);
 				peers.add(child);
 			}
 
@@ -116,6 +115,25 @@ public class Domain implements Child<Domain>, Comparable<Domain> {
 
 	@Override
 	public int compareTo(Domain t) {
-		return name.compareTo(t.name);
+		if (this.num < t.num) return -1;
+		else if (this.num > t.num) return 1;
+		else return 0;
+	}
+
+	@Override
+	public int getNumber() {
+		return this.num;
+	}
+
+	@Override
+	public String getId() {
+		return Integer.toString(this.num);
+	}
+
+	@Override
+	public boolean deepEquals(Object o) {
+		if (!this.equals(o)) return false;
+		Domain other = (Domain)o;
+		return this.name.equals(other.name) && (this.parent == null ? other.parent == null : this.parent.equals(other.parent));
 	}
 }

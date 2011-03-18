@@ -31,19 +31,16 @@ public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, Couplin
 	public StyledEdge decorateEdge(CouplingInstance edge,
 			StyledNode fromNode, StyledNode toNode) {
 
-		Coupling c = edge.getCoupling();
-		ProcessIteration from = edge.getFrom(), to = edge.getTo();
-		String label = null, style = null;
-		if (from != null && to != null) {
-			if (c == null) {
-				label = "step";
-				style = "style=dashed";
-			}
-			else {
-				label = c.getName();
-			}
+		String label, style;
+		if (edge.isVirtual()) {
+			label = edge.toSameInstance() ? "step" : "state";
+			style = "style=dashed";
 		}
-
+		else {
+			label = edge.getCoupling().getName();
+			style = null;
+		}
+		
 		return new AnnotatedStyledEdge(fromNode, toNode, style, label);
 	}
 

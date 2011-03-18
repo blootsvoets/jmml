@@ -143,7 +143,7 @@ public class XMMLDocument {
 		}
 		
 		try {
-			doc.export(GraphType.DOMAIN, args[1], args[2]);
+			doc.export(GraphType.TASK, args[1], args[2]);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
 			System.exit(3);

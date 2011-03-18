@@ -93,7 +93,7 @@ public class Coupling implements Edge<Instance> {
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Coupling c = (Coupling)o;
-		return (this.name == null ? c.name == null : this.name.equals(c.name)) && this.from.equals(c.from) && this.to.equals(c.to);
+		return this.from.equals(c.from) && this.to.equals(c.to) && (this.name == null ? c.name == null : this.name.equals(c.name));
 	}
 	
 	@Override

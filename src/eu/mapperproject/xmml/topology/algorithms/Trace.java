@@ -63,19 +63,23 @@ public class Trace {
 	/** Overrides the values of the given trace with the current trace, selected by given collection */
 	public void override(Trace t, IntArrayList select) {
 		int len = select.size();
+		if (len == 0) return;
+		resizeTrace(select.getQuick(len - 1));
 		for (int i = 0; i < len; i++) {
-			int num = select.get(i);
-			this.put(num, t.trace[num]);
+			int num = select.getQuick(i);
+			this.trace[num] = t.trace[num];
 		}
 	}
 
 	/** Merges the values of the given trace with the current trace, selected by given collection */
 	public void merge(Trace t, IntArrayList select) {
 		int len = select.size();
+		if (len == 0) return;
+		resizeTrace(select.getQuick(len - 1));
 		for (int i = 0; i < len; i++) {
-			int num = select.get(i);
+			int num = select.getQuick(i);
 			if (t.trace[num] > this.trace[num]) {
-				this.put(num, t.trace[num]);
+				this.trace[num] = t.trace[num];
 			}
 		}
 	}

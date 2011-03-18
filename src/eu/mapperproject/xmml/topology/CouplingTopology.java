@@ -131,6 +131,6 @@ public class CouplingTopology {
 		}
 		else {
 			return cs;
-		}		
+		}
 	}
 }

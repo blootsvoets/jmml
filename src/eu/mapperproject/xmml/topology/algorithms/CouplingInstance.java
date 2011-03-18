@@ -34,15 +34,29 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	/**
 	 * Whether this coupling instance represents a state transfered from one instance of a processiteration to the next
 	 */
+	public boolean isVirtual() {
+		return this.coupling == null;
+	}
+
+	/**
+	 * Whether this coupling instance represents a state transfered from one instance of a processiteration to the next
+	 */
 	public boolean isState() {
-		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() + 1 == to.getInstanceCounter();
+		return isVirtual() && !toSameInstance();
 	}
 
 	/**
 	 * Whether this coupling instance represents a step from one operator of a processiteration to the next
 	 */
 	public boolean isStep() {
-		return this.coupling == null && from.getInstance().equals(to.getInstance()) && from.getInstanceCounter() == to.getInstanceCounter();
+		return isVirtual() && toSameInstance();
+	}
+
+	/**
+	 * Whether this coupling instance represents a step from one operator of a processiteration to the next
+	 */
+	public boolean toSameInstance() {
+		return isVirtual() && from.getInstanceCounter() == to.getInstanceCounter();
 	}
 
 	/**

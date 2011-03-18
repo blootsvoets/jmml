@@ -27,7 +27,7 @@ public class ProcessIterationTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Domain d = new Domain("bas");
+		Domain d = new Domain(1, "bas");
 		ScaleMap scales = new ScaleMap();
 		scales.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("4 s")), true));
 		ScaleMap scaleOther = new ScaleMap();

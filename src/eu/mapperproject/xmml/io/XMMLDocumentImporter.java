@@ -394,7 +394,8 @@ public class XMMLDocumentImporter {
 	private Map<String, Instance> parseInstances(Elements instances, Map<String, Submodel> submodels) {
 		Map<String, Instance> map = new HashMap<String, Instance>();
 		Map<String, List<Domain>> domains = new TreeMap<String, List<Domain>>();
-		
+		int domainNum = 1;
+
 		for (int i = 0; i < instances.size(); i++) {
 			Element instance = instances.get(i);
 			String id = instance.getAttributeValue("id");
@@ -413,7 +414,10 @@ public class XMMLDocumentImporter {
 			}
 			
 			String domainStr = instance.getAttributeValue("domain");
-			Domain domain = domainStr == null ? Domain.GENERIC : Domain.parseDomain(domainStr, domains);
+			Domain domain = domainStr == null ? Domain.GENERIC : Domain.parseDomain(domainStr, domainNum, domains);
+			if (domain.getNumber() >= domainNum) {
+				domainNum = domain.getNumber() + 1;
+			}
 			
 			String initialStr = instance.getAttributeValue("init");
 			boolean initial = initialStr == null ? submodel.isInitial() : initialStr.equals("yes");
