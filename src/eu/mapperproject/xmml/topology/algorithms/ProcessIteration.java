@@ -169,13 +169,7 @@ public class ProcessIteration {
 
 				// Loop until the end condition is met or sequentially within the loop
 				if (currentOp.compareTo(SEL.S) < 0 || this.finalLoop()) {
-					try {
-						set.nextOperator();
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-						System.out.print(this.annot);
-					}
+					set.nextOperator();
 				}
 				else {
 					set.setOperater(SEL.Oi);
