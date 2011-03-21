@@ -36,15 +36,9 @@ public class GraphDesigner<T, E extends Edge<T>> {
 			nodes.put(t, n);
 
 			StyledEdge e = this.decor.addSourceEdge(t, n);
-			if (e != null) {
-				graph.setSource(e.getFrom());
-				graph.addEdge(e);
-			}
+			if (e != null) graph.addEdge(e);
 			e = this.decor.addSinkEdge(t, n);
-			if (e != null) {
-				graph.setSink(e.getTo());
-				graph.addEdge(e);
-			}
+			if (e != null) graph.addEdge(e);
 		}
 	}
 
