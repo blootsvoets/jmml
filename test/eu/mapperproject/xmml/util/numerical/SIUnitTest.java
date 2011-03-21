@@ -1,11 +1,12 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
+import eu.mapperproject.xmml.util.numerical.SIUnit;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 
 public class SIUnitTest {
 	private SIUnit o1s, o1min;

@@ -1,5 +1,6 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
+import eu.mapperproject.xmml.util.parser.MultiStringParseToken;
 import java.math.BigInteger;
 
 public class ScaleModifier implements Comparable<ScaleModifier>{
@@ -180,15 +181,15 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	
 	@Override
 	public String toString() {
-		String dim = this.dim == null ? "" : "[" + this.dim + "]";
+		String dimStr = this.dim == null ? "" : "[" + this.dim + "]";
 		if (this.mult.equals(one) && !this.div.equals(one)) {
-			return this.div + "^-1" + dim;
+			return this.div + "^-1" + dimStr;
 		}
-		else if (this.div.equals(one) && !this.mult.equals(1)) {
-			return this.mult + dim;
+		else if (this.div.equals(one) && !this.mult.equals(BigInteger.valueOf(1))) {
+			return this.mult + dimStr;
 		}
 		else {
-			return this.mult + "/" + this.div + dim;
+			return this.mult + "/" + this.div + dimStr;
 		}
 	}
 	private final static MultiStringParseToken<ScaleModifier>[] scaleTokens;

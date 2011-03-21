@@ -1,5 +1,9 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
+import eu.mapperproject.xmml.util.parser.RegexParseToken;
+import eu.mapperproject.xmml.util.parser.CharParseToken;
+import eu.mapperproject.xmml.util.parser.ParseToken;
+import eu.mapperproject.xmml.util.parser.MultiStringParseToken;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;

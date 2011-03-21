@@ -1,9 +1,9 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 
 /**
  * Represents a number with a unit

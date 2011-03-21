@@ -5,7 +5,7 @@ import java.util.Map;
 import eu.mapperproject.xmml.Identifiable;
 import eu.mapperproject.xmml.ModelMetadata;
 import eu.mapperproject.xmml.Param;
-import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
+import eu.mapperproject.xmml.util.parser.MultiStringParseToken.Optional;
 
 /** An xMML submodel
  * 

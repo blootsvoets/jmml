@@ -3,7 +3,7 @@
  */
 package eu.mapperproject.xmml.topology;
 
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 
 /**
  * A coupling filter.

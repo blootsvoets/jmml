@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.parser;
 
 /**
  * An object and multiple possible strings that represent it

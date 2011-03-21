@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.parser;
 
 /**
  * A ParseToken keeps an object and can match that to a String

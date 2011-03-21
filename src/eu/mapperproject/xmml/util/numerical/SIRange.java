@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
 /**
  * A range from one SI unit to the next

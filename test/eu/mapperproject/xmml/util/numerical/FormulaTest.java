@@ -1,5 +1,6 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
+import eu.mapperproject.xmml.util.numerical.Formula;
 import static org.junit.Assert.*;
 
 import java.text.ParseException;

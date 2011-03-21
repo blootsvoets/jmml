@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.parser;
 
 /**
  * Represents an object by a single char

@@ -34,12 +34,12 @@ import eu.mapperproject.xmml.topology.Domain;
 import eu.mapperproject.xmml.topology.Filter;
 import eu.mapperproject.xmml.topology.Instance;
 import eu.mapperproject.xmml.topology.InstancePort;
-import eu.mapperproject.xmml.util.Formula;
-import eu.mapperproject.xmml.util.MultiStringParseToken;
-import eu.mapperproject.xmml.util.SIUnit;
+import eu.mapperproject.xmml.util.numerical.Formula;
+import eu.mapperproject.xmml.util.parser.MultiStringParseToken;
+import eu.mapperproject.xmml.util.numerical.SIUnit;
 import eu.mapperproject.xmml.util.Version;
-import eu.mapperproject.xmml.util.MultiStringParseToken.Optional;
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.parser.MultiStringParseToken.Optional;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 import java.util.Set;
 import java.util.TreeMap;
 

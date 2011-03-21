@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.parser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -4,9 +4,9 @@
 package eu.mapperproject.xmml.definitions;
 
 import eu.mapperproject.xmml.Identifiable;
-import eu.mapperproject.xmml.util.SIRange;
-import eu.mapperproject.xmml.util.SIUnit;
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.numerical.SIRange;
+import eu.mapperproject.xmml.util.numerical.SIUnit;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 
 /**
  * Represents an xMML scale element

@@ -1,8 +1,8 @@
 package eu.mapperproject.xmml.definitions;
 
 import eu.mapperproject.xmml.Identifiable;
-import eu.mapperproject.xmml.util.Formula;
-import eu.mapperproject.xmml.util.SIUnit;
+import eu.mapperproject.xmml.util.numerical.Formula;
+import eu.mapperproject.xmml.util.numerical.SIUnit;
 /**
  * An xMML datatype, possibly representing a real data object
  * @author Joris Borgdorff

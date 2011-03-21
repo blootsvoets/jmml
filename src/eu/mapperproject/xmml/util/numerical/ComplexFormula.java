@@ -1,5 +1,6 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
+import eu.mapperproject.xmml.util.numerical.Formula;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;

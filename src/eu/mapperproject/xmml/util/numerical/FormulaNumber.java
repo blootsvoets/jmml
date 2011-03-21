@@ -1,4 +1,4 @@
-package eu.mapperproject.xmml.util;
+package eu.mapperproject.xmml.util.numerical;
 
 import java.util.Map;
 

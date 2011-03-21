@@ -11,9 +11,9 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import eu.mapperproject.xmml.definitions.Scale;
 import eu.mapperproject.xmml.definitions.ScaleMap;
-import eu.mapperproject.xmml.util.SIRange;
-import eu.mapperproject.xmml.util.SIUnit;
-import eu.mapperproject.xmml.util.ScaleModifier.Dimension;
+import eu.mapperproject.xmml.util.numerical.SIRange;
+import eu.mapperproject.xmml.util.numerical.SIUnit;
+import eu.mapperproject.xmml.util.numerical.ScaleModifier.Dimension;
 
 /**
  * Parse the scales of a submodel or instance
