@@ -133,7 +133,7 @@ public class ScaleParser {
 		if (dim == Dimension.TIME) {
 			id = "t";
 		}
-		else if (dim == Dimension.LENGTH) {
+		else if (dim == Dimension.SPACE) {
 			if (!current.hasScale("x")) id = "x";
 			else if (!current.hasScale("y")) id = "y";
 			else if (!current.hasScale("z")) id = "z";

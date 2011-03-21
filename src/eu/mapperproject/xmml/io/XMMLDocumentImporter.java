@@ -213,7 +213,7 @@ public class XMMLDocumentImporter {
 			
 			ScaleParser scParser = new ScaleParser(meta.getId());
 			scParser.parseElements(submodel.getChildElements("timescale"), Dimension.TIME);
-			scParser.parseElements(submodel.getChildElements("spacescale"), Dimension.LENGTH);
+			scParser.parseElements(submodel.getChildElements("spacescale"), Dimension.SPACE);
 			scParser.parseElements(submodel.getChildElements("otherscale"), Dimension.OTHER);
 			ScaleMap scales = scParser.getScaleMap();
 
@@ -339,7 +339,7 @@ public class XMMLDocumentImporter {
 					scale = Dimension.TIME;
 				}
 				if (scaleStr.equals("space") || scaleStr.equals("spatial") || scaleStr.equals("length")) {
-					scale = Dimension.LENGTH;
+					scale = Dimension.SPACE;
 				}
 				else {
 					scale = Dimension.OTHER;
@@ -424,7 +424,7 @@ public class XMMLDocumentImporter {
 
 			ScaleParser scParser = new ScaleParser(id, submodel.getScaleMap());
 			scParser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
-			scParser.parseElements(instance.getChildElements("spacescale"), Dimension.LENGTH);
+			scParser.parseElements(instance.getChildElements("spacescale"), Dimension.SPACE);
 			scParser.parseElements(instance.getChildElements("otherscale"), Dimension.OTHER);
 			ScaleMap scales = scParser.getScaleMap();
 

@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 public class ScaleModifier implements Comparable<ScaleModifier>{
 	public enum Dimension {
-		DATA, TIME, LENGTH, OTHER;
+		DATA, TIME, SPACE, OTHER;
 	}
 	
 	private final static BigInteger one = BigInteger.valueOf(1), ten = BigInteger.valueOf(10);

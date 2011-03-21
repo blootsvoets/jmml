@@ -35,7 +35,7 @@ public class ScaleMap {
 		case TIME:
 			time = s;
 			break;
-		case LENGTH:
+		case SPACE:
 			space.put(s.getId(), s);
 			break;
 		default:
