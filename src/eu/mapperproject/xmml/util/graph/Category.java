@@ -16,6 +16,7 @@ import java.util.Map;
 public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
 	public final static Category NO_CATEGORY = new Category(Domain.GENERIC.getName(), new String[0]);
+
 	private final static Map<String[], Category> categories;
 	private final static List<Category> categoriesDomain;
 	static {
@@ -35,6 +36,12 @@ public class Category implements Child<Category> {
 		this.parent = ancestorNames.length == 0 ? null : getCategory(ancestorNames);
 	}
 
+	/**
+	 * Get a category based on a domain.
+	 * This implementation is cached, so calling this method with two equal Domain objects
+	 * twice only create one Category objects.
+	 * @throws NullPointerException if dom is null
+	 */
 	public static Category getCategory(Domain dom) {
 		int num = dom.getNumber();
 		while (categoriesDomain.size() <= num) {
@@ -48,9 +55,6 @@ public class Category implements Child<Category> {
 		if (name.equals(NO_CATEGORY.name)) {
 			if (dom.isRoot()) {
 				return NO_CATEGORY;
-			}
-			else {
-				throw new IllegalArgumentException("May not instantiate another version of NO_CATEGORY");
 			}
 		}
 
@@ -73,6 +77,12 @@ public class Category implements Child<Category> {
 		return c;
 	}
 
+	/** Get a category based on the hierarchy of categories.
+	 * An array of category names gives all ancestors of the requested category
+	 * and as final element the category name itself. This implementation is
+	 * cached.
+	 * @throws NullPointerException if given array is null.
+	 */
 	private static Category getCategory(String[] theseNames) {
 		int len = theseNames.length - 1;
 
@@ -86,7 +96,14 @@ public class Category implements Child<Category> {
 			return c;
 		}
 	}
-	
+
+
+	/** Get the name of this category, without parents */
+	public String getName() {
+		return this.name;
+	}
+
+	// Child
 	@Override
 	public boolean isRoot() {
 		return this.parent == null;
@@ -100,17 +117,27 @@ public class Category implements Child<Category> {
 		
 		return this.parent;
 	}
-	
+
+	// Comparable
+	@Override
+	public int compareTo(Category t) {
+		return this.name.compareTo(t.name);
+	}
+
+	// Object
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Category c = (Category)o;
 		return this.name.equals(c.name) && Arrays.equals(this.ancenstorNames, c.ancenstorNames);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return this.name.hashCode() ^ Arrays.hashCode(this.ancenstorNames);
+		int hash = 3;
+		hash = 47 * hash + Arrays.hashCode(this.ancenstorNames);
+		hash = 47 * hash + this.name.hashCode();
+		return hash;
 	}
 
 	@Override
@@ -121,15 +148,5 @@ public class Category implements Child<Category> {
 		else {
 			return this.parent.toString() + "." + this.name;
 		}
-	}
-
-	/** Get the name of this category, without parents */
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public int compareTo(Category t) {
-		return this.name.compareTo(t.name);
 	}
 }

@@ -39,6 +39,17 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Catego
 		this.parent = parent;
 	}
 
+	/** Get the name of this cluster */
+	public String getName() {
+		return this.name;
+	}
+
+	/** Get the induced subgraph of only this cluster */
+	public PTGraph<T,E> getGraph() {
+		return this.graph;
+	}
+
+	// Child<Cluster<T,E>>
 	@Override
 	public Cluster<T,E> parent() {
 		if (this.isRoot()) {
@@ -52,12 +63,20 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Catego
 	public boolean isRoot() {
 		return this.parent == null;
 	}
-	
-	/** Get the induced subgraph of only this cluster */
-	public PTGraph<T,E> getGraph() {
-		return this.graph;
+
+	// Categorizable
+	@Override
+	public Category getCategory() {
+		return this.category;
 	}
 
+	// Comparable<Cluster<T,E>>
+	@Override
+	public int compareTo(Cluster<T,E> t) {
+		return this.name.compareTo(t.name);
+	}
+
+	// Object
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
@@ -73,20 +92,5 @@ public class Cluster<T,E extends Edge<T>> implements Child<Cluster<T,E>>, Catego
 	@Override
 	public String toString() {
 		return this.name;
-	}
-
-	/** Get the name of this cluster */
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Category getCategory() {
-		return this.category;
-	}
-
-	@Override
-	public int compareTo(Cluster<T, E> t) {
-		return this.name.compareTo(t.name);
 	}
 }
