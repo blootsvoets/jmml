@@ -10,8 +10,6 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		DATA, TIME, SPACE, OTHER;
 	}
 
-	private final static BigInteger one = BigInteger.valueOf(1), ten = BigInteger.valueOf(10);
-
 	private final BigInteger mult;
 	private final BigInteger div;
 	private final Dimension dim;
@@ -20,12 +18,12 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	public ScaleModifier(int exp, Dimension dim) {
 		this.dim = dim;
 		if (exp >= 0) {
-			mult = ten.pow(exp);
-			div = one;
+			mult = BigInteger.TEN.pow(exp);
+			div = BigInteger.ONE;
 		}
 		else {
-			mult = one;
-			div = ten.pow(-exp);
+			mult = BigInteger.ONE;
+			div = BigInteger.TEN.pow(-exp);
 		}
 	}
 
@@ -164,10 +162,10 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	@Override
 	public String toString() {
 		String dimStr = this.dim == null ? "" : "[" + this.dim + "]";
-		if (this.mult.equals(one) && !this.div.equals(one)) {
+		if (this.mult.equals(BigInteger.ONE) && !this.div.equals(BigInteger.ONE)) {
 			return this.div + "^-1" + dimStr;
 		}
-		else if (this.div.equals(one) && !this.mult.equals(BigInteger.valueOf(1))) {
+		else if (this.div.equals(BigInteger.ONE) && !this.mult.equals(BigInteger.valueOf(1))) {
 			return this.mult + dimStr;
 		}
 		else {
