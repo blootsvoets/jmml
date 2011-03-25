@@ -1,1 +1,9 @@
-eu.mapperproject.xmml.definitions
+eu.mapperproject.jmml
+eu.mapperproject.jmml.definitions
+eu.mapperproject.jmml.io
+eu.mapperproject.jmml.topology
+eu.mapperproject.jmml.topology.algorithms
+eu.mapperproject.jmml.util
+eu.mapperproject.jmml.util.graph
+eu.mapperproject.jmml.util.numerical
+eu.mapperproject.jmml.util.parser
