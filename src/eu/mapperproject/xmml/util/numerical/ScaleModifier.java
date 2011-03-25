@@ -1,53 +1,21 @@
 package eu.mapperproject.xmml.util.numerical;
 
 import eu.mapperproject.xmml.util.parser.MultiStringParseToken;
+import eu.mapperproject.xmml.util.parser.ParseToken;
 import java.math.BigInteger;
 
 public class ScaleModifier implements Comparable<ScaleModifier>{
 	public enum Dimension {
 		DATA, TIME, SPACE, OTHER;
 	}
-	
+
 	private final static BigInteger one = BigInteger.valueOf(1), ten = BigInteger.valueOf(10);
 
-	public final static ScaleModifier SI = new ScaleModifier(0);
-	
-	public final static ScaleModifier MINUTE = new ScaleModifier(60, 1, Dimension.TIME);
-	public final static ScaleModifier HOUR = new ScaleModifier(60*60, 1, Dimension.TIME);
-	public final static ScaleModifier DAY = new ScaleModifier(60*60*24, 1, Dimension.TIME);
-	public final static ScaleModifier WEEK = new ScaleModifier(60*60*24*7, 1, Dimension.TIME);
-	public final static ScaleModifier MONTH = new ScaleModifier(60*60*24*365/12, 1, Dimension.TIME);
-	public final static ScaleModifier YEAR = new ScaleModifier(60*60*24*365, 1, Dimension.TIME);
-
-	public final static ScaleModifier BIT = new ScaleModifier(1, 8, Dimension.DATA);
-	
-	public final static ScaleModifier DECI = new ScaleModifier(-1);
-	public final static ScaleModifier CENTI = new ScaleModifier(-2);
-	public final static ScaleModifier MILLI = new ScaleModifier(-3);
-	public final static ScaleModifier MICRO = new ScaleModifier(-6);
-	public final static ScaleModifier NANO = new ScaleModifier(-9);
-	public final static ScaleModifier PICO = new ScaleModifier(-12);
-	public final static ScaleModifier FEMTO = new ScaleModifier(-12);
-	public final static ScaleModifier ATTO = new ScaleModifier(-18);
-	public final static ScaleModifier ZEPTO = new ScaleModifier(-21);
-	public final static ScaleModifier YOCTO = new ScaleModifier(-24);
-
-	public final static ScaleModifier DECA = new ScaleModifier(1);
-	public final static ScaleModifier HECTO = new ScaleModifier(2);
-	public final static ScaleModifier KILO = new ScaleModifier(3);
-	public final static ScaleModifier MEGA = new ScaleModifier(6);
-	public final static ScaleModifier GIGA = new ScaleModifier(9);
-	public final static ScaleModifier TERA = new ScaleModifier(12);
-	public final static ScaleModifier PETA = new ScaleModifier(15);
-	public final static ScaleModifier EXA = new ScaleModifier(18);
-	public final static ScaleModifier ZETTA = new ScaleModifier(21);
-	public final static ScaleModifier YOTTA = new ScaleModifier(24);
-
-		
 	private final BigInteger mult;
 	private final BigInteger div;
 	private final Dimension dim;
 
+	/** Create a ScaleModifier with a power of ten size and a dimension. */
 	public ScaleModifier(int exp, Dimension dim) {
 		this.dim = dim;
 		if (exp >= 0) {
@@ -60,18 +28,22 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		}
 	}
 
+	/** Create a ScaleModifier with a power of ten size. */
 	public ScaleModifier(int exp) {
 		this(exp, null);
 	}
 
+	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
 	public ScaleModifier(long m, long div, Dimension dim) {
 		this(BigInteger.valueOf(m), BigInteger.valueOf(div), dim);
 	}
 
+	/** Create a ScaleModifier with a dividend m and a divisor div */
 	public ScaleModifier(long m, long div) {
 		this(m, div, null);
 	}
 
+	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
 	public ScaleModifier(BigInteger m, BigInteger div, Dimension dim) {
 		this.dim = dim;
 		BigInteger gcd = m.gcd(div);
@@ -79,6 +51,7 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		this.div = div.divide(gcd);
 	}
 
+	/** Create a ScaleModifier with a dividend m and a divisor div */
 	public ScaleModifier(BigInteger m, BigInteger div) {
 		this(m, div, null);
 	}
@@ -115,12 +88,16 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	
 	/** Divide the scale by a value */
 	public ScaleModifier div(long d) {
-		return new ScaleModifier(this.mult, this.div.multiply(BigInteger.valueOf(d)));
+		return new ScaleModifier(this.mult, this.div.multiply(BigInteger.valueOf(d)), this.dim);
 	}
 	
+	/**
+	 * Apply this ScaleModifier to a double and return the result.
+	 * @throws IllegalStateException if the divisor or dividend are so large that they can not be represented as a finite double.
+	 */
 	public double apply(double orig) {
-		long m = this.mult.longValue();
-		long d = this.div.longValue();
+		double m = this.mult.doubleValue();
+		double d = this.div.doubleValue();
 		if (m == Double.POSITIVE_INFINITY || d == Double.POSITIVE_INFINITY) {
 			throw new IllegalStateException("Can not apply numbers larger than longs");
 		}
@@ -129,12 +106,15 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	}
 	
 	/**
-	 * @return dimension of the scale
+	 * Get the dimension of the scale.
 	 */
 	public Dimension getDimension() {
 		return this.dim;
 	}
 
+	/**
+	 * Whether the scale is dimensionless, or, has no dimension.
+	 */
 	public boolean isDimensionless() {
 		return this.dim == null;
 	}
@@ -163,7 +143,8 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 			return c;
 		}
 	}
-	
+
+	// Object
 	@Override
 	public boolean equals(Object other) {
 		if (!other.getClass().equals(this.getClass())) return false;
@@ -192,9 +173,43 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 			return this.mult + "/" + this.div + dimStr;
 		}
 	}
-	private final static MultiStringParseToken<ScaleModifier>[] scaleTokens;
-	private final static MultiStringParseToken<Dimension>[] dimTokens;
-	private final static MultiStringParseToken<ScaleModifier> bitToken = new MultiStringParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
+
+	public final static ScaleModifier SI = new ScaleModifier(0);
+
+	public final static ScaleModifier MINUTE = new ScaleModifier(60, 1, Dimension.TIME);
+	public final static ScaleModifier HOUR = new ScaleModifier(60*60, 1, Dimension.TIME);
+	public final static ScaleModifier DAY = new ScaleModifier(60*60*24, 1, Dimension.TIME);
+	public final static ScaleModifier WEEK = new ScaleModifier(60*60*24*7, 1, Dimension.TIME);
+	public final static ScaleModifier MONTH = new ScaleModifier(60*60*24*365/12, 1, Dimension.TIME);
+	public final static ScaleModifier YEAR = new ScaleModifier(60*60*24*365, 1, Dimension.TIME);
+
+	public final static ScaleModifier BIT = new ScaleModifier(1, 8, Dimension.DATA);
+
+	public final static ScaleModifier DECI = new ScaleModifier(-1);
+	public final static ScaleModifier CENTI = new ScaleModifier(-2);
+	public final static ScaleModifier MILLI = new ScaleModifier(-3);
+	public final static ScaleModifier MICRO = new ScaleModifier(-6);
+	public final static ScaleModifier NANO = new ScaleModifier(-9);
+	public final static ScaleModifier PICO = new ScaleModifier(-12);
+	public final static ScaleModifier FEMTO = new ScaleModifier(-12);
+	public final static ScaleModifier ATTO = new ScaleModifier(-18);
+	public final static ScaleModifier ZEPTO = new ScaleModifier(-21);
+	public final static ScaleModifier YOCTO = new ScaleModifier(-24);
+
+	public final static ScaleModifier DECA = new ScaleModifier(1);
+	public final static ScaleModifier HECTO = new ScaleModifier(2);
+	public final static ScaleModifier KILO = new ScaleModifier(3);
+	public final static ScaleModifier MEGA = new ScaleModifier(6);
+	public final static ScaleModifier GIGA = new ScaleModifier(9);
+	public final static ScaleModifier TERA = new ScaleModifier(12);
+	public final static ScaleModifier PETA = new ScaleModifier(15);
+	public final static ScaleModifier EXA = new ScaleModifier(18);
+	public final static ScaleModifier ZETTA = new ScaleModifier(21);
+	public final static ScaleModifier YOTTA = new ScaleModifier(24);
+
+	private final static ParseToken<ScaleModifier>[] scaleTokens;
+	private final static ParseToken<Dimension>[] dimTokens;
+	private final static ParseToken<ScaleModifier> bitToken = new MultiStringParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
 	static {
 		ScaleModifier[] objects = {
 				MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
@@ -211,15 +226,16 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		names = new String[][] {{"bytes", "byte", "B"}, {"seconds", "second", "sec", "s"}, {"meters", "meter", "m"}, {}};
 		dimTokens = MultiStringParseToken.createTokens(Dimension.values(), names);
 	}
-	
+
+	/** Parse a string and convert it to a ScaleModifier */
 	public static ScaleModifier parseScale(String s) {
 		ScaleModifier scale = null;
 		Dimension dim = null;
 		if (s.length() == 0) s = null;
 		
-		// Scale
+		// Numeric scale
 		if (s != null) {
-			for (MultiStringParseToken<ScaleModifier> token : scaleTokens) {
+			for (ParseToken<ScaleModifier> token : scaleTokens) {
 				if (token.startOf(s)) {
 					s = token.getRemainder();
 					scale = token.getObject();
@@ -233,12 +249,12 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 			scale = (scale == null) ? bitToken.getObject() : scale.add(bitToken.getObject());
 			dim = scale.dim;
 		}
-		// Dimension
+		// Dimension of the scale
 		if (dim == null && s != null) {
-			for (MultiStringParseToken<Dimension> token : dimTokens) {
+			for (ParseToken<Dimension> token : dimTokens) {
 				if (token.startOf(s)) {
-					dim = token.getObject();
 					s = token.getRemainder();
+					dim = token.getObject();
 					break;
 				}
 			}
