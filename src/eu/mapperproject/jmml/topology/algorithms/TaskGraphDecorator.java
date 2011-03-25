@@ -1,6 +1,5 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.topology.Coupling;
 import eu.mapperproject.jmml.util.graph.AnnotatedStyledEdge;
 import eu.mapperproject.jmml.util.graph.Category;
 import eu.mapperproject.jmml.util.graph.GraphDecorator;

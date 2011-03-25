@@ -19,6 +19,7 @@ import java.util.Map;
 public class Tree<T extends Child<T>> implements Iterable<T> {
 	private final Map<T, Collection<T>> childMap;
 	private T root;
+	@SuppressWarnings("rawtypes")
 	private final static Collection childless = new ArrayList(0);
 	
 	/** Create an empty tree. */
@@ -77,6 +78,7 @@ public class Tree<T extends Child<T>> implements Iterable<T> {
 	 * @param elem of which to get the children
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Collection<T> getChildren(T elem) {
 		Collection<T> col = childMap.get(elem);
 		return col == null ? childless : col;

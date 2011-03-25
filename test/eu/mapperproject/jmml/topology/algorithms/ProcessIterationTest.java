@@ -23,8 +23,7 @@ public class ProcessIterationTest {
 	
 	private Coupling cdBasic2other, cdOther2basic, cdOther2other;
 	private ProcessIteration piBasic1, piBasic2, piBasicz, piOther;
-	private Coupling cdBasicz2basicz;
-
+	
 	@Before
 	public void setUp() throws Exception {
 		Domain d = new Domain(1, "bas");
@@ -43,7 +42,6 @@ public class ProcessIterationTest {
 
 		Port in = new Port("in", SEL.finit, null, Port.Type.NORMAL);
 		Port out = new Port("out", SEL.Of, null, Port.Type.NORMAL);
-		cdBasicz2basicz = new Coupling(null, new InstancePort(pdBasicz, out), new InstancePort(pdBasicz, in), null);
 		cdBasic2other = new Coupling(null, new InstancePort(pdBasic, out), new InstancePort(pdOther, in), null);
 		cdOther2basic = new Coupling(null, new InstancePort(pdOther, out), new InstancePort(pdBasic, in), null);
 		cdOther2other = new Coupling(null, new InstancePort(pdOther, out), new InstancePort(pdOther, in), null);
@@ -72,19 +70,20 @@ public class ProcessIterationTest {
 	@Test(expected= IllegalStateException.class)
 	public void completion() {
 		ProcessIteration out;
-		// Oi
+		assertSame(SEL.finit, piBasicz.getOperator());
+		
 		out = piBasicz.nextStep();
 		assertSame(null, out);
 		assertSame(SEL.Oi, piBasicz.getOperator());
-		// B
+		
 		out = piBasicz.nextStep();
 		assertSame(null, out);
 		assertSame(SEL.B, piBasicz.getOperator());
-		// S
+		
 		out = piBasicz.nextStep();
 		assertSame(null, out);
 		assertSame(SEL.S, piBasicz.getOperator());
-		// Of
+
 		out = piBasicz.nextStep();
 		assertSame(null, out);
 		assertSame(SEL.Of, piBasicz.getOperator());

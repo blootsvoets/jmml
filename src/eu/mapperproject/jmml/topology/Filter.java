@@ -11,7 +11,7 @@ import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
  *
  */
 public class Filter {
-	/** Fitering type. */
+	/** Filtering type. */
 	public enum Type {
 		INTERPOLATION, REDUCTION, CONVERTER
 	}

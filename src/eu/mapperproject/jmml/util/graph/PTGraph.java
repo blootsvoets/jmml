@@ -52,7 +52,7 @@ public class PTGraph<T, E extends Edge<T>> {
 		for (T elem : tree) {
 			graph.addNode(elem);
 			if (!elem.isRoot()) {
-				graph.addEdge(new SimpleEdge(elem.parent(), elem));
+				graph.addEdge(new SimpleEdge<T>(elem.parent(), elem));
 			}
 		}
 		return graph;

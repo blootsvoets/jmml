@@ -41,7 +41,6 @@ import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
 import eu.mapperproject.jmml.util.parser.MultiStringParseToken;
 import eu.mapperproject.jmml.util.parser.MultiStringParseToken.Optional;
 
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
