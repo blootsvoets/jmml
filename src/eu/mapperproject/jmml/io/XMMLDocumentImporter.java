@@ -24,7 +24,7 @@ import eu.mapperproject.jmml.MMLDocument;
 import eu.mapperproject.jmml.definitions.Converter;
 import eu.mapperproject.jmml.definitions.Datatype;
 import eu.mapperproject.jmml.definitions.Port;
-import eu.mapperproject.jmml.definitions.ScaleMap;
+import eu.mapperproject.jmml.definitions.ScaleSet;
 import eu.mapperproject.jmml.definitions.Submodel;
 import eu.mapperproject.jmml.definitions.MMLDefinitions;
 import eu.mapperproject.jmml.definitions.Submodel.SEL;
@@ -215,7 +215,7 @@ public class XMMLDocumentImporter {
 			scParser.parseElements(submodel.getChildElements("timescale"), Dimension.TIME);
 			scParser.parseElements(submodel.getChildElements("spacescale"), Dimension.SPACE);
 			scParser.parseElements(submodel.getChildElements("otherscale"), Dimension.OTHER);
-			ScaleMap scales = scParser.getScaleMap();
+			ScaleSet scales = scParser.getScaleMap();
 
 			Element ports = submodel.getFirstChildElement("ports");
 			Map<String, Port> in = parsePorts(ports.getChildElements("in"), true, datatypes);
@@ -426,7 +426,7 @@ public class XMMLDocumentImporter {
 			scParser.parseElements(instance.getChildElements("timescale"), Dimension.TIME);
 			scParser.parseElements(instance.getChildElements("spacescale"), Dimension.SPACE);
 			scParser.parseElements(instance.getChildElements("otherscale"), Dimension.OTHER);
-			ScaleMap scales = scParser.getScaleMap();
+			ScaleSet scales = scParser.getScaleMap();
 
 			int num = map.size();
 			map.put(id, new Instance(num, id, submodel, domain, initial, scales));

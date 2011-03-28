@@ -1,7 +1,7 @@
 package eu.mapperproject.jmml.topology;
 
 import eu.mapperproject.jmml.Identifiable;
-import eu.mapperproject.jmml.definitions.ScaleMap;
+import eu.mapperproject.jmml.definitions.ScaleSet;
 import eu.mapperproject.jmml.definitions.Submodel;
 import eu.mapperproject.jmml.util.Numbered;
 
@@ -17,11 +17,11 @@ public class Instance implements Identifiable, Domainable, Numbered, Comparable<
 	private final Domain domain;
 	private boolean initial;
 	private boolean isfinal;
-	private final ScaleMap scales;
+	private final ScaleSet scales;
 	private final int num;
 
 	public Instance(int num, String id, Submodel submodel, Domain domain,
-			boolean initial, ScaleMap scales) {
+			boolean initial, ScaleSet scales) {
 		this.num = num;
 		this.id = id;
 		this.submodel = submodel;

@@ -10,7 +10,7 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
 import eu.mapperproject.jmml.definitions.Scale;
-import eu.mapperproject.jmml.definitions.ScaleMap;
+import eu.mapperproject.jmml.definitions.ScaleSet;
 import eu.mapperproject.jmml.util.numerical.SIRange;
 import eu.mapperproject.jmml.util.numerical.SIUnit;
 import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
@@ -24,18 +24,18 @@ public class ScaleParser {
 	private final static Logger logger = Logger.getLogger(ScaleParser.class.getName());
 
 	private final String from;
-	private final ScaleMap orig;
-	private final ScaleMap current;
+	private final ScaleSet orig;
+	private final ScaleSet current;
 	private boolean lastFixed;
 
 	public ScaleParser(String from) {
 		this(from, null);
 	}
 	
-	public ScaleParser(String from, ScaleMap orig) {
+	public ScaleParser(String from, ScaleSet orig) {
 		this.from = from;
 		this.orig = orig;
-		this.current = (orig == null) ? new ScaleMap() : orig.copy();
+		this.current = (orig == null) ? new ScaleSet() : orig.copy();
 		this.lastFixed = false;
 	}
 	
@@ -81,7 +81,7 @@ public class ScaleParser {
 	}
 	
 	/** Get the scalemap that was parsed so far */
-	public ScaleMap getScaleMap() {
+	public ScaleSet getScaleMap() {
 		return this.current;
 	}
 	

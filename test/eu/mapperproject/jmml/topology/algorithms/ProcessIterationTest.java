@@ -8,7 +8,7 @@ import org.junit.Test;
 import eu.mapperproject.jmml.ModelMetadata;
 import eu.mapperproject.jmml.definitions.Port;
 import eu.mapperproject.jmml.definitions.Scale;
-import eu.mapperproject.jmml.definitions.ScaleMap;
+import eu.mapperproject.jmml.definitions.ScaleSet;
 import eu.mapperproject.jmml.definitions.Submodel;
 import eu.mapperproject.jmml.definitions.Submodel.SEL;
 import eu.mapperproject.jmml.topology.Coupling;
@@ -27,9 +27,9 @@ public class ProcessIterationTest {
 	@Before
 	public void setUp() throws Exception {
 		Domain d = new Domain(1, "bas");
-		ScaleMap scales = new ScaleMap();
+		ScaleSet scales = new ScaleSet();
 		scales.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("4 s")), true));
-		ScaleMap scaleOther = new ScaleMap();
+		ScaleSet scaleOther = new ScaleSet();
 		scaleOther.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("1 s")), true));
 		
 		Submodel sbbasz = new Submodel(new ModelMetadata("basicz", null, null, null), null, null, null, null, false, null, null);

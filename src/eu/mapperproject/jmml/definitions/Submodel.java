@@ -60,14 +60,14 @@ public class Submodel implements Identifiable {
 	
 	private final Map<String,Port> in;
 	private final Map<String,Port> out;
-	private final ScaleMap scales;
+	private final ScaleSet scales;
 	private final Map<String,Param> params;
 	private final ModelMetadata meta;
 	private final boolean initial;
 	private final Optional stateful;
 	private final Optional interactive;
 	
-	public Submodel(ModelMetadata meta, ScaleMap scales, Map<String,Port> in, Map<String,Port> out, Map<String,Param> params, boolean initial, Optional stateful, Optional interactive) {
+	public Submodel(ModelMetadata meta, ScaleSet scales, Map<String,Port> in, Map<String,Port> out, Map<String,Param> params, boolean initial, Optional stateful, Optional interactive) {
 		this.meta = meta;
 		this.scales = scales;
 		this.in = in;
@@ -96,7 +96,7 @@ public class Submodel implements Identifiable {
 	/**
 	 * @return the scale map of the submodel
 	 */
-	public ScaleMap getScaleMap() {
+	public ScaleSet getScaleMap() {
 		return scales;
 	}
 

@@ -6,20 +6,20 @@ import java.util.TreeMap;
  * Stores and represents the scales of a submodel (instance)
  * @author Joris Borgdorff
  */
-public class ScaleMap {
+public class ScaleSet {
 	private Map<String, Scale> all;
 	private Scale time;
 	private Map<String, Scale> space;
 	private Map<String, Scale> other;
 
-	public ScaleMap() {
+	public ScaleSet() {
 		this.time = null;
 		this.space = new TreeMap<String, Scale>();
 		this.other = new TreeMap<String, Scale>();
 		this.all = new TreeMap<String, Scale>();
 	}
 
-	public ScaleMap(Scale time, Map<String, Scale> space, Map<String, Scale> other) {
+	public ScaleSet(Scale time, Map<String, Scale> space, Map<String, Scale> other) {
 		this.time = time;
 		this.space = space;
 		this.other = other;
@@ -62,8 +62,8 @@ public class ScaleMap {
 	}
 	
 	/** Copy references to each of the scales in the scale map to a new scale map */
-	public ScaleMap copy() {
-		ScaleMap copy = new ScaleMap();
+	public ScaleSet copy() {
+		ScaleSet copy = new ScaleSet();
 		for (Scale s : this.all.values()) {
 			copy.putScale(s);
 		}
