@@ -31,6 +31,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 	private final GraphDecorator<V, E> decorator;
 	private Writer out;
 	private final PTGraph<V,E> graph;
+	private boolean hasSink, hasSource;
 	
 	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph, boolean cluster, boolean horizontal, boolean edgeLabel) {
 		this.tab = new Indent(4);
@@ -123,11 +124,29 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 	private void clusterContents(Cluster<V,E> c, Tree<Cluster<V,E>> clusters) throws IOException {
 		StringBuilder sb = new StringBuilder(SB_NODES*30);
 		PTGraph<V,E> g = c.getGraph();
+		boolean directed = this.decorator.isDirected();
 		int i = 0;
 		if (g != null) {
 			for (V n : g.getNodes()) {
 				StyledNode sn = this.decorator.decorateNode(n);
 				this.nodeTemplate(sb, sn);
+				StyledEdge extremity = this.decorator.addSinkEdge(n, sn);
+				if (extremity != null) {
+					if (!this.hasSink) {
+						this.hasSink = true;
+						this.nodeTemplate(sb, extremity.getTo());
+					}
+					this.edgeTemplate(sb, extremity, directed);
+				}
+				extremity = this.decorator.addSourceEdge(n, sn);
+				if (extremity != null) {
+					if (!this.hasSource) {
+						this.hasSource = true;
+						this.nodeTemplate(sb, extremity.getFrom());
+					}
+					this.edgeTemplate(sb, extremity, directed);
+				}
+
 				if (SB_NODES == ++i) {
 					print(sb);
 					i = 0;
@@ -139,7 +158,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 
 			for (E e : g.getEdges()) {
 				StyledEdge se = this.decorator.decorateEdge(e, null);
-				this.edgeTemplate(sb, se, g.isDirected());
+				this.edgeTemplate(sb, se, directed);
 				if ((SB_NODES-1)/3 == ++i) {
 					print(sb);
 					i = 0;
@@ -182,6 +201,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 	}
 	
 	public void convert() throws IOException {
+		this.hasSink = this.hasSource = false;
 		StringBuilder sb = new StringBuilder(200);
 		sb.append(decorator.isDirected() ? "digraph" : "graph");
 		sb.append(" G {");
