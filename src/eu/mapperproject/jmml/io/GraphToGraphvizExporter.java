@@ -127,9 +127,12 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 		boolean directed = this.decorator.isDirected();
 		int i = 0;
 		if (g != null) {
+			// Add nodes
 			for (V n : g.getNodes()) {
 				StyledNode sn = this.decorator.decorateNode(n);
 				this.nodeTemplate(sb, sn);
+
+				// Add source or sink if necessary
 				StyledEdge extremity = this.decorator.addSinkEdge(n, sn);
 				if (extremity != null) {
 					if (!this.hasSink) {
@@ -147,6 +150,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 					this.edgeTemplate(sb, extremity, directed);
 				}
 
+				// Output temporary results to file
 				if (SB_NODES == ++i) {
 					print(sb);
 					i = 0;
@@ -156,6 +160,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 			print(sb);
 			i = 0;
 
+			// Add edges
 			for (E e : g.getEdges()) {
 				StyledEdge se = this.decorator.decorateEdge(e, null);
 				this.edgeTemplate(sb, se, directed);
