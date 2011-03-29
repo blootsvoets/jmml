@@ -69,7 +69,12 @@ public class TaskGraph {
 			}
 		}
 		
-		state.printDeadlock();
+		Collection<ProcessIteration> dead = state.printDeadlock();
+		if (dead != null) {
+			for (ProcessIteration pi : dead) {
+				this.graph.addNode(pi);
+			}
+		}
 	}
 	
 	/**

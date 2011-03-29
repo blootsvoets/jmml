@@ -70,13 +70,15 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	/**
 	 * Prints all deadlocks that are present
 	 */
-	public void printDeadlock() {
+	public Collection<ProcessIteration> printDeadlock() {
 		if (this.activeProcesses.isEmpty() && !this.snoozingProcesses.isEmpty()) {
 			System.out.println("Deadlock:");
 			for (Map.Entry<ProcessIteration, Collection<Coupling>> m : snoozingProcesses.entrySet()) {
 				hasAllCouplings(m.getKey(), m.getValue(), true);
 			}
+			return snoozingProcesses.keySet();
 		}
+		return null;
 	}
 	
 	/** Add the state of the given processiteration to the task graph state */
