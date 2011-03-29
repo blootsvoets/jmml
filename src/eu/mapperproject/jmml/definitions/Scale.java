@@ -118,4 +118,9 @@ public class Scale implements Identifiable {
 
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
+	@Override
+	public String toString() {
+		return "Scale[" + this.id + ",[" + this.delta + ',' + this.max + "])";
+	}
 }

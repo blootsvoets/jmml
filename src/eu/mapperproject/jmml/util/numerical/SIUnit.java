@@ -75,6 +75,11 @@ public class SIUnit implements Comparable<SIUnit> {
 	public double doubleValue() {
 		return this.scale.apply(this.value);
 	}
+
+	/** Get the log10 of the current SIUnit */
+	public double log10() {
+		return this.scale.log10() + Math.log10(this.value);
+}
 	
 	@Override
 	public boolean equals(Object other) {

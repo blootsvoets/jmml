@@ -62,11 +62,16 @@ public class SIRange {
 	}
 	
 	/** The mean value between the minimum and maximum.
-	 * Returns null if either the minimum or maximum is null
+	 * Returns null if both the minimum and maximum are null, and
+	 * either value if the other is null.
 	 */
 	public SIUnit getMean() {
-		if (!this.isDefinite()) {
-			return null;
+		if (this.max == null) {
+			if (this.min == null) return null;
+			return this.min;
+		}
+		else if (this.min == null || this.isPoint()) {
+			return this.max;
 		}
 		return this.max.add(this.min).div(2l);
 	}
@@ -74,5 +79,10 @@ public class SIRange {
 	/** Whether the given range is a full subset of this range */
 	public boolean contains(SIRange range) {
 		return (this.min == null || this.min.compareTo(range.min) <= 0) && (this.max == null || this.max.compareTo(range.max) >= 0);
+	}
+
+	@Override
+	public String toString() {
+		return this.getMean().toString();
 	}
 }

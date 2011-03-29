@@ -89,6 +89,25 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	public ScaleModifier div(long d) {
 		return new ScaleModifier(this.mult, this.div.multiply(BigInteger.valueOf(d)), this.dim);
 	}
+
+	/**
+	 * Apply the log10 to the modifier and return the result as a double
+	 */
+	public double log10() {
+		double ret = 0d;
+		ret += iterativeLog10(this.mult);
+		ret -= iterativeLog10(this.div);
+		return ret;
+	}
+
+	private double iterativeLog10(BigInteger b) {
+		double ret = 0d;
+		while (b.compareTo(BIG_LONG) > 0) {
+			b = b.divide(BIG_INT);
+			ret += BIG_INT_LOG10;
+		}
+		return ret + Math.log10(b.doubleValue());
+	}
 	
 	/**
 	 * Apply this ScaleModifier to a double and return the result.
@@ -165,8 +184,11 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		if (this.mult.equals(BigInteger.ONE) && !this.div.equals(BigInteger.ONE)) {
 			return this.div + "^-1" + dimStr;
 		}
-		else if (this.div.equals(BigInteger.ONE) && !this.mult.equals(BigInteger.valueOf(1))) {
+		else if (this.div.equals(BigInteger.ONE) && !this.mult.equals(BigInteger.ONE)) {
 			return this.mult + dimStr;
+		}
+		else if (this.div.equals(BigInteger.ONE) && this.mult.equals(BigInteger.ONE)) {
+			return dimStr;
 		}
 		else {
 			return this.mult + "/" + this.div + dimStr;
@@ -206,22 +228,29 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 	public final static ScaleModifier ZETTA = new ScaleModifier(21);
 	public final static ScaleModifier YOTTA = new ScaleModifier(24);
 
-	private final static ParseToken<ScaleModifier>[] scaleTokens;
+	private final static BigInteger BIG_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+	// 10^9
+	private final static BigInteger BIG_INT = BigInteger.valueOf(1000000000);
+	private final static double BIG_INT_LOG10 = 9d;
+	
+	private final static ParseToken<ScaleModifier>[] scalePrefixTokens, timeTokens;
 	private final static ParseToken<Dimension>[] dimTokens;
 	private final static ParseToken<ScaleModifier> bitToken = new MultiStringParseToken<ScaleModifier>(BIT, new String[] {"bits", "bit"});
 	static {
 		ScaleModifier[] objects = {
-				MINUTE, HOUR, DAY, WEEK, MONTH, YEAR,
 				DECA, HECTO, KILO, MEGA, GIGA, TERA, PETA, EXA, ZETTA, YOTTA,
 				DECI, CENTI, MILLI, MICRO, NANO, PICO, FEMTO, ATTO, ZEPTO, YOCTO
 			};
 		String[][] names = {
-				{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"months", "month"}, {"years", "year", "yrs", "yr"},
 				{"deca", "da"}, {"hecto", "h"}, {"kilo", "K", "k"}, {"mega", "M"}, {"giga", "G"}, {"tera", "T"}, {"peta", "P"}, {"exa", "E"}, {"zetta", "Z"}, {"yotta", "Y"},
 				{"deci", "d"}, {"centi", "c"}, {"milli", "m"}, {"micro", "u"}, {"nano", "n"}, {"pico", "p"}, {"femto", "f"}, {"atto", "a"}, {"zepto", "z"}, {"yocto", "y"}
 			};
-		scaleTokens = MultiStringParseToken.createTokens(objects, names);
-		
+		scalePrefixTokens = MultiStringParseToken.createTokens(objects, names);
+
+		names = new String[][] {{"minutes", "minute", "min"}, {"hours", "hour", "hrs", "hr"}, {"days", "day"}, {"weeks", "week", "wks", "wk"}, {"months", "month"}, {"years", "year", "yrs", "yr"}};
+		objects = new ScaleModifier[] {MINUTE, HOUR, DAY, WEEK, MONTH, YEAR};
+		timeTokens = MultiStringParseToken.createTokens(objects, names);
+
 		names = new String[][] {{"bytes", "byte", "B"}, {"seconds", "second", "sec", "s"}, {"meters", "meter", "m"}, {}};
 		dimTokens = MultiStringParseToken.createTokens(Dimension.values(), names);
 	}
@@ -232,13 +261,26 @@ public class ScaleModifier implements Comparable<ScaleModifier>{
 		Dimension dim = null;
 		if (s.length() == 0) s = null;
 		
-		// Numeric scale
+		// Time scale
 		if (s != null) {
-			for (ParseToken<ScaleModifier> token : scaleTokens) {
+			for (ParseToken<ScaleModifier> token : timeTokens) {
 				if (token.startOf(s)) {
 					s = token.getRemainder();
 					scale = token.getObject();
 					break;
+				}
+			}
+		}
+		// Numeric scale
+		if (scale == null && s != null) {
+			for (ParseToken<ScaleModifier> token : scalePrefixTokens) {
+				if (token.startOf(s)) {
+					String rem = token.getRemainder();
+					if (rem != null) {
+						s = rem;
+						scale = token.getObject();
+						break;
+					}
 				}
 			}
 		}
