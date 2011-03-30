@@ -146,14 +146,14 @@ public class MMLDocument {
 
 		new CouplingTopologyToScaleMapExporter(doc.topology);
 		
-		try {
-			doc.export(GraphType.TASK, args[1], args[2]);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
-			System.exit(3);
-		} catch (InterruptedException ex) {
-			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
-			System.exit(4);
-		}
+//		try {
+//			doc.export(GraphType.TASK, args[1], args[2]);
+//		} catch (IOException e) {
+//			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
+//			System.exit(3);
+//		} catch (InterruptedException ex) {
+//			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
+//			System.exit(4);
+//		}
 	}
 }

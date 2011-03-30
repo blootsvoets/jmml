@@ -137,4 +137,9 @@ public class Submodel implements Identifiable {
 			&& this.stateful == sub.stateful
 			&& this.interactive == sub.interactive;
 	}
+
+	@Override
+	public String toString() {
+		return "Submodel " + this.meta.toString();
+	}
 }

@@ -68,4 +68,9 @@ public class ModelMetadata implements Identifiable {
 				&& ((this.description == null && md.description == null) || this.description.equals(md.description))
 				&& ((this.version == null && md.version == null) || this.version.equals(md.version));
 	}
+
+	@Override
+	public String toString() {
+		return this.id;
+	}
 }

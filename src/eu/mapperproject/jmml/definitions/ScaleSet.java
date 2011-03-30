@@ -88,7 +88,8 @@ public class ScaleSet {
 	 * The first element returned is the x-coordinate and the second the width.
 	 */
 	private static float[] getBounds(Collection<Scale> scales) {
-		float[] yh, yhMax = new float[2];
+		float[] yh, yhMax = {Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
+
 		boolean hasScale = false;
 		for (Scale scale : scales) {
 			yh = getBounds(scale);
