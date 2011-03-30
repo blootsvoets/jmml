@@ -89,6 +89,10 @@ public class Instance implements Identifiable, Domainable, Numbered, Comparable<
 		return this.scales.getTimesteps() <= steps + 1;
 	}
 
+	public ScaleSet getScales() {
+		return scales;
+	}
+
 	@Override
 	public String toString() {
 		String subId = submodel.getId();

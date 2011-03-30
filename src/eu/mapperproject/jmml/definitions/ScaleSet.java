@@ -1,7 +1,9 @@
 package eu.mapperproject.jmml.definitions;
 
+import eu.mapperproject.jmml.util.numerical.SIRange;
 import eu.mapperproject.jmml.util.numerical.SIUnit;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -70,22 +72,25 @@ public class ScaleSet {
 	 * scale is preset, other scale is used. If this is also not present or timescale
 	 * is not present, null is returned.
 	 */
-	public Rectangle2D.Double getBounds() {
-		double[] xw = getBounds(this.time);
+	public Rectangle2D getBounds() {
+		float[] xw = getBounds(this.time);
 		if (xw == null) return null;
-		double[] yh = getBounds(this.space.values());
+		float[] yh = getBounds(this.space.values());
 		if (yh == null) {
 			yh = getBounds(this.other.values());
 			if (yh == null) return null;
 		}
-		return new Rectangle2D.Double(xw[0], yh[0], xw[1], yh[1]);
+		return new Rectangle2D.Float(xw[0], yh[0], xw[1], yh[1]);
 	}
-	
-	private static double[] getBounds(Collection<Scale> scales) {
-		double[] yh, yhMax = new double[2];
+
+	/**
+	 * Get the maximal range of the collection of scales.
+	 * The first element returned is the x-coordinate and the second the width.
+	 */
+	private static float[] getBounds(Collection<Scale> scales) {
+		float[] yh, yhMax = new float[2];
 		boolean hasScale = false;
 		for (Scale scale : scales) {
-			System.out.println(scale);
 			yh = getBounds(scale);
 			if (yh != null && (yh[1] > yhMax[1] || (yh[1] == yhMax[1] && yh[0] > yhMax[0]))) {
 				yhMax = yh;
@@ -95,22 +100,40 @@ public class ScaleSet {
 		return hasScale ? yhMax : null;
 	}
 
-	private static double[] getBounds(Scale scale) {
-		double[] d = new double[2];
-		SIUnit max = scale.getMax().getMean();
-		if (max != null) {
-			d[1] = max.log10();
+	/**
+	 * Get the range of a scales.
+	 * The first element returned is the x-coordinate and the second the width.
+	 * If either is not set, width is 0.
+	 * If neither are set, null is returned.
+	 */
+	private static float[] getBounds(Scale scale) {
+		float[] d = new float[2];
+		SIUnit delta = null, max = null;
+		SIRange sirange;
+
+		sirange = scale.getDelta();
+		if (sirange != null) {
+			delta = sirange.getMean();
+			if (delta != null) {
+				d[0] = d[1] = (float)delta.log10();
+			}
 		}
-		SIUnit delta = scale.getDelta().getMean();
-		if (delta != null) {
-			d[0] = delta.log10();
-			if (max != null) d[1] -= d[0];
+		sirange = scale.getMax();
+		if (sirange != null) {
+			max = sirange.getMean();
+			if (max != null) {
+				d[1] = (float)max.log10();
+				if (delta == null) d[0] = d[1];
+			}
 		}
 		// No temporal dimension
-		else if (max == null) {
+		if (delta == null && max == null) {
 			return null;
 		}
-		return d;
+		else {
+			d[1] -= d[0];
+			return d;
+		}
 	}
 	
 	/** Copy references to each of the scales in the scale map to a new scale map */

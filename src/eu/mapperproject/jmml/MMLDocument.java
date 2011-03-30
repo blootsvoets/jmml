@@ -8,6 +8,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import eu.mapperproject.jmml.definitions.MMLDefinitions;
+import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
 import eu.mapperproject.jmml.io.XMMLDocumentImporter;
 import eu.mapperproject.jmml.topology.Coupling;
@@ -142,6 +143,8 @@ public class MMLDocument {
 			logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
 			System.exit(2);
 		}
+
+		new CouplingTopologyToScaleMapExporter(doc.topology);
 		
 		try {
 			doc.export(GraphType.TASK, args[1], args[2]);
