@@ -29,11 +29,13 @@ import eu.mapperproject.jmml.util.graph.Tree;
 import java.util.logging.Logger;
 
 /**
- * An xMML document. Different graphs can be generated from this document,
- * a coupling topology or a task graph.
+ * An MML document.
+ * Different graphs can be generated from this document,
+ * a coupling topology, task graph, overview of domains used or a scale
+ * separation map.
  *
- * In the future, this class may also be called to do verification and validation
- * of xMML documents.
+ * In the future, this class may also be called to do more detailed 
+ * verification and validation of xMML documents.
  *
  * Calling this as an executable, it takes three arguments:
  * an xMML file, a Graphviz dot file and a pdf file which Graphviz will convert
@@ -112,8 +114,8 @@ public class MMLDocument {
 
 	public static void main(String[] args) throws IOException {
 		// Argument verification
-		if (args.length != 3) {
-			logger.severe("XMMLDocument takes three arguments: an xMML file, a GraphViz dot file to write to and a pdf file for GraphViz to write to");
+		if (args.length != 4) {
+			logger.severe("XMMLDocument takes four arguments: an xMML file, a GraphViz dot file to write to, a pdf file for GraphViz to write to and a SVG file to write the Scale Separation Map to.");
 			System.exit(1);
 		}
 		File xmml = new File(args[0]);
@@ -131,6 +133,11 @@ public class MMLDocument {
 			logger.log(Level.SEVERE, "directory of pdf file {0} does not exist", args[2]);
 			System.exit(2);
 		}
+		File ssmParent = new File(args[3]).getParentFile();
+		if (ssmParent == null || !ssmParent.exists()) {
+			logger.log(Level.SEVERE, "directory of SVG file {0} does not exist", args[2]);
+			System.exit(2);
+		}
 
 		// Generating an XMML document and exporting it
 		MMLDocument doc = null;
@@ -138,22 +145,24 @@ public class MMLDocument {
 			doc = new XMMLDocumentImporter().parse(xmml);
 		} catch (ValidityException e) {
 			logger.log(Level.SEVERE, "The xMML file provided did not contain valid XML: {}", e);
-			System.exit(1);
+			System.exit(5);
 		} catch (ParsingException e) {
 			logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
-			System.exit(2);
+			System.exit(6);
 		}
 
-		new CouplingTopologyToScaleMapExporter(doc.topology).export(new File(args[1]));
-		
-//		try {
-//			doc.export(GraphType.TASK, args[1], args[2]);
-//		} catch (IOException e) {
-//			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
-//			System.exit(3);
-//		} catch (InterruptedException ex) {
-//			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
-//			System.exit(4);
-//		}
+		CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
+		exp.display();
+
+		try {
+			doc.export(GraphType.TASK, args[1], args[2]);
+			exp.export(new File(args[3]));
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
+			System.exit(7);
+		} catch (InterruptedException ex) {
+			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
+			System.exit(8);
+		}
 	}
 }
