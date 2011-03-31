@@ -13,23 +13,16 @@ import eu.mapperproject.jmml.util.graph.StyledEdge;
 import eu.mapperproject.jmml.util.graph.StyledNode;
 import eu.mapperproject.jmml.util.graph.Tree;
 
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Can export a PTGraph to graphviz
  * @author Joris Borgdorff
  */
-public class GraphToGraphvizExporter<V, E extends Edge<V>> {
+public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExporter {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
 	private final static String DOT_EXEC = "/usr/local/bin/dot";
 	private final static int SB_NODES = 1000;
 	private final GraphDecorator<V, E> decorator;
-	private Writer out;
 	private final PTGraph<V,E> graph;
 	private boolean hasSink, hasSource;
 	
@@ -44,31 +37,6 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 	
 	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph) {
 		this(decorator, graph, false, false, true);
-	}
-
-	public void export(File f) throws IOException {
-		Writer fout = null;
-		try {
-			fout = new OutputStreamWriter(new FileOutputStream(f));
-			this.export(fout);
-			fout.close();
-		} finally {
-			if (fout != null)
-				fout.close();
-		}
-	}
-
-	public void export(Writer out) throws IOException {
-		this.out = out;
-		this.convert();
-	}
-
-	public void print() {
-		try {
-			this.export(new OutputStreamWriter(System.out));
-		} catch (IOException ex) {
-			Logger.getLogger(GraphToGraphvizExporter.class.getName()).log(Level.SEVERE, "System.out could not be used for writing: {}", ex);
-		}
 	}
 
 	public void export(File f, File pdf) throws IOException, InterruptedException {
@@ -204,8 +172,9 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 		
 		clusterContents(clusters.getRoot(), clusters);
 	}
-	
-	public void convert() throws IOException {
+
+	@Override
+	protected void convert() throws IOException {
 		this.hasSink = this.hasSource = false;
 		StringBuilder sb = new StringBuilder(200);
 		sb.append(decorator.isDirected() ? "digraph" : "graph");
@@ -224,10 +193,5 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> {
 		sb.append(tab);
 		sb.append("}\n");
 		print(sb);
-	}
-
-	private void print(StringBuilder sb) throws IOException {
-		this.out.write(sb.toString());
-		sb.setLength(0);
 	}
 }
