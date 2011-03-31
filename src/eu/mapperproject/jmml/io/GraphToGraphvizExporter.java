@@ -20,7 +20,7 @@ import eu.mapperproject.jmml.util.graph.Tree;
 public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExporter {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
-	private final static String DOT_EXEC = "/usr/local/bin/dot";
+	private final static String DOT_EXEC = System.getProperty("eu.mapperproject.jmml.io.dot.path", "dot");
 	private final static int SB_NODES = 1000;
 	private final GraphDecorator<V, E> decorator;
 	private final PTGraph<V,E> graph;
