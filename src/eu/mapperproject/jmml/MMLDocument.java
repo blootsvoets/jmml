@@ -144,7 +144,7 @@ public class MMLDocument {
 			System.exit(2);
 		}
 
-		new CouplingTopologyToScaleMapExporter(doc.topology);
+		new CouplingTopologyToScaleMapExporter(doc.topology).export(new File(args[1]));
 		
 //		try {
 //			doc.export(GraphType.TASK, args[1], args[2]);

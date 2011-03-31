@@ -5,20 +5,21 @@ import eu.mapperproject.jmml.definitions.ScaleSet;
 import eu.mapperproject.jmml.definitions.Submodel;
 import eu.mapperproject.jmml.topology.CouplingTopology;
 import eu.mapperproject.jmml.topology.Instance;
+import eu.mapperproject.jmml.util.Painter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import javax.swing.JPanel;
 
 /**
  * Represent the scales of a coupling topology
  */
-public class ScaleMap extends JPanel {
+public class ScaleMap implements Painter {
 	private enum Alignment {
 		CENTER, LEFT, RIGHT;
 	}
@@ -38,19 +39,20 @@ public class ScaleMap extends JPanel {
 	private final static char[] prefixPlus24 = {'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'};
 	private final static String[] prefixTime = {"min", "hr", "day", "wk", "mon", "yr", "dec.", "cent.", "mill."};
 	private final static float[] prefixTimeLog = {1.77815125f, 3.556302501f, 4.936513742f, 5.781611782f, 6.419922721f, 7.498806607f, 8.498806607f, 9.498806607f, 10.498806607f};
+	private final IntArrayList tickPlacement;
 
-	public ScaleMap(Dimension d, CouplingTopology topology) {
+	public ScaleMap(CouplingTopology topology) {
 		this.bounds = null;
 		this.scales = new ArrayList<NamedRectangle>();
+		this.tickPlacement = new IntArrayList();
 
 		this.addScales(topology.getInstances());
-		this.setDoubleBuffered(true);
 	}
 
 	@Override
-	public void paint(Graphics g) {
-		Dimension drawDim = new Dimension(this.getWidth() - margin, this.getHeight() - margin);
-		this.paintAxes(g, drawDim);
+	public void paint(Graphics2D g, Dimension dim) {
+		Dimension drawDim = new Dimension(dim.width - margin, dim.height - margin);
+		this.paintAxes(g, dim, drawDim);
 		Rectangle2D rectTransform = new Rectangle2D.Double(
 				bounds.getX(),
 				bounds.getY(),
@@ -70,28 +72,34 @@ public class ScaleMap extends JPanel {
 		}
 	}
 
-	private void paintAxes(Graphics g, Dimension drawDim) {
-		Dimension axesDim = new Dimension(this.getWidth() - marginAxes, this.getHeight() - marginAxes);
-		IntArrayList tickPlacement = new IntArrayList();
+	private void paintAxes(Graphics2D g, Dimension dim, Dimension drawDim) {
+		Dimension axesDim = new Dimension(dim.width - marginAxes, dim.height - marginAxes);
+		double boundsWidth = this.bounds.getWidth() * axesDim.width / (double)drawDim.width;
+		double boundsHeight = this.bounds.getHeight() * axesDim.height / (double)drawDim.height;
+		Rectangle2D axesBounds = new Rectangle2D.Double(
+				this.bounds.getX() - (boundsWidth - this.bounds.getWidth()) / 2d,
+				this.bounds.getY() - (boundsHeight - this.bounds.getHeight()) / 2d,
+				boundsWidth, boundsHeight);
 		final int baseX = marginAxesSide;
 		final int baseY = marginAxesSide + axesDim.height;
+		tickPlacement.clear();
 
 		// paint x
-		double baseMult = drawDim.width / this.bounds.getWidth();
-		double base0 = baseMult * -this.bounds.getX();
+		double baseMult = axesDim.width / axesBounds.getWidth();
+		double base0 = baseMult * -axesBounds.getX();
 		g.drawLine(baseX, baseY, baseX + axesDim.width, baseY);
 
-		if (this.bounds.getWidth() < 1d) {
-			int closest = (int)Math.round(this.bounds.getCenterX());
+		if (axesBounds.getWidth() < 1d) {
+			int closest = (int)Math.round(axesBounds.getCenterX());
 			tickPlacement.add(closest);
-			if (this.bounds.getX() > closest || this.bounds.getMaxX() < closest) {
+			if (axesBounds.getX() > closest || axesBounds.getMaxX() < closest) {
 				base0 = axesDim.width / 2d;
 				baseMult = Double.NaN;
 			}
 		}
 		else {
-			double from = this.bounds.getX();
-			double to = this.bounds.getMaxX();
+			double from = axesBounds.getX();
+			double to = axesBounds.getMaxX();
 
 			if (to - from >= maxTicks) {
 				if (from <= -3) {
@@ -117,7 +125,7 @@ public class ScaleMap extends JPanel {
 			}
 		}
 
-		int baseTicks = marginSide;
+		int baseTicks = marginAxesSide;
 		for (int i = 0; i < tickPlacement.size(); i++) {
 			int t = tickPlacement.getQuick(i);
 			String text;
@@ -146,27 +154,27 @@ public class ScaleMap extends JPanel {
 		}
 
 		// paint y
-		baseMult = drawDim.height / this.bounds.getHeight();
-		base0 = baseMult * -this.bounds.getY();
+		baseMult = axesDim.height / axesBounds.getHeight();
+		base0 = baseMult * -axesBounds.getY();
 		g.drawLine(baseX, baseY, baseX, baseY - axesDim.height);
 		tickPlacement.clear();
-		if (this.bounds.getHeight() < 1d) {
-			int closest = (int)Math.round(this.bounds.getCenterY());
+		if (axesBounds.getHeight() < 1d) {
+			int closest = (int)Math.round(axesBounds.getCenterY());
 			tickPlacement.add(closest);
-			if (this.bounds.getY() > closest || this.bounds.getMaxY() < closest) {
+			if (axesBounds.getY() > closest || axesBounds.getMaxY() < closest) {
 				base0 = axesDim.height / 2d;
 				baseMult = Double.NaN;
 			}
 		}
 		else {
-			int from = (int)Math.ceil(this.bounds.getY());
-			int to = (int)Math.floor(this.bounds.getMaxY());
+			int from = (int)Math.ceil(axesBounds.getY());
+			int to = (int)Math.floor(axesBounds.getMaxY());
 			
 			if (to - from >= maxTicks) {
 				if (from <= -3) {
 					int start = -(int)Math.ceil(from/3d);
 					int stop = -Math.min(0, (int)Math.floor(to / 3d));
-					for (int i = start; i > stop; i--) {
+					for (int i = start; i >= stop; i--) {
 						tickPlacement.add(-i*3);
 					}
 				}
@@ -196,7 +204,7 @@ public class ScaleMap extends JPanel {
 			}
 		}
 
-		baseTicks = marginSide + drawDim.height;
+		baseTicks = marginAxesSide + axesDim.height;
 		for (int i = 0; i < tickPlacement.size(); i++) {
 			int t = tickPlacement.getQuick(i);
 			int baseT = baseTicks - (int)Math.round(base0 + baseMult*t);
@@ -204,7 +212,13 @@ public class ScaleMap extends JPanel {
 
 			String text;
 			if (t <= -3) {
-				text = prefixMin24[-(int)Math.floor(t/3d) - 1] + "m";
+				int prefixIndex = -(int)Math.floor(t/3d) - 1;
+				if (prefixIndex < prefixMin24.length) {
+					text = prefixMin24[prefixIndex] + "m";
+				}
+				else {
+					text = "10^" + t + " m";
+				}
 				int mod = t % 3;
 				if (mod == -2) text = "10 " + text;
 				if (mod == -1) text = "100 " + text;
@@ -219,7 +233,13 @@ public class ScaleMap extends JPanel {
 				text = prefixPlus2[t - 1] + "m";
 			}
 			else {
-				text = prefixPlus24[t/3 - 1] + "m";
+				int prefixIndex = t/3 - 1;
+				if (prefixIndex < prefixPlus24.length) {
+					text = prefixPlus24[prefixIndex] + "m";
+				}
+				else {
+					text = "10^" + t + " m";
+				}
 				int mod = t % 3;
 				if (mod == 1) text = "10 " + text;
 				if (mod == 2) text = "100 " + text;
@@ -234,7 +254,6 @@ public class ScaleMap extends JPanel {
 		for (Instance inst : insts) {
 			Submodel sub = inst.getSubmodel();
 			if (visited.contains(sub)) continue;
-			System.out.println(sub);
 			if (tryAddScale(sub.getScaleMap(), sub.getId())
 					|| tryAddScale(inst.getScales(), sub.getId())) {
 				visited.add(sub);
@@ -244,7 +263,6 @@ public class ScaleMap extends JPanel {
 
 	private boolean tryAddScale(ScaleSet sc, String name) {
 		Rectangle2D scBounds = sc.getBounds();
-		System.out.println(scBounds);
 		if (scBounds != null) {
 			if (this.bounds == null) {
 				this.bounds = new Rectangle2D.Float(
