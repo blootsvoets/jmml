@@ -6,6 +6,17 @@
 	<classpathentry kind="lib" path="lib/xom-1.2.6.jar"/>
 	<classpathentry kind="lib" path="lib/jung-graph-impl-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/colt-1.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/batik-awt-util.jar"/>
+	<classpathentry kind="lib" path="lib/batik-css.jar"/>
+	<classpathentry kind="lib" path="lib/batik-dom.jar"/>
+	<classpathentry kind="lib" path="lib/batik-ext.jar"/>
+	<classpathentry kind="lib" path="lib/batik-gui-util.jar"/>
+	<classpathentry kind="lib" path="lib/batik-gvt.jar"/>
+	<classpathentry kind="lib" path="lib/batik-parser.jar"/>
+	<classpathentry kind="lib" path="lib/batik-svg-dom.jar"/>
+	<classpathentry kind="lib" path="lib/batik-svggen.jar"/>
+	<classpathentry kind="lib" path="lib/batik-util.jar"/>
+	<classpathentry kind="lib" path="lib/batik-xml.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
