@@ -25,7 +25,8 @@ public class ScaleMap implements Painter {
 	}
 	private Rectangle2D bounds;
 	private final Collection<NamedRectangle> scales;
-	private final static int maxTicks = 5;
+	private final static int prefTicks = 5;
+	private final static int maxTicks = 8;
 	private final static int marginAxes = 120;
 	private final static int marginAxesSide = marginAxes/2;
 
@@ -84,11 +85,13 @@ public class ScaleMap implements Painter {
 		final int baseY = marginAxesSide + axesDim.height;
 		tickPlacement.clear();
 
-		// paint x
+		// paint x axes
 		double baseMult = axesDim.width / axesBounds.getWidth();
 		double base0 = baseMult * -axesBounds.getX();
 		g.drawLine(baseX, baseY, baseX + axesDim.width, baseY);
 
+		// Calculate tick placement
+		// When no or one tick is applicable
 		if (axesBounds.getWidth() < 1d) {
 			int closest = (int)Math.round(axesBounds.getCenterX());
 			tickPlacement.add(closest);
@@ -97,11 +100,13 @@ public class ScaleMap implements Painter {
 				baseMult = Double.NaN;
 			}
 		}
+		// When multiple ticks are applicable
 		else {
-			double from = axesBounds.getX();
-			double to = axesBounds.getMaxX();
+			// Allow a small margin around the drawn area to also show ticks in proximity
+			double from = Math.max(axesBounds.getX(), Math.floor(this.bounds.getX() - .5d));
+			double to = Math.min(axesBounds.getMaxX(), Math.ceil(this.bounds.getMaxX() + .5d));
 
-			if (to - from >= maxTicks) {
+			if (to - from >= prefTicks) {
 				if (from <= -3) {
 					int start = -(int)Math.ceil(from/3d);
 					int stop = -Math.min(0, (int)Math.floor(to / 3d));
@@ -118,27 +123,43 @@ public class ScaleMap implements Painter {
 			if (from <= 0 && to >= 0) {
 				tickPlacement.add(0);
 			}
+			// Add ticks while there are time units left
 			for (int i = 0; i < prefixTime.length; i++) {
 				if (prefixTimeLog[i] < from) continue;
 				if (prefixTimeLog[i] > to) break;
 				tickPlacement.add(i + 1);
 			}
 		}
+		// Remove superfluous ticks
+		while (tickPlacement.size() > maxTicks) {
+			for (int i = tickPlacement.size() - 2; i > 0; i -= 2) {
+				if (tickPlacement.get(i) != 0)
+					tickPlacement.delete(i);
+			}
+		}
 
+		// Assign labels to ticks and draw them
 		int baseTicks = marginAxesSide;
 		for (int i = 0; i < tickPlacement.size(); i++) {
 			int t = tickPlacement.getQuick(i);
 			String text;
 			if (t <= -3) {
-				text = prefixMin24[-(int)Math.floor(t/3d) - 1] + "s";
-				int mod = t % 3;
-				if (mod == -2) text = "10 " + text;
-				if (mod == -1) text = "100 " + text;
+				int prefixIndex = -(int)Math.floor(t/3d) - 1;
+				if (prefixIndex < prefixMin24.length) {
+					text = prefixMin24[prefixIndex] + "s";
+					int mod = t % 3;
+					if (mod == -2) text = "10 " + text;
+					if (mod == -1) text = "100 " + text;
+				}
+				else {
+					text = "10^" + t + " s";
+				}
 			}
 			else if (t == 0) {
 				text = "s";
 			}
 			else {
+				// Can not overflow, as method of adding ticks is based on prefixTime array.
 				text = prefixTime[t - 1];
 			}
 
@@ -153,11 +174,14 @@ public class ScaleMap implements Painter {
 			}
 		}
 
-		// paint y
+		// paint y axis
 		baseMult = axesDim.height / axesBounds.getHeight();
 		base0 = baseMult * -axesBounds.getY();
 		g.drawLine(baseX, baseY, baseX, baseY - axesDim.height);
 		tickPlacement.clear();
+
+		// Calculate tick placement
+		// When no or one tick is applicable
 		if (axesBounds.getHeight() < 1d) {
 			int closest = (int)Math.round(axesBounds.getCenterY());
 			tickPlacement.add(closest);
@@ -166,11 +190,13 @@ public class ScaleMap implements Painter {
 				baseMult = Double.NaN;
 			}
 		}
+		// When multiple ticks are applicable
 		else {
-			int from = (int)Math.ceil(axesBounds.getY());
-			int to = (int)Math.floor(axesBounds.getMaxY());
+			// Allow a small margin around the drawn area to also show ticks in proximity
+			int from = Math.max((int)Math.ceil(axesBounds.getY()), (int)Math.floor(this.bounds.getY() - .5d));
+			int to = Math.min((int)Math.floor(axesBounds.getMaxY()), (int)Math.ceil(this.bounds.getMaxY() + .5d));
 			
-			if (to - from >= maxTicks) {
+			if (to - from >= prefTicks) {
 				if (from <= -3) {
 					int start = -(int)Math.ceil(from/3d);
 					int stop = -Math.min(0, (int)Math.floor(to / 3d));
@@ -203,13 +229,19 @@ public class ScaleMap implements Painter {
 				}
 			}
 		}
+		// Remove superfluous ticks
+		while (tickPlacement.size() > maxTicks) {
+			for (int i = tickPlacement.size() - 2; i > 0; i -= 2) {
+				if (tickPlacement.get(i) != 0)
+					tickPlacement.delete(i);
+			}
+		}
 
+		// Assign labels to ticks and draw them
 		baseTicks = marginAxesSide + axesDim.height;
 		for (int i = 0; i < tickPlacement.size(); i++) {
 			int t = tickPlacement.getQuick(i);
-			int baseT = baseTicks - (int)Math.round(base0 + baseMult*t);
-			g.drawLine(baseX - 3, baseT, baseX + 3, baseT);
-
+			
 			String text;
 			if (t <= -3) {
 				int prefixIndex = -(int)Math.floor(t/3d) - 1;
@@ -245,7 +277,15 @@ public class ScaleMap implements Painter {
 				if (mod == 2) text = "100 " + text;
 			}
 
-			drawString(text, g, Alignment.RIGHT, baseX - 5, baseT + 5);
+			// No ticks
+			if (baseMult == Double.NaN) {
+				drawString(text, g, Alignment.RIGHT, baseX - 5, baseTicks + (int)Math.round(base0) + 5);
+			}
+			else {
+				int baseT = baseTicks - (int)Math.round(base0 + baseMult*t);
+				g.drawLine(baseX - 3, baseT, baseX + 3, baseT);
+				drawString(text, g, Alignment.RIGHT, baseX - 5, baseT + 5);
+			}
 		}
 	}
 
