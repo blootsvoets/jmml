@@ -62,14 +62,22 @@ public class ScaleMap implements Painter {
 				);
 
 		int icolor = 0;
+		float[] rgb = new float[3];
 		final int originy = drawDim.height + marginSide;
 		for (NamedRectangle inst : scales) {
 			Rectangle sc = inst.getRect(rectTransform);
-			g.setColor(colorwheel[icolor++]);
+			Color color = colorwheel[icolor++];
 			if (icolor == colorwheel.length) icolor = 0;
-
+			g.setColor(color);
+			
 			g.drawRect(sc.x + marginSide, originy - sc.y, sc.width, sc.height);
 			g.drawString(inst.getName(), sc.x + marginSide + 5, originy - sc.y + 15);
+
+			// Re-use the same color to fill but transparently
+			color.getRGBColorComponents(rgb);
+			color = new Color(rgb[0], rgb[1], rgb[2], 0.1f);
+			g.setColor(color);
+			g.fillRect(sc.x + marginSide, originy - sc.y, sc.width, sc.height);
 		}
 	}
 
