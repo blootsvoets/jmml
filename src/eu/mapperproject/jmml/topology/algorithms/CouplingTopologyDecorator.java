@@ -16,6 +16,11 @@ import eu.mapperproject.jmml.util.graph.StyledNode;
  *
  */
 public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling> {
+	/** A start node. */
+	private final static SimpleNode START = new SimpleNode("start", "label=\"\",shape=circle,fill=black,style=filled,fillcolor=black,width=0.25");
+	/** An end node. */
+	private final static SimpleNode END = new SimpleNode("end", "label=\"\",shape=doublecircle,style=filled,fillcolor=black,width=0.25");
+
 	public CouplingTopologyDecorator() {
 		super(true);
 	}
@@ -60,7 +65,7 @@ public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling
 	@Override
 	public StyledEdge addSourceEdge(Instance node, StyledNode snode) {
 		if (node.isInitial()) {
-			return new SimpleStyledEdge(SimpleNode.START, snode);
+			return new SimpleStyledEdge(START, snode);
 		}
 		return null;
 	}
@@ -68,7 +73,7 @@ public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling
 	@Override
 	public StyledEdge addSinkEdge(Instance node, StyledNode snode) {
 		if (node.isFinal()) {
-			return new SimpleStyledEdge(snode, SimpleNode.END);
+			return new SimpleStyledEdge(snode, END);
 		}
 		return null;
 	}
