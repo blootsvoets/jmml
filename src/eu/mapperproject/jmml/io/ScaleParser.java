@@ -52,6 +52,7 @@ public class ScaleParser {
 			
 			// Get information of the original version of this scale, if applicable
 			SIRange origDelta = null, origMax = null;
+			SIUnit characteristic = null;
 			boolean origDeltaFixed = false, origMaxFixed = false;
 			if (this.orig != null) {
 				Scale origScale = this.orig.getScale(id);
@@ -61,14 +62,25 @@ public class ScaleParser {
 				}
 				origDelta = origScale.getDelta();
 				origMax = origScale.getMax();
+				characteristic = origScale.getCharacteristic();
+			}
+			else {
+				String charVal = scale.getAttributeValue("characteristic");
+				if (!charVal.isEmpty()) {
+					characteristic = SIUnit.parseSIUnit(charVal);
+				}
 			}
 			
 			SIRange delta = this.parseRange(scale, id, "delta", "step size", origDelta, origDeltaFixed);
 			boolean deltaFixed = this.lastFixed;
+			if (characteristic == null) {
+				characteristic = delta.getMean();
+			}
 			
 			SIRange max = this.parseRange(scale, id, "max", "maximum size", origMax, origMaxFixed);
 			boolean maxFixed = this.lastFixed;
 
+			
 			Attribute dims = scale.getAttribute("dimensions");
 			int dimensions = 1;
 			if (dims != null) {
@@ -76,7 +88,7 @@ public class ScaleParser {
 			}
 			String dimName = scale.getAttributeValue("name");
 			
-			current.putScale(new Scale(id, dim, delta, deltaFixed, max, maxFixed, dimensions, dimName));
+			current.putScale(new Scale(id, dim, delta, deltaFixed, max, maxFixed, characteristic, dimensions, dimName));
 		}
 	}
 	
