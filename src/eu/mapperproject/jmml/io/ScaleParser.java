@@ -66,7 +66,7 @@ public class ScaleParser {
 			}
 			else {
 				String charVal = scale.getAttributeValue("characteristic");
-				if (!charVal.isEmpty()) {
+				if (charVal != null) {
 					characteristic = SIUnit.parseSIUnit(charVal);
 				}
 			}
