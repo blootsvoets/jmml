@@ -165,7 +165,7 @@ public class ProcessIteration {
 			case ITERATION:
 				SEL currentOp = this.annot.getOperator();
 				if (currentOp == SEL.Of) {
-					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getInstance());
+					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getIteration());
 				}
 
 				// Loop until the end condition is met or sequentially within the loop
