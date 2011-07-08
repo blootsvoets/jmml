@@ -14,6 +14,11 @@ import eu.mapperproject.jmml.util.graph.StyledNode;
  *
  */
 public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, CouplingInstance> {
+	/** A start node. */
+	private final static SimpleNode START = new SimpleNode("start", "shape=Mdiamond");
+	/** An end node. */
+	private final static SimpleNode END = new SimpleNode("end", "shape=Msquare");	
+
 	public TaskGraphDecorator() {
 		super(true);
 	}
@@ -46,7 +51,7 @@ public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, Couplin
 	@Override
 	public StyledEdge addSourceEdge(ProcessIteration node, StyledNode snode) {
 		if (node.isInitial()) {
-			return new SimpleStyledEdge(SimpleNode.START, snode);
+			return new SimpleStyledEdge(START, snode);
 		}
 		return null;
 	}
@@ -54,7 +59,7 @@ public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, Couplin
 	@Override
 	public StyledEdge addSinkEdge(ProcessIteration node, StyledNode snode) {
 		if (node.isFinal()) {
-			return new SimpleStyledEdge(snode, SimpleNode.END);
+			return new SimpleStyledEdge(snode, END);
 		}
 		return null;
 	}

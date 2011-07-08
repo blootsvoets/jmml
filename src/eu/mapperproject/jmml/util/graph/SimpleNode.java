@@ -10,11 +10,6 @@ public class SimpleNode implements StyledNode {
 	private final String style;
 	private final Category category;
 	
-	/** A prototypical start node. */
-	public final static SimpleNode START = new SimpleNode("s", "fixedsize=true,shape=circle,style=filled,color=black,height=0.3");
-	/** A prototypical end node. */
-	public final static SimpleNode END = new SimpleNode("e", "fixedsize=true,shape=doublecircle,style=filled,color=black,height=0.3");
-	
 	public SimpleNode(String name, String style) {
 		this(name, style, Category.NO_CATEGORY);
 	}

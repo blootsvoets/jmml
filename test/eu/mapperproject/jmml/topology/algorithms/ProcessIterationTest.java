@@ -28,9 +28,9 @@ public class ProcessIterationTest {
 	public void setUp() throws Exception {
 		Domain d = new Domain(1, "bas");
 		ScaleSet scales = new ScaleSet();
-		scales.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("4 s")), true));
+		scales.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("4 s")), true, SIUnit.parseSIUnit("1 s")));
 		ScaleSet scaleOther = new ScaleSet();
-		scaleOther.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("1 s")), true));
+		scaleOther.putScale(new Scale("t", Dimension.TIME, new SIRange(SIUnit.parseSIUnit("1 s")), true, new SIRange(SIUnit.parseSIUnit("1 s")), true, SIUnit.parseSIUnit("1 s")));
 		
 		Submodel sbbasz = new Submodel(new ModelMetadata("basicz", null, null, null), null, null, null, null, false, null, null);
 		Submodel sbbas = new Submodel(new ModelMetadata("basic", null, null, null), null, null, null, null, false, null, null);

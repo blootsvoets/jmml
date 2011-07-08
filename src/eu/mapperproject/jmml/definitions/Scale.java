@@ -22,9 +22,10 @@ public class Scale implements Identifiable {
 	private final boolean deltaFixed;
 	private final SIRange max;
 	private final boolean maxFixed;
+	private final SIUnit characteristic;
 	private final int steps;
 	
-	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed, int dimensions, String dimName) {
+	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed, SIUnit characteristic, int dimensions, String dimName) {
 		this.id = id;
 		this.dim = dim;
 		this.dimName = dimName;
@@ -34,10 +35,11 @@ public class Scale implements Identifiable {
 		this.max = max;
 		this.maxFixed = maxFixed;
 		this.steps = calculateSteps();
+		this.characteristic = characteristic;
 	}
 
-	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed) {
-		this(id, dim, delta, deltaFixed, max, maxFixed, 1, null);
+	public Scale(String id, Dimension dim, SIRange delta, boolean deltaFixed, SIRange max, boolean maxFixed, SIUnit characteristic) {
+		this(id, dim, delta, deltaFixed, max, maxFixed, characteristic, 1, null);
 	}
 	
 	/**
@@ -66,6 +68,10 @@ public class Scale implements Identifiable {
 	 */
 	public SIRange getDelta() {
 		return this.delta;
+	}
+
+	public SIUnit getCharacteristic() {
+		return this.characteristic;
 	}
 
 	/* (non-Javadoc)
@@ -115,7 +121,6 @@ public class Scale implements Identifiable {
 
 	@Override
 	public boolean deepEquals(Object o) {
-
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
