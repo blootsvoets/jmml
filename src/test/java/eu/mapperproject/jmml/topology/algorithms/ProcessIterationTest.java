@@ -78,11 +78,11 @@ public class ProcessIterationTest {
 		
 		out = piBasicz.nextStep();
 		assertSame(null, out);
-		assertSame(SEL.B, piBasicz.getOperator());
+		assertSame(SEL.S, piBasicz.getOperator());
 		
 		out = piBasicz.nextStep();
 		assertSame(null, out);
-		assertSame(SEL.S, piBasicz.getOperator());
+		assertSame(SEL.B, piBasicz.getOperator());
 
 		out = piBasicz.nextStep();
 		assertSame(null, out);

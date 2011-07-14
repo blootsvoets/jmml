@@ -18,10 +18,10 @@ public class Submodel implements Identifiable {
 		finit(false),
 		/** Intermediate observation */
 		Oi(true),
-		/** Boundary condition */
-		B(false),
 		/** Solver */
 		S(false),
+		/** Boundary condition */
+		B(false),
 		/** Final observation */
 		Of(true);
 		

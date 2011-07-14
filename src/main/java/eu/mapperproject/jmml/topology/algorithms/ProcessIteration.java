@@ -104,7 +104,7 @@ public class ProcessIteration {
 	}
 
 	public boolean firstLoop() {
-		return this.annot.getIteration() == 0 && this.annot.getOperator().compareTo(SEL.S) <= 0;
+		return this.annot.getIteration() == 0 && this.annot.getOperator().compareTo(SEL.B) <= 0;
 	}
 	
 	public final boolean initializing() {
@@ -169,7 +169,7 @@ public class ProcessIteration {
 				}
 
 				// Loop until the end condition is met or sequentially within the loop
-				if (currentOp.compareTo(SEL.S) < 0 || this.finalLoop()) {
+				if (currentOp.compareTo(SEL.B) < 0 || this.finalLoop()) {
 					set.nextOperator();
 				}
 				else {
