@@ -66,20 +66,25 @@ public class ScaleParser {
 			}
 			else {
 				String charVal = scale.getAttributeValue("characteristic");
-				if (!charVal.isEmpty()) {
+				if (charVal != null && !charVal.isEmpty()) {
 					characteristic = SIUnit.parseSIUnit(charVal);
 				}
 			}
 			
 			SIRange delta = this.parseRange(scale, id, "delta", "step size", origDelta, origDeltaFixed);
 			boolean deltaFixed = this.lastFixed;
-			if (characteristic == null) {
-				characteristic = delta.getMean();
-			}
 			
 			SIRange max = this.parseRange(scale, id, "max", "maximum size", origMax, origMaxFixed);
 			boolean maxFixed = this.lastFixed;
-
+			if (characteristic == null) {
+				if (delta != null) {
+					characteristic = delta.getMean();
+				}
+				else if (max != null) {
+					characteristic = max.getMean();
+				}
+			}
+			
 			
 			Attribute dims = scale.getAttribute("dimensions");
 			int dimensions = 1;
