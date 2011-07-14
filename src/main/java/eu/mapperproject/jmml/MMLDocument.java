@@ -123,17 +123,17 @@ public class MMLDocument {
 			logger.log(Level.SEVERE, "given xMML document {0} does not exist", xmml);
 			System.exit(2);
 		}
-		File dotParent = new File(args[1]).getParentFile();
+		File dotParent = new File(args[1]).getAbsoluteFile().getParentFile();
 		if (dotParent == null || !dotParent.exists()) {
 			logger.log(Level.SEVERE, "directory of Graphviz file {0} does not exist", args[1]);
 			System.exit(2);
 		}
-		File pdfParent = new File(args[2]).getParentFile();
+		File pdfParent = new File(args[2]).getAbsoluteFile().getParentFile();
 		if (pdfParent == null || !pdfParent.exists()) {
 			logger.log(Level.SEVERE, "directory of pdf file {0} does not exist", args[2]);
 			System.exit(2);
 		}
-		File ssmParent = new File(args[3]).getParentFile();
+		File ssmParent = new File(args[3]).getAbsoluteFile().getParentFile();
 		if (ssmParent == null || !ssmParent.exists()) {
 			logger.log(Level.SEVERE, "directory of SVG file {0} does not exist", args[2]);
 			System.exit(2);
