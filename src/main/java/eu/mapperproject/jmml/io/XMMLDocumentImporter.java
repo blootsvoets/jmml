@@ -78,7 +78,7 @@ public class XMMLDocumentImporter {
 		Version xmmlVersion = new Version(model.getAttributeValue("xmml_version"));
 		
 		if (!SUPPORTED_VERSIONS.contains(xmmlVersion)) {
-			throw new IllegalArgumentException("Document xMML format version " + xmmlVersion + "is not supported, only versions " +
+			throw new IllegalArgumentException("Document xMML format " + xmmlVersion + " is not supported, only versions " +
 					SUPPORTED_VERSIONS.versionString() + " are supported.");
 		}
 		ModelMetadata mm = this.parseModelMetadata(model);
