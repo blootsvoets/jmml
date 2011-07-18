@@ -72,23 +72,23 @@ public class ProcessIterationTest {
 		ProcessIteration out;
 		assertSame(SEL.finit, piBasicz.getOperator());
 		
-		out = piBasicz.nextStep();
+		out = piBasicz.nextStep(true);
 		assertSame(null, out);
 		assertSame(SEL.Oi, piBasicz.getOperator());
 		
-		out = piBasicz.nextStep();
+		out = piBasicz.nextStep(true);
 		assertSame(null, out);
 		assertSame(SEL.S, piBasicz.getOperator());
 		
-		out = piBasicz.nextStep();
+		out = piBasicz.nextStep(true);
 		assertSame(null, out);
 		assertSame(SEL.B, piBasicz.getOperator());
 
-		out = piBasicz.nextStep();
+		out = piBasicz.nextStep(true);
 		assertSame(null, out);
 		assertSame(SEL.Of, piBasicz.getOperator());
 		assertTrue(piBasicz.instanceCompleted());
 		// Error
-		out = piBasicz.nextStep();
+		out = piBasicz.nextStep(true);
 	}
 }

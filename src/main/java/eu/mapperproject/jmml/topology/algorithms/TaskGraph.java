@@ -14,15 +14,17 @@ import eu.mapperproject.jmml.util.graph.PTGraph;
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
 public class TaskGraph {
 	private final PTGraph<ProcessIteration, CouplingInstance> graph;
-	private CouplingTopology topology;
+	private final CouplingTopology topology;
+	private final boolean collapse;
 	
 	public TaskGraph(CouplingTopology topology) {
-		this(topology, false, false);
+		this(topology, true, false, false);
 	}
 	
-	public TaskGraph(CouplingTopology topology, boolean horizontal, boolean subgraphs) {
+	public TaskGraph(CouplingTopology topology, boolean collapse, boolean horizontal, boolean subgraphs) {
 		this.topology = topology;
 		this.graph = new PTGraph<ProcessIteration, CouplingInstance>(true);
+		this.collapse = collapse;
 	}
 
 	
@@ -110,7 +112,7 @@ public class TaskGraph {
 
 	/** Create an instance of a stateful coupling between one process iteration and the next */
 	private void activateStep(TaskGraphState state, ProcessIteration pi) {
-		ProcessIteration pnext = pi.nextStep();
+		ProcessIteration pnext = pi.nextStep(this.collapse);
 		if (pnext == null) {
 			state.activate(pi);
 		}

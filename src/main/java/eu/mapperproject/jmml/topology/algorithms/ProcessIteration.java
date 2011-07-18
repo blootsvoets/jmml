@@ -119,12 +119,12 @@ public class ProcessIteration {
 		return this.range == null;
 	}
 	
-	public ProcessIteration nextStep() {
-		return this.progress(ProgressType.ITERATION);
+	public ProcessIteration nextStep(boolean collapse) {
+		return this.progress(ProgressType.ITERATION, collapse);
 	}
 	
 	public ProcessIteration nextState() {
-		return this.progress(ProgressType.INSTANCE);
+		return this.progress(ProgressType.INSTANCE, false);
 	}
 
 	public ProcessIteration nextIteration(Coupling pd) {
@@ -151,7 +151,7 @@ public class ProcessIteration {
 		return new CouplingInstance(this, pnext, cd);
 	}
 
-	private ProcessIteration progress(ProgressType instance) {		
+	private ProcessIteration progress(ProgressType instance, boolean collapse) {		
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
 		}
@@ -188,7 +188,7 @@ public class ProcessIteration {
 
 		set.applySubject();
 
-		if (hasEdgesOut || instance == ProgressType.INSTANCE) {
+		if (!collapse || hasEdgesOut || instance == ProgressType.INSTANCE) {
 			// Since no more progress may be made, we can free the annotations
 			this.annotOut = null;
 			this.annot.freeTraces();
