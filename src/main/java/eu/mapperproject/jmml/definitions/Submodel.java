@@ -11,7 +11,7 @@ import eu.mapperproject.jmml.util.parser.MultiStringParseToken.Optional;
  * 
  * @author Joris Borgdorff
  */
-public class Submodel implements Identifiable {
+public class Submodel extends AbstractElement implements Identifiable {
 	/** Operators of the submodel execution loop (SEL) */
 	public enum SEL {
 		/** Initialization */
@@ -58,20 +58,15 @@ public class Submodel implements Identifiable {
 		}
 	}
 	
-	private final Map<String,Port> in;
-	private final Map<String,Port> out;
 	private final ScaleSet scales;
 	private final Map<String,Param> params;
-	private final ModelMetadata meta;
 	private final boolean initial;
 	private final Optional stateful;
 	private final Optional interactive;
 	
 	public Submodel(ModelMetadata meta, ScaleSet scales, Map<String,Port> in, Map<String,Port> out, Map<String,Param> params, boolean initial, Optional stateful, Optional interactive) {
-		this.meta = meta;
+		super(meta, in, out);
 		this.scales = scales;
-		this.in = in;
-		this.out = out;
 		this.params = params;
 		this.initial = initial;
 		this.stateful = stateful;
