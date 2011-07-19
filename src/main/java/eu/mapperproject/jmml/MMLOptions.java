@@ -19,8 +19,8 @@ import java.util.List;
  * @author jborgdo1
  */
 public class MMLOptions {
-	@Parameter(names={"--collapse","-c"})
-	public boolean collapse = true;
+	@Parameter(names={"--no-collapse","-C"})
+	public boolean nocollapse = false;
 	
 	@Parameter(names={"--ssm", "-s"},converter=FileConverter.class,validateWith=WritableFile.class)
 	public File ssm;
@@ -31,7 +31,10 @@ public class MMLOptions {
 	@Parameter(names={"--topology","-t"},converter=FileConverter.class,validateWith=WritableFile.class)
 	public File topology;
 	
-	@Parameter(names={"--dotfile","-d"},converter=FileConverter.class,validateWith=WritableFile.class)
+	@Parameter(names={"--domain","-d"},converter=FileConverter.class,validateWith=WritableFile.class)
+	public File domain;
+	
+	@Parameter(names={"--dotfile","-o"},converter=FileConverter.class,validateWith=WritableFile.class)
 	private File dotfile;
 	
 	@Parameter(description="XMML_FILE",validateWith=ReadableFile.class,arity=1)
@@ -49,7 +52,7 @@ public class MMLOptions {
 	}
 	
 	public boolean wantsOutput() {
-		return this.topology != null || this.taskgraph != null || this.ssm != null;
+		return this.topology != null || this.taskgraph != null || this.ssm != null || this.domain != null;
 	}
 	
 	public File getDotFile() throws IOException {

@@ -1,7 +1,5 @@
 package eu.mapperproject.jmml;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -75,21 +73,21 @@ public class MMLDocument {
 	 * Export a graph of a given type of this document to a dot file
 	 * and make a pdf file out of it.
 	 */
-	public void export(GraphType gt, File dot, File pdf) throws IOException, InterruptedException {
+	public void export(GraphType gt, File dot, File pdf, boolean collapse) throws IOException, InterruptedException {
 		GraphToGraphvizExporter<?,?> exporter;
 		switch (gt) {
 			case DOMAIN:
 				exporter = new GraphToGraphvizExporter(new DomainDecorator(), this.getDomainGraph());
 				break;
 			case TASK:
-				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph());
+				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph(collapse));
 				break;
 			default:
 				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), this.topology.getGraph(), true, false, true);
 				break;
 		}
 		
-		System.out.println("Exporting graphviz file...");
+		System.out.println("Exporting graphviz file visualizing the " + gt + "...");
 		
 		exporter.export(dot, pdf);
 		
@@ -97,8 +95,8 @@ public class MMLDocument {
 	}
 
 	/** Generate a task graph */
-	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph() {
-		TaskGraph task = new TaskGraph(this.topology);
+	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph(boolean collapse) {
+		TaskGraph task = new TaskGraph(this.topology, collapse, false, false);
 		task.computeGraph();
 		return task.getGraph();
 	}
@@ -132,10 +130,13 @@ public class MMLDocument {
 			try {
 				File out;
 				if (opt.topology != null) {
-					doc.export(GraphType.TOPOLOGY, dot, opt.topology);
+					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
 				}
 				if (opt.taskgraph != null) {
-					doc.export(GraphType.TASK, dot, opt.taskgraph);
+					doc.export(GraphType.TASK, dot, opt.taskgraph, !opt.nocollapse);
+				}
+				if (opt.domain != null) {
+					doc.export(GraphType.DOMAIN, dot, opt.domain, false);
 				}
 				if (opt.ssm != null) {
 					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
