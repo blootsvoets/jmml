@@ -11,7 +11,7 @@ import eu.mapperproject.jmml.util.parser.MultiStringParseToken.Optional;
  * 
  * @author Joris Borgdorff
  */
-public class Submodel extends AbstractElement implements Identifiable {
+public class Submodel extends AbstractElement {
 	/** Operators of the submodel execution loop (SEL) */
 	public enum SEL {
 		/** Initialization */
@@ -24,16 +24,16 @@ public class Submodel extends AbstractElement implements Identifiable {
 		B(false),
 		/** Final observation */
 		Of(true);
-		
+
 		private final boolean sending;
 		private final String asString;
 		private final static SEL values[] = SEL.values();
-		
+
 		private SEL(boolean send) {
 			this.sending = send;
 			this.asString = super.toString();
 		}
-		
+
 		/** Whether the operator may send data */
 		public boolean isSending() {
 			return this.sending;
@@ -73,21 +73,6 @@ public class Submodel extends AbstractElement implements Identifiable {
 		this.interactive = interactive;
 	}
 
-	@Override
-	public String getId() {
-		return meta.getId();
-	}
-	
-	/** Get an in port by its name */
-	public Port getInPort(String name) {
-		return in.get(name);
-	}
-
-	/** Get an out port by its name */
-	public Port getOutPort(String name) {
-		return out.get(name);
-	}
-
 	/**
 	 * @return the scale map of the submodel
 	 */
@@ -107,17 +92,6 @@ public class Submodel extends AbstractElement implements Identifiable {
 	 */
 	public boolean isInitial() {
 		return this.initial;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (o == null || getClass() != o.getClass()) return false;
-		return this.meta.equals(((Submodel)o).meta);
-	}
-
-	@Override
-	public int hashCode() {
-		return this.meta.hashCode();
 	}
 
 	@Override

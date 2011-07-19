@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.definitions;
 
 import eu.mapperproject.jmml.ModelMetadata;
@@ -19,5 +15,15 @@ public abstract class AbstractElement extends AbstractImplementation {
 		super(meta);
 		this.in = inPorts;
 		this.out = outPorts;
+	}
+	
+	/** Get an in port by its name */
+	public Port getInPort(String name) {
+		return in.get(name);
+	}
+
+	/** Get an out port by its name */
+	public Port getOutPort(String name) {
+		return out.get(name);
 	}
 }
