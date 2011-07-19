@@ -73,24 +73,21 @@ public class MMLDocument {
 	 * Export a graph of a given type of this document to a dot file
 	 * and make a pdf file out of it.
 	 */
-	public void export(GraphType gt, String dotStr, String pdfStr) throws IOException, InterruptedException {
+	public void export(GraphType gt, File dot, File pdf, boolean collapse) throws IOException, InterruptedException {
 		GraphToGraphvizExporter<?,?> exporter;
 		switch (gt) {
 			case DOMAIN:
 				exporter = new GraphToGraphvizExporter(new DomainDecorator(), this.getDomainGraph());
 				break;
 			case TASK:
-				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph());
+				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph(collapse));
 				break;
 			default:
 				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), this.topology.getGraph(), true, false, true);
 				break;
 		}
 		
-		System.out.println("Exporting graphviz file...");
-
-		File dot = new File(dotStr);
-		File pdf = new File(pdfStr);
+		System.out.println("Exporting graphviz file visualizing the " + gt + "...");
 		
 		exporter.export(dot, pdf);
 		
@@ -98,8 +95,8 @@ public class MMLDocument {
 	}
 
 	/** Generate a task graph */
-	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph() {
-		TaskGraph task = new TaskGraph(this.topology);
+	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph(boolean collapse) {
+		TaskGraph task = new TaskGraph(this.topology, collapse, false, false);
 		task.computeGraph();
 		return task.getGraph();
 	}
@@ -111,58 +108,47 @@ public class MMLDocument {
 		Tree<Cluster<Instance,Coupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
 		return PTGraph.graphFromTree(clTree);
 	}
-
 	public static void main(String[] args) throws IOException {
-		// Argument verification
-		if (args.length != 4) {
-			logger.severe("XMMLDocument takes four arguments: an xMML file, a GraphViz dot file to write to, a pdf file for GraphViz to write to and a SVG file to write the Scale Separation Map to.");
-			System.exit(1);
-		}
-		File xmml = new File(args[0]);
-		if (!xmml.exists()) {
-			logger.log(Level.SEVERE, "given xMML document {0} does not exist", xmml);
-			System.exit(2);
-		}
-		File dotParent = new File(args[1]).getAbsoluteFile().getParentFile();
-		if (dotParent == null || !dotParent.exists()) {
-			logger.log(Level.SEVERE, "directory of Graphviz file {0} does not exist", args[1]);
-			System.exit(2);
-		}
-		File pdfParent = new File(args[2]).getAbsoluteFile().getParentFile();
-		if (pdfParent == null || !pdfParent.exists()) {
-			logger.log(Level.SEVERE, "directory of pdf file {0} does not exist", args[2]);
-			System.exit(2);
-		}
-		File ssmParent = new File(args[3]).getAbsoluteFile().getParentFile();
-		if (ssmParent == null || !ssmParent.exists()) {
-			logger.log(Level.SEVERE, "directory of SVG file {0} does not exist", args[2]);
-			System.exit(2);
-		}
-
-		// Generating an XMML document and exporting it
-		MMLDocument doc = null;
-		try {
-			doc = new XMMLDocumentImporter().parse(xmml);
-		} catch (ValidityException e) {
-			logger.log(Level.SEVERE, "The xMML file provided did not contain valid XML: {}", e);
-			System.exit(5);
-		} catch (ParsingException e) {
-			logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
-			System.exit(6);
-		}
-
-		CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
-		exp.display();
-
-		try {
-			doc.export(GraphType.TOPOLOGY, args[1], args[2]);
-			exp.export(new File(args[3]));
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
-			System.exit(7);
-		} catch (InterruptedException ex) {
-			logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
-			System.exit(8);
+		MMLOptions opt = new MMLOptions(args);
+		
+		if (opt.wantsOutput()) {
+			File xmml = opt.getXMMLFile();
+			File dot = opt.getDotFile();
+			
+			// Generating an XMML document and exporting it
+			MMLDocument doc = null;
+			try {
+				doc = new XMMLDocumentImporter().parse(xmml);
+			} catch (ValidityException e) {
+				logger.log(Level.SEVERE, "The xMML file provided did not contain valid XML: {}", e);
+				System.exit(2);
+			} catch (ParsingException e) {
+				logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
+				System.exit(3);
+			}
+			
+			try {
+				File out;
+				if (opt.topology != null) {
+					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
+				}
+				if (opt.taskgraph != null) {
+					doc.export(GraphType.TASK, dot, opt.taskgraph, !opt.nocollapse);
+				}
+				if (opt.domain != null) {
+					doc.export(GraphType.DOMAIN, dot, opt.domain, false);
+				}
+				if (opt.ssm != null) {
+					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
+					exp.export(opt.ssm);
+				}
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
+				System.exit(4);
+			} catch (InterruptedException ex) {
+				logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
+				System.exit(5);
+			}
 		}
 	}
 }
