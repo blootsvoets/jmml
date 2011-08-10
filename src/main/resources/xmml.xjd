@@ -1,17 +1,41 @@
 <?xml version="1.0"?>
 <bindings version="2.0"
   xmlns="http://java.sun.com/xml/ns/jaxb"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <bindings schemaLocation="xmml.xsd">
-    <schemaBindings>
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+  <globalBindings fixedAttributeAsConstantProperty="true" typesafeEnumBase="xs:NCName"/>
+  
+  <bindings schemaLocation="/Users/jborgdo1/Developer/xml/xmml/external/mad.xsd">
+	<schemaBindings>
+      <package name="eu.mapperproject.mad.specification"/>
+    </schemaBindings>
+  </bindings>
+  <bindings schemaLocation="/Users/jborgdo1/Developer/xml/xmml/xmml.xsd">
+  <schemaBindings>
       <package name="eu.mapperproject.xmml.specification"/>
     </schemaBindings>
-    <bindings node="//xs:attributeGroup[@name='regularScale']/xs:attribute[@name='delta']">
+    <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='delta']">
       <property name="RegularDelta" />
     </bindings>
-    <bindings node="//xs:attributeGroup[@name='regularScale']/xs:attribute[@name='total']">
+    <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='total']">
       <property name="RegularTotal" />
     </bindings>
+	
+	<bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
+		<typesafeEnumClass name="type"/>
+	</bindings>
+    <bindings node="//xs:element[@name='filter']//xs:attribute[@name='type']/xs:simpleType">
+		<typesafeEnumClass name="type"/>
+	</bindings>
+    <bindings node="//xs:complexType[@name='port']//xs:attribute[@name='type']/xs:simpleType">
+		<typesafeEnumClass name="type"/>
+	</bindings>
+    <bindings node="//xs:complexType[@name='range']//xs:attribute[@name='type']/xs:simpleType">
+		<typesafeEnumClass name="type"/>
+	</bindings>
+    <bindings node="//xs:simpleType[@name='unit']">
+		<class name="unit"/>
+	</bindings>
     <!-- <bindings node="//[@type='t:unit']">
       <javaType name="SIUnit"
          parseMethod="javax.xml.bind.DatatypeConverter.parseInt" 
