@@ -23,6 +23,9 @@
       <property name="RegularTotal" />
     </bindings>
 	
+	<bindings node="//xs:complexType[@name='definition']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinition" />
+	</bindings>
 	  <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>
 	  </bindings>

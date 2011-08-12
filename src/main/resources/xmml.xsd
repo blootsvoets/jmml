@@ -92,7 +92,11 @@
 		<complexType>
 			<sequence>
 				<element ref="t:datatype" minOccurs="0" maxOccurs="unbounded"/>
-				<element ref="t:element" minOccurs="0" maxOccurs="unbounded"/>
+				<choice minOccurs="0" maxOccurs="unbounded">
+					<element ref="t:filter"/>
+					<element ref="t:mapper"/>
+					<element ref="t:submodel"/>
+				</choice>
 			</sequence>
   		<anyAttribute processContents="lax"/>
 		</complexType>
@@ -113,9 +117,7 @@
 		</complexContent></complexType>
 	</element>
 
-  <element name="element" abstract="true"/>
-
-	<element name="filter" substitutionGroup="t:element">
+	<element name="filter">
 	  <annotation><documentation>
 	    A conduit filter, filtering a type of data and either converting it to
       another type of data, or reducing the data over a dimension with a
@@ -150,7 +152,7 @@
 		</unique>
 	</element>
 
-	<element name="mapper" substitutionGroup="t:element">
+	<element name="mapper">
 	  <annotation><documentation>
 	    A fan-in or fan-out mapper. If the type is fan-in, it may have multiple
       in ports and one out port, otherwise, one in port and multiple out ports.
@@ -185,7 +187,7 @@
 		</unique>
 	</element>
 
-	<element name="submodel" substitutionGroup="t:element">
+	<element name="submodel">
 	  <annotation><documentation>
 	    Definition of a single code of a single submodel. Attributes state whether
       the submodel should be started at initialization if this is ambiguous,
@@ -280,8 +282,12 @@
       	<element name="out" type="t:port"/>
 			</choice>
 		</complexType>
-		<unique name="portId">
-			<selector xpath="*"/>
+		<unique name="portInId">
+			<selector xpath="t:in"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="portOutId">
+			<selector xpath="t:out"/>
 			<field xpath="@id"/>
 		</unique>
 	</element>
