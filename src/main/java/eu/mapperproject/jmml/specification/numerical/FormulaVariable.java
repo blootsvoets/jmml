@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /** Represent a single formula */
-class FormulaVariable extends Formula {
+class FormulaVariable extends InterpretedFormula {
 	private String var;
 	private Set<String> vars;
 

@@ -1,7 +1,5 @@
 package eu.mapperproject.jmml.specification.numerical;
 
-import eu.mapperproject.jmml.specification.numerical.Formula;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -9,20 +7,20 @@ import java.util.TreeSet;
 /** Represents a simple mathematical formula
  * @author Joris Borgdorff
  */
-public class ComplexFormula extends Formula {
+public class ComplexFormula extends InterpretedFormula {
 	private Operator operator;
-	private Formula left;
-	private Formula right;
+	private InterpretedFormula left;
+	private InterpretedFormula right;
 	private Set<String> variables;
 	
-	ComplexFormula(Operator op, Formula left, Formula right) {
+	ComplexFormula(Operator op, InterpretedFormula left, InterpretedFormula right) {
 		this.variables = null;
 		this.left = left;
 		this.right = right;
 		this.operator = op;
 	}
 	
-	ComplexFormula(Operator op, Formula value) {
+	ComplexFormula(Operator op, InterpretedFormula value) {
 		this(op, null, value);
 	}
 	

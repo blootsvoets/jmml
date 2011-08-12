@@ -26,7 +26,7 @@
 	<bindings node="//xs:complexType[@name='definition']">
 		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinition" />
 	</bindings>
-	  <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
+    <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>
 	  </bindings>
     <bindings node="//xs:element[@name='filter']//xs:attribute[@name='type']/xs:simpleType">

@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** A representation of a Formula */
-public abstract class Formula {
+public abstract class InterpretedFormula {
 	/** Symbols that can be used */
 	enum Operator {
 		PLUS('+'), MINUS("[^*/^+-]-", 2), TIMES('*'), DIVIDE('/'), NEGATE("-", 1), POW('^'),
@@ -95,7 +95,7 @@ public abstract class Formula {
 	 */
 	public abstract double evaluate(Map<String,Integer> variables);
 
-	public static Formula parseFormula(String formulaString) throws ParseException {
+	public static InterpretedFormula valueOf(String formulaString) throws ParseException {
 		formulaString = whitespace.matcher(formulaString).replaceAll("");
 		List<String> tokens = tokenizeParens(formulaString);
 		return parseString(tokens.get(0), tokens);
@@ -107,9 +107,9 @@ public abstract class Formula {
 	 * @param tokens Contents of tokens denoting parentheses
 	 * @throws ParseException if the formula is not well-formed
 	 */
-	private static Formula parseString(String s, List<String> tokens) throws ParseException {
-		Formula left, right;
-		Formula current = null;
+	private static InterpretedFormula parseString(String s, List<String> tokens) throws ParseException {
+		InterpretedFormula left, right;
+		InterpretedFormula current = null;
 		
 		if (s == null || s.isEmpty()) {
 			throw new IllegalArgumentException("Can not parse empty string");

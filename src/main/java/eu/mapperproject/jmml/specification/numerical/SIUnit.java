@@ -15,7 +15,7 @@ public class SIUnit implements Comparable<SIUnit> {
 	private final ScaleModifier scale;
 	private final static Pattern siPattern = Pattern.compile("(-?[0-9.]+)([eE](-?[0-9]+))?\\s*(\\w*\\s*\\w*)");
 	
-	public static SIUnit parseSIUnit(String siunit) {
+	public static SIUnit valueOf(String siunit) {
 		Matcher m = siPattern.matcher(siunit);
 		if (m.find()) {
 			double value = Double.parseDouble(m.group(1));

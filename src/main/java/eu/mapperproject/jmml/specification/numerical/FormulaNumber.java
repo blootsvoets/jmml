@@ -3,7 +3,7 @@ package eu.mapperproject.jmml.specification.numerical;
 import java.util.Map;
 
 /** Represent a single number */
-class FormulaNumber extends Formula {
+class FormulaNumber extends InterpretedFormula {
 	private double value;
 
 	FormulaNumber(String var) {

@@ -13,6 +13,7 @@ import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.InstancePort;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.ObjectFactory;
+import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.specification.Ports;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.Topology;
