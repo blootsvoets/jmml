@@ -6,7 +6,7 @@ package eu.mapperproject.jmml.specification.graph;
  *
  * @param <T> type of parent that child has
  */
-public interface Child<T extends Child<T>> extends Comparable<T> {
+public interface Child<T extends Child<T>> {
 	public T parent();
 	public boolean isRoot();
 }

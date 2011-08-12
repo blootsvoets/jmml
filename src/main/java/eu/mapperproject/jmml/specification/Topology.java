@@ -58,9 +58,9 @@ public class Topology {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 	
-	private Map<String, Instance> instances;
-	private List<Coupling> couplings;
-	private boolean accessed;
+	private transient Map<String, Instance> instances;
+	private transient List<Coupling> couplings;
+	private transient boolean accessed;
 
 	public Topology() {
 		this.instances = new HashMap<String, Instance>();

@@ -9,12 +9,8 @@
 package eu.mapperproject.jmml.specification;
 
 import eu.mapperproject.jmml.specification.graph.Child;
-import eu.mapperproject.jmml.specification.graph.Numbered;
-import eu.mapperproject.jmml.topology.HierarchicalDomain;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -43,10 +39,23 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "domain", propOrder = {
-    "value"
+    "name"
 })
-public class Domain {
-    private HierarchicalDomain domain;
+public class Domain implements Child<Domain>{
+	@XmlValue
+	private String name;
+	private transient Domain parent;
+	
+	public Domain() {
+		this.name = null;
+		this.parent = null;
+	}
+	
+	private Domain(String[] names, int level) {
+		this.name = names[level];
+		this.parent = getDomain(names, level - 1);
+	}
+	
 	
     /**
      * 
@@ -59,15 +68,16 @@ public class Domain {
      *     {@link String }
      *     
      */
-	@XmlValue
-    public String getValue() {
-        return domain.toString();
+	
+    public String getName() {
+		if (this.isRoot()) {
+			return this.name;
+		}
+		else {
+			return this.parent.getName() + '.' + this.name;
+		}
     }
 
-	public HierarchicalDomain getHierarchicalDomain() {
-		return this.domain;
-	}
-	
     /**
      * Sets the value of the value property.
      * 
@@ -76,7 +86,72 @@ public class Domain {
      *     {@link String }
      *     
      */
-    public void setValue(String value) {
-		this.domain = HierarchicalDomain.parseDomain(value);
+    public void setName(String value) {
+		String[] names = value.split("\\.");
+		
+		if (!this.matches(names, names.length - 1)) {
+			this.name = names[names.length - 1];
+			this.parent = getDomain(names, names.length - 2);
+			addDomain(this, names.length - 1);
+		}
     }
+	
+	/**
+	 * Wheter a array of strings matches the current domain on the specified
+	 * level.
+	 * @param names
+	 * @param level
+	 * @return 
+	 */
+	private boolean matches(String[] names, int level) {
+		if (level == 0) {
+			return names[0].equals(this.name);
+		}
+		else {
+			return names[level].equals(this.name)
+				&& this.parent != null
+				&& this.parent.matches(names, level - 1);
+		}
+	}
+	
+	@Override
+	public Domain parent() {
+		return this.parent;
+	}
+
+	@Override
+	public boolean isRoot() {
+		return this.parent == null;
+	}
+
+	
+	private final static List<List<Domain>> DOMAINS;
+	static {
+		DOMAINS = new ArrayList<List<Domain>>();
+	}
+
+	public static Domain getDomain(String[] names, int level) {
+		if (level < 0) {
+			return null;
+		}
+		
+		if (DOMAINS.size() > level) {
+			for (Domain domain : DOMAINS.get(level)) {
+				if (domain.matches(names, level)) {
+					return domain;
+				}
+			}
+		}
+		
+		Domain domain = new Domain(names, level);
+		addDomain(domain, level);
+		return domain;
+	}
+	
+	private static void addDomain(Domain domain, int level) {
+		while (DOMAINS.size() <= level) {
+			DOMAINS.add(new ArrayList<Domain>());
+		}
+		DOMAINS.get(level).add(domain);
+	}
 }
