@@ -5,5 +5,5 @@
 // Generated on: 2011.08.11 at 06:37:51 PM CEST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.mapper-project.eu/xmml", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package eu.mapperproject.jmml.specification;
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.mapper-project.eu/mad")
+package eu.mapperproject.mad.specification;

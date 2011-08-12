@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cd src/main/java &&
-xjc -b ../resources/xmml.xjd ../../../../../xml/xmml/xmml.xsd ../../../../../xml/xmml/external/mad.xsd
+xjc -b ../resources/xmml.xjd ../resources/xmml.xsd ../resources/mad.xsd
   

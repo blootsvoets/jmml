@@ -28,7 +28,7 @@
 			<attribute name="id" type="NCName" use="required"/>
 			<attribute name="name" type="string"/>
 			<attribute name="version" type="string"/>
-			<attribute name="xmml_version" fixed="0.3.3"/>
+			<attribute name="xmml_version" fixed="0.3.3" type="t:version"/>
 			<anyAttribute processContents="lax"/>
 		</complexType>
   
@@ -46,6 +46,10 @@
 		</unique>
 		<unique name="filterId">
 			<selector xpath="t:definitions/t:filter"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="instanceId">
+			<selector xpath="t:topology/t:instance"/>
 			<field xpath="@id"/>
 		</unique>
 		
@@ -100,7 +104,7 @@
 	  </documentation></annotation>
 		<complexType><complexContent>
 		  <extension base="t:definition">
-  			<attribute name="size_estimate" type="string">
+  			<attribute name="size_estimate" type="t:formula">
   			  <annotation><documentation>
   			    A function in terms of the scales and params of the
   			    submodel it originated from.
@@ -137,7 +141,7 @@
   				</simpleType>
   			</attribute>
   			<attribute name="dimension" type="string"/>
-  			<attribute name="factor" type="t:unit"/>
+  			<attribute name="factor" type="t:formula"/>
   		</extension>
 		</complexContent></complexType>
 		<unique name="filterParamId">
@@ -310,7 +314,7 @@
 				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
 				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
 			</sequence>
-			<attribute name="id" type="ID"/>
+			<attribute name="id" type="NCName"/>
 			<attribute name="submodel" type="NCName"/>
 			<attribute name="mapper" type="NCName"/>
 			<attribute name="domain" type="t:domain"><annotation><documentation>
@@ -537,6 +541,22 @@
 		</restriction>
 	</simpleType>
 	
+	<simpleType name="version">
+	  <annotation><documentation>
+	    Version number of xMML.
+	  </documentation></annotation>
+	  <restriction base="string">
+	    <pattern value="\p{N}+(\.\p{N}+)*(\.\p{N}+-?(\p{L}|\p{N})+)?"/>
+	  </restriction>
+	</simpleType>
+
+	<simpleType name="formula">
+	  <annotation><documentation>
+	    A formula with variables and some standard operators.
+	  </documentation></annotation>
+	  <restriction base="string"/>
+	</simpleType>
+
 	<!-- Shared attributes and elements -->
 	
 	<complexType name="anyContent" mixed="true">

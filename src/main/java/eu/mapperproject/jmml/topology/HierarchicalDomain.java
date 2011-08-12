@@ -5,6 +5,7 @@ import eu.mapperproject.jmml.specification.graph.Numbered;
 import java.util.Map;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,27 +13,31 @@ import java.util.List;
  * @author Joris Borgdorff
  *
  */
-public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
+public class HierarchicalDomain implements Child<HierarchicalDomain>,Comparable<HierarchicalDomain>, Numbered {
 	private final String name;
-	private final Domain parent;
+	private final HierarchicalDomain parent;
 	private final int num;
+	private int maxNum;
+	private final Map<String, HierarchicalDomain> children;
 	
 	/** A generic root domain denoting all domains */
-	public final static Domain GENERIC = new Domain(0, "GENERIC");
+	public final static HierarchicalDomain GENERIC = new HierarchicalDomain(0, "GENERIC");
 	
-	public Domain(int num, String name) {
+	public HierarchicalDomain(int num, String name) {
 		this(num, name, null);
 	}
 	
-	private Domain(int num, String name, Domain parent) {
+	private HierarchicalDomain(int num, String name, HierarchicalDomain parent) {
 		this.parent = parent;
 		this.name = name;
 		this.num = num;
+		this.maxNum = num;
+		this.children = new HashMap<String, HierarchicalDomain>();
 	}
 	
 	/** Create a new domain which is a child of the current domain */
-	public Domain getChild(int num, String name) {
-		return new Domain(num, name, this);
+	public HierarchicalDomain getChild(int num, String name) {
+		return new HierarchicalDomain(num, name, this);
 	}
 	
 	@Override
@@ -41,7 +46,7 @@ public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	}
 	
 	@Override
-	public Domain parent() {
+	public HierarchicalDomain parent() {
 		return this.parent;
 	}
 	
@@ -63,7 +68,7 @@ public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
-		return this.num == ((Domain)o).num;
+		return this.num == ((HierarchicalDomain)o).num;
 	}
 
 	@Override
@@ -78,22 +83,25 @@ public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	 * @param s parseable string
 	 * @param domains a map of previously parsed domains, which can be used as parents. This will be extended with new domains found
 	 */
-	public static Domain parseDomain(String s, int startNum, Map<String, List<Domain>> domains) {
+	public static HierarchicalDomain parseDomain(String s, int startNum, Map<String, List<HierarchicalDomain>> domains) {
 		String[] ss = s.split("\\.");
-		Domain child = Domain.GENERIC, parent = Domain.GENERIC;
+		HierarchicalDomain child = HierarchicalDomain.GENERIC;
+		HierarchicalDomain parent = HierarchicalDomain.GENERIC;
 		
 		for (int i = 0; i < ss.length; i++) {
-			child = null;
+			child = parent.children.get(ss[i]);
+			
+			
 
 			// Get all domains that have the same name but might be somewhere else in the hierarchy
-			List<Domain> peers = domains.get(ss[i]);
+			List<HierarchicalDomain> peers = domains.get(ss[i]);
 			if (peers == null) {
-				peers = new ArrayList<Domain>();
+				peers = new ArrayList<HierarchicalDomain>();
 				domains.put(ss[i], peers);
 			}
 
 			// Determine which of the namesakes has the same place in the hierarchy
-			for (Domain peer : peers) {
+			for (HierarchicalDomain peer : peers) {
 				if (!peer.isRoot() && peer.parent().equals(parent)) {
 					child = peer;
 					break;
@@ -114,7 +122,7 @@ public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	}
 
 	@Override
-	public int compareTo(Domain t) {
+	public int compareTo(HierarchicalDomain t) {
 		if (this.num < t.num) return -1;
 		else if (this.num > t.num) return 1;
 		else return 0;
@@ -133,7 +141,7 @@ public class Domain implements Child<Domain>, Comparable<Domain>, Numbered {
 	@Override
 	public boolean deepEquals(Object o) {
 		if (!this.equals(o)) return false;
-		Domain other = (Domain)o;
+		HierarchicalDomain other = (HierarchicalDomain)o;
 		return this.name.equals(other.name) && (this.parent == null ? other.parent == null : this.parent.equals(other.parent));
 	}
 }

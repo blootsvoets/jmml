@@ -14,13 +14,13 @@ public class Instance implements Identifiable, Domainable, Numbered, Comparable<
 
 	private final String id;
 	private final Submodel submodel;
-	private final Domain domain;
+	private final HierarchicalDomain domain;
 	private boolean initial;
 	private boolean isfinal;
 	private final ScaleSet scales;
 	private final int num;
 
-	public Instance(int num, String id, Submodel submodel, Domain domain,
+	public Instance(int num, String id, Submodel submodel, HierarchicalDomain domain,
 			boolean initial, ScaleSet scales) {
 		this.num = num;
 		this.id = id;
@@ -53,7 +53,7 @@ public class Instance implements Identifiable, Domainable, Numbered, Comparable<
 	 * @see eu.mapperproject.xmml.topology.Domainable#getDomain()
 	 */
 	@Override
-	public Domain getDomain() {
+	public HierarchicalDomain getDomain() {
 		return this.domain;
 	}
 

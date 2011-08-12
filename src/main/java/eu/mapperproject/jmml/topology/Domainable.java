@@ -10,5 +10,5 @@ package eu.mapperproject.jmml.topology;
  */
 public interface Domainable {
 	/** Get the domain */
-	public Domain getDomain();
+	public HierarchicalDomain getDomain();
 }

@@ -4,7 +4,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xmml="http://www.mapper-project.eu/xmml"
   elementFormDefault="qualified">
-  <globalBindings fixedAttributeAsConstantProperty="true" typesafeEnumBase="xs:NCName"/>
+  <globalBindings typesafeEnumBase="xs:NCName"/>
   
   <bindings schemaLocation="mad.xsd">
 	  <schemaBindings>
@@ -14,7 +14,7 @@
 
   <bindings schemaLocation="xmml.xsd">
     <schemaBindings>
-      <package name="eu.mapperproject.xmml.specification"/>
+      <package name="eu.mapperproject.jmml.specification"/>
     </schemaBindings>
     <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='delta']">
       <property name="RegularDelta" />
@@ -35,8 +35,21 @@
     <bindings node="//xs:complexType[@name='range']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>
 	  </bindings>
+	  
     <bindings node="//xs:simpleType[@name='unit']">
 		  <class name="unit"/>
 	  </bindings>
+	  <bindings node="//xs:simpleType[@name='version']">
+      <class name="version"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='domain']">
+      <class name="domain"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='instancePort']">
+      <class name="instancePort"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='formula']">
+      <class name="formula"/>
+    </bindings>
   </bindings>
 </bindings>
