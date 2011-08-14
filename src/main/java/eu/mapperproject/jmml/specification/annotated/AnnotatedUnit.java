@@ -24,4 +24,16 @@ public class AnnotatedUnit extends Unit {
 		super.setValue(value);
 		this.unit = SIUnit.valueOf(value);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!o.getClass().equals(getClass())) return false;
+		AnnotatedUnit au = (AnnotatedUnit)o;
+		return (this.unit == null ? au.unit == null : this.unit.equals(au.unit));
+	}
+
+	@Override
+	public int hashCode() {
+		return (this.unit != null ? this.unit.hashCode() : 0);
+	}
 }

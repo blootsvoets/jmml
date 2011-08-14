@@ -282,12 +282,8 @@
       	<element name="out" type="t:port"/>
 			</choice>
 		</complexType>
-		<unique name="portInId">
-			<selector xpath="t:in"/>
-			<field xpath="@id"/>
-		</unique>
-		<unique name="portOutId">
-			<selector xpath="t:out"/>
+		<unique name="portId">
+			<selector xpath="*"/>
 			<field xpath="@id"/>
 		</unique>
 	</element>
@@ -297,10 +293,10 @@
 	    The instantiation of computational elements and the couplings between them.
     </documentation></annotation>
 		<complexType>
-			<choice maxOccurs="unbounded">
-				<element ref="t:instance"/>
-				<element ref="t:coupling"/>
-			</choice>
+			<sequence>
+				<element ref="t:instance" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:coupling" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
   		<anyAttribute processContents="lax"/>
 		</complexType>
 	</element>

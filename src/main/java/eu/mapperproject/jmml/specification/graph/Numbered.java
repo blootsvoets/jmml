@@ -7,4 +7,6 @@ package eu.mapperproject.jmml.specification.graph;
 public interface Numbered extends Identifiable {
 	/** Get the number of the current class */
 	public int getNumber();
+	
+	public void setNumber(int num);
 }

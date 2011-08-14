@@ -16,7 +16,13 @@
     <schemaBindings>
       <package name="eu.mapperproject.jmml.specification"/>
     </schemaBindings>
-    <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='delta']">
+    <bindings node="//xs:complexType[@name='scale']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedScale"/>
+	</bindings>
+    <bindings node="//xs:complexType[@name='range']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedRange"/>
+	</bindings>
+	<bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='delta']">
       <property name="RegularDelta" />
     </bindings>
     <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='total']">
@@ -25,6 +31,18 @@
 	
 	<bindings node="//xs:complexType[@name='definition']">
 		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinition" />
+	</bindings>
+    <bindings node="//xs:complexType[@name='port']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedPort" />
+	</bindings>
+    <bindings node="//xs:element[@name='definitions']/xs:complexType">
+		<class name="Definitions" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions" />
+	</bindings>
+    <bindings node="//xs:element[@name='topology']/xs:complexType">
+		<class name="Topology" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedTopology" />
+	</bindings>
+    <bindings node="//xs:element[@name='coupling']/xs:complexType">
+		<class name="Coupling" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling" />
 	</bindings>
     <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>

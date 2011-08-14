@@ -9,6 +9,9 @@ import eu.mapperproject.jmml.specification.Definitions;
 import eu.mapperproject.jmml.specification.Filter;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.Submodel;
+import eu.mapperproject.jmml.specification.util.DistinguishClass;
+import eu.mapperproject.jmml.specification.util.DistinguishQName;
+import eu.mapperproject.jmml.specification.util.Distinguisher;
 import eu.mapperproject.jmml.specification.util.UniqueLists;
 import java.util.List;
 
@@ -18,13 +21,11 @@ import java.util.List;
  */
 public class AnnotatedDefinitions extends Definitions {
 	
-	@Override
-	public List<AnnotatedDefinition> getFilterOrMapperOrSubmodel() {
-        if (filterOrMapperOrSubmodel == null) {
-            filterOrMapperOrSubmodel = new UniqueLists(new String[] {"filter", "mapper", "submodels"});
-        }
-        return this.filterOrMapperOrSubmodel;
-    }
+	public AnnotatedDefinitions() {
+		Distinguisher dist = new DistinguishClass(new Class[] {Filter.class, Mapper.class, Submodel.class});
+		filterOrMapperOrSubmodel = new UniqueLists(dist);		
+		System.out.println("aha");
+	}
 	
 	public Mapper getMapper(String id) {
 		return (Mapper)((UniqueLists)this.filterOrMapperOrSubmodel).getById(1, id);

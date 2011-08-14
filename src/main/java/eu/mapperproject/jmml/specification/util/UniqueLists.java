@@ -4,75 +4,93 @@
  */
 package eu.mapperproject.jmml.specification.util;
 
-import eu.mapperproject.jmml.specification.graph.Identifiable;
+import eu.mapperproject.jmml.specification.graph.Numbered;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 
 /**
  *
  * @author Joris Borgdorff
  */
-public class UniqueLists<V> extends AbstractList<JAXBElement<V>> {
-	private List[] lists;
-	private String[] names;
+public class UniqueLists<T,V> extends AbstractList<V> {
+	private final List<V> elems;
+	private final Distinguisher<T, V> dist;
+	private final boolean setNumbers;
+	private final Validator<V> valid;
 	
-	public UniqueLists(String[] names) {
-		this.names = names;
-		this.lists = new ArrayList[names.length];
+	public UniqueLists(Distinguisher<T,V> dist, boolean setNumbers, Validator<V> valid) {
+		this.elems = new ArrayList<V>();
+		this.dist = dist;
+		this.setNumbers = setNumbers;
+		this.valid = valid;
+	}
+	
+	public UniqueLists(Distinguisher<T,V> dist) {
+		this(dist, true, null);
 	}
 	
 	@Override
-	public boolean add(JAXBElement<V> el) {
-		int i = getIndex(el.getName().getLocalPart());
-		
-		if (lists[i].contains(el)) {
-			throw new IllegalArgumentException("May not add two ports with the same name.");
+	public boolean add(V el) {
+		if (this.valid != null && !valid.isValid(el)) {
+			return false;
 		}
-			
-		return lists[i].add(el);
+		if (this.containsElement(el)) {
+			throw new IllegalArgumentException("May not add double element.");
+		}
+		if (this.setNumbers) {
+			((Numbered)el).setNumber(elems.size());
+		}
+		return this.elems.add(el);
 	}
 	
 	@Override
-	public JAXBElement<V> get(int i) {
-		int j = 0, n = lists[0].size();
-		while (i >= lists[j].size() && j < names.length - 1) {
-			i -= lists[j].size();
-			j++;
-		}
-		
-		return (JAXBElement<V>)lists[j].get(i);
+	public V get(int i) {
+		return this.elems.get(i);
 	}
 		
-	public V getById(String name, String id) {
-		return getById(getIndex(name), id);
+	public V getById(T type, String id) {
+		return getById(dist.getTypeIndex(type), id);
 	}
 	
 	public V getById(int i, String id) {
-		for (JAXBElement<V> je : (List<JAXBElement<V>>)lists[i]) {
-			if (je != null && ((Identifiable)je.getValue()).getId().equals(id)) {
-				return je.getValue();
+		if (i >= 0) {
+			for (V elem : elems) {
+				if (dist.getIndex(elem) == i && dist.getId(elem).equals(id)) {
+					return elem;
+				}
+			}
+		}
+		return null;	
+	}
+
+	public V getById(String id) {
+		for (V elem : elems) {
+			if (dist.getId(elem).equals(id)) {
+				return elem;
 			}
 		}
 		return null;	
 	}
 
 	@Override
-	public int size() {
-		int sz = 0;
-		for (List l : lists) {
-			sz += l.size();
-		}
-		return sz;
+	public boolean contains(Object o) {
+		return this.elems.contains(o);
 	}
 
-	private int getIndex(String name) {
-		for (int i = 0; i < names.length; i++) {
-			if (name.equals(names[i])) {
-				return i;
-			}
+	public boolean containsElement(V el) {
+		try {
+			return (getById(dist.getIndex(el), dist.getId(el)) != null);
 		}
-		return -1;
+		catch (NullPointerException e) {
+			System.out.println(el);
+			System.exit(1);
+			return true;
+		}
+	}
+	
+	@Override
+	public int size() {
+		return elems.size();
 	}
 }

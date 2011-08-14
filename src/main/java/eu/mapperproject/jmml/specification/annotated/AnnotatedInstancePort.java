@@ -5,31 +5,30 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.InstancePort;
+import eu.mapperproject.jmml.specification.Port;
+import eu.mapperproject.jmml.specification.Submodel;
 
 /**
  *
  * @author jborgdo1
  */
 public class AnnotatedInstancePort extends InstancePort {
-	private String port;
-
-	public String getPort() {
+	private AnnotatedPort port;
+	private AnnotatedInstance instance;
+	
+	public AnnotatedPort getPort() {
 		return port;
 	}
 
-	public String getInstance() {
-		return value;
+	public AnnotatedInstance getInstance() {
+		return instance;
 	}
-	
-	@Override
-	public String getValue() {
-		return value + '.' + port;
-	}
-	
+		
 	@Override
 	public void setValue(String value) {
+		super.setValue(value);
 		String[] split = value.split("\\.");
-		this.value = split[0];
-		this.port = split[1];
+		this.instance = ObjectFactoryAnnotated.getModel().getTopology().getInstance(split[0]);
+		this.port = this.instance.getPorts().getPort(split[1]);
 	}
 }

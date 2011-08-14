@@ -12,12 +12,15 @@ import eu.mapperproject.jmml.specification.Formula;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.InstancePort;
 import eu.mapperproject.jmml.specification.Mapper;
+import eu.mapperproject.jmml.specification.Model;
 import eu.mapperproject.jmml.specification.ObjectFactory;
 import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.specification.Ports;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.Topology;
 import eu.mapperproject.jmml.specification.Unit;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlRegistry;
 
 /**
@@ -26,6 +29,13 @@ import javax.xml.bind.annotation.XmlRegistry;
  */
 @XmlRegistry
 public class ObjectFactoryAnnotated extends ObjectFactory {
+	private static AnnotatedModel m = null;
+	
+	@Override
+	public Model createModel() {
+		m = new AnnotatedModel();
+		return m;
+	}
 	
 	@Override
 	public Domain createDomain() {
@@ -81,5 +91,9 @@ public class ObjectFactoryAnnotated extends ObjectFactory {
 	@Override
 	public Ports createPorts() {
 		return new AnnotatedPorts();
+	}
+	
+	public static AnnotatedModel getModel() {
+		return m;
 	}
 }

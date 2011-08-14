@@ -6,6 +6,9 @@ package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.specification.Ports;
+import eu.mapperproject.jmml.specification.util.DistinguishQName;
+import eu.mapperproject.jmml.specification.util.Distinguisher;
+import eu.mapperproject.jmml.specification.util.PortValidator;
 import eu.mapperproject.jmml.specification.util.UniqueLists;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -18,19 +21,25 @@ import javax.xml.bind.JAXBElement;
  */
 public class AnnotatedPorts extends Ports {
 
+	public AnnotatedPorts() {
+		Distinguisher dist = new DistinguishQName(new String[] {"in", "out"});
+		inOrOut = new UniqueLists(dist, false, new PortValidator());
+	}
+	
 	@Override
 	public List<JAXBElement<Port>> getInOrOut() {
-        if (inOrOut == null) {
-            inOrOut = new UniqueLists(new String[] {"in", "out"});
-        }
         return this.inOrOut;
     }
 	
-	public Port getInPort(String id) {
-		return ((UniqueLists<Port>)inOrOut).getById(0, id);
+	public AnnotatedPort getPort(String id) {
+		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(id)).getValue();
+	}
+	
+	public AnnotatedPort getInPort(String id) {
+		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(0, id)).getValue();
 	}
 
-	public Port getOutPort(String id) {
-		return ((UniqueLists<Port>)inOrOut).getById(1, id);
+	public AnnotatedPort getOutPort(String id) {
+		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(1, id)).getValue();
 	}
 }
