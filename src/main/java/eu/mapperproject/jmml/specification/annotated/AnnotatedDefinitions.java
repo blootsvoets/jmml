@@ -27,8 +27,8 @@ public class AnnotatedDefinitions extends Definitions {
 		return (Mapper)((UniqueLists)this.filterOrMapperOrSubmodel).getById(1, id);
 	}
 
-	public Filter getFilter(String id) {
-		return (Filter)((UniqueLists)this.filterOrMapperOrSubmodel).getById(0, id);
+	public AnnotatedFilter getFilter(String id) {
+		return (AnnotatedFilter)((UniqueLists)this.filterOrMapperOrSubmodel).getById(0, id);
 	}
 
 	public Submodel getSubmodel(String id) {

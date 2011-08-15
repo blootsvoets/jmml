@@ -29,10 +29,9 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		}
     }
 
-	
 	@Override
 	public void setMapper(String map) {
-		super.setMapper(map);
+		this.mapper = map;
 		if (map != null) {
 			if (this.submodel != null) {
 				throw new IllegalStateException("Cannot create an instance of both a submodel and a mapper.");
@@ -45,20 +44,13 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	}
 	
 	public Mapper getMapperInstance() {
-		if (this.mapperInst == null) {
-			if (this.mapper == null) {
-				return null;
-			}
-			else {
-				this.mapperInst = ObjectFactoryAnnotated.getModel().getDefinitions().getMapper(this.mapper);
-			}
-		}
+		if (this.mapperInst == null) this.setMapper(this.mapper);
 		return this.mapperInst;
 	}
 	
 	@Override
 	public void setSubmodel(String sub) {
-		super.setSubmodel(sub);
+		this.submodel = sub;
 		if (sub != null) {
 			if (this.mapper != null) {
 				throw new IllegalStateException("Cannot create an instance of both a submodel and a mapper.");
@@ -71,14 +63,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	}
 
 	public Submodel getSubmodelInstance() {
-		if (this.submodelInst == null) {
-			if (this.submodel == null) {
-				return null;
-			}
-			else {
-				this.submodelInst = ObjectFactoryAnnotated.getModel().getDefinitions().getSubmodel(this.submodel);
-			}
-		}
+		if (this.submodelInst == null) this.setSubmodel(this.submodel);
 		return this.submodelInst;
 	}
 	
@@ -96,6 +81,17 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		else {
 			return null;
 		}
+	}
+	
+	@Override
+	public AnnotatedScale getTimescale() {
+		if (this.timescale != null){
+			return this.timescale;
+		}
+		else if (this.ofSubmodel()) {
+			return (AnnotatedScale) this.getSubmodelInstance().getTimescale();
+		}
+		return null;
 	}
 	
 	@Override
@@ -126,6 +122,9 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	@Override
 	public String toString() {
-		return this.getClass() + "@" + this.id + " " + mapper + " " + submodel;
+		return this.getClass().getSimpleName()
+			+ "(" + (ofSubmodel() ? "submodel " : "mapper ")
+			+ this.id
+			+ "<" + (ofSubmodel() ? submodel : mapper) + ">)";
 	}
 }

@@ -14,21 +14,13 @@ public class AnnotatedFormula extends Formula {
 	private transient InterpretedFormula formula;
 
 	public InterpretedFormula interpret() {
-		if (this.formula == null) {
-			if (value == null) return null;
-			try {
-				this.formula = InterpretedFormula.valueOf(value);
-			} catch (ParseException ex) {
-				this.formula = null;
-				Logger.getLogger(AnnotatedFormula.class.getName()).log(Level.SEVERE, "Could not parse formula: {}", ex);
-			}
-		}
+		if (this.formula == null) this.setValue(this.value);
 		return this.formula;
 	}
 	
 	@Override
 	public void setValue(String value) {
-		super.setValue(value);
+		this.value = value;
 		try {
 			this.formula = InterpretedFormula.valueOf(value);
 		} catch (ParseException ex) {

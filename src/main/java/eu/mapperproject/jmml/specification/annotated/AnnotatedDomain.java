@@ -4,11 +4,18 @@ import eu.mapperproject.jmml.specification.Domain;
 import eu.mapperproject.jmml.specification.graph.Child;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  *
  * @author Joris Borgdorff
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "domain", propOrder = {
+    "value"
+})
 public class AnnotatedDomain extends Domain implements Child<AnnotatedDomain> {
 	private transient AnnotatedDomain parent;
 	
@@ -36,6 +43,7 @@ public class AnnotatedDomain extends Domain implements Child<AnnotatedDomain> {
      */	
 	@Override
     public String getValue() {
+		if (this.parent == null && this.value.contains(".")) this.setValue(value); 
 		if (this.isRoot()) {
 			return this.value;
 		}

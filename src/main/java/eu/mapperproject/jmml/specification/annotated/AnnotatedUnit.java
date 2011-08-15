@@ -28,7 +28,7 @@ public class AnnotatedUnit extends Unit {
 	public boolean equals(Object o) {
 		if (!o.getClass().equals(getClass())) return false;
 		AnnotatedUnit au = (AnnotatedUnit)o;
-		return (this.interpret() == null ? au.interpret() == null : this.unit.equals(au.unit));
+		return (this.interpret() == null ? au.interpret() == null : this.unit.equals(au.interpret()));
 	}
 
 	@Override

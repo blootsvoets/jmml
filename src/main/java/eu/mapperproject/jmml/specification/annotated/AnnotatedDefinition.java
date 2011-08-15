@@ -9,7 +9,7 @@ import eu.mapperproject.jmml.specification.graph.Numbered;
  * @author Joris Borgdorff
  */
 public class AnnotatedDefinition extends Definition implements Numbered {
-	protected int number;
+	protected transient int number;
 
 	@Override
 	public boolean deepEquals(Object o) {
@@ -35,5 +35,10 @@ public class AnnotatedDefinition extends Definition implements Numbered {
 	@Override
 	public int hashCode() {
 		return this.number;
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "(" + getId() + ")";
 	}
 }
