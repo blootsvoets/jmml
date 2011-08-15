@@ -26,6 +26,7 @@ public class PortValidator implements Validator<JAXBElement<Port>> {
 				return false;
 			}
 		}
+		
 		return true;
 	}
 	

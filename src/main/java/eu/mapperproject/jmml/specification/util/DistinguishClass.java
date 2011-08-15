@@ -1,4 +1,4 @@
-|package eu.mapperproject.jmml.specification.util;
+package eu.mapperproject.jmml.specification.util;
 
 import eu.mapperproject.jmml.specification.graph.Identifiable;
 
