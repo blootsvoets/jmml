@@ -16,7 +16,7 @@ import org.junit.Test;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class UnmarshallingTest {
 	@Test

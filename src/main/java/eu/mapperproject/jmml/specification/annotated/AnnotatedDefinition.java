@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Definition;
@@ -10,7 +6,7 @@ import eu.mapperproject.jmml.specification.graph.Numbered;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class AnnotatedDefinition extends Definition implements Numbered {
 	protected int number;

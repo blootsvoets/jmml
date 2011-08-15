@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.util;
 
 import eu.mapperproject.jmml.specification.Port;

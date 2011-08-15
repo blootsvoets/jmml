@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Definition;
@@ -25,7 +21,7 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 @XmlRegistry
 public class ObjectFactoryAnnotated extends ObjectFactory {

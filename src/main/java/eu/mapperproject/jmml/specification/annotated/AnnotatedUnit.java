@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Unit;
@@ -10,7 +6,7 @@ import java.text.ParseException;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class AnnotatedUnit extends Unit {
 	private transient SIUnit unit;

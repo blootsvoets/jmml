@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.InstancePort;
@@ -10,7 +6,7 @@ import eu.mapperproject.jmml.specification.Submodel;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class AnnotatedInstancePort extends InstancePort {
 	private transient AnnotatedPort port;

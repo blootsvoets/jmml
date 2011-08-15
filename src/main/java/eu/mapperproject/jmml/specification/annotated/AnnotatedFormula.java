@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Formula;
@@ -12,7 +8,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class AnnotatedFormula extends Formula {
 	private transient InterpretedFormula formula;

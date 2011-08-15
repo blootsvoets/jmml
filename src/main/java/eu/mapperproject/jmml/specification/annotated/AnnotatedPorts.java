@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Port;
@@ -17,10 +13,11 @@ import javax.xml.bind.JAXBElement;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class AnnotatedPorts extends Ports {
 
+	@SuppressWarnings("unchecked")
 	public AnnotatedPorts() {
 		Distinguisher dist = new DistinguishQName(new String[] {"in", "out"});
 		inOrOut = new UniqueLists(dist, false, new PortValidator());
@@ -31,14 +28,17 @@ public class AnnotatedPorts extends Ports {
         return this.inOrOut;
     }
 	
+	@SuppressWarnings("unchecked")
 	public AnnotatedPort getPort(String id) {
 		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(id)).getValue();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public AnnotatedPort getInPort(String id) {
 		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(0, id)).getValue();
 	}
 
+	@SuppressWarnings("unchecked")
 	public AnnotatedPort getOutPort(String id) {
 		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(1, id)).getValue();
 	}
