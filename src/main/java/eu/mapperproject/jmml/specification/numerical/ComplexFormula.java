@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.numerical;
 
+import eu.mapperproject.jmml.specification.util.ArraySet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,7 +30,7 @@ public class ComplexFormula extends InterpretedFormula {
 	 */
 	public Set<String> getVariableNames() {
 		if (this.variables == null) {
-			this.variables = new TreeSet<String>();
+			this.variables = new ArraySet<String>();
 			if (this.left != null)
 				this.variables.addAll(this.left.getVariableNames());
 			if (this.right != null)

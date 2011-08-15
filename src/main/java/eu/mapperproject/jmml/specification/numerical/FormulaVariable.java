@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.numerical;
 
+import eu.mapperproject.jmml.specification.util.ArraySet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,7 +12,7 @@ class FormulaVariable extends InterpretedFormula {
 
 	FormulaVariable(String var) {
 		this.var = var;
-		this.vars = new TreeSet<String>();
+		this.vars = new ArraySet<String>(1);
 		this.vars.add(var);
 	}
 

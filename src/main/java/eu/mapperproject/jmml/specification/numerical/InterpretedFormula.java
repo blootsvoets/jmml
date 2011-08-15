@@ -5,6 +5,7 @@ import eu.mapperproject.jmml.specification.parser.MultiStringParseToken;
 import eu.mapperproject.jmml.specification.parser.ParseToken;
 import eu.mapperproject.jmml.specification.parser.RegexParseToken;
 
+import eu.mapperproject.jmml.specification.util.ArraySet;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public abstract class InterpretedFormula {
 	private final static Pattern whitespace = Pattern.compile("\\s");
 	private final static Pattern parens = Pattern.compile("\\(([^\\(\\)]*)\\)");
 	
-	private final static Set<String> emptySet = new TreeSet<String>();
+	private final static Set<String> emptySet = new ArraySet<String>(0);
 
 	/**
 	 * @return variable names contained in the formula
