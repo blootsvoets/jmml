@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.mapperproject.jmml;
 
 import com.beust.jcommander.IParameterValidator;
@@ -16,7 +12,7 @@ import java.util.List;
 
 /**
  *
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public class MMLOptions {
 	@Parameter(names={"--no-collapse","-C"})

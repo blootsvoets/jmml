@@ -2,7 +2,7 @@ package eu.mapperproject.jmml.util.graph;
 
 /**
  * Can Categorize an object of type T.
- * @author jborgdo1
+ * @author Joris Borgdorff
  */
 public interface Categorizer<T> {
 	/** Return a non-null category based on some aspect of the object. */
