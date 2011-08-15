@@ -38,6 +38,9 @@
     <bindings node="//xs:element[@name='definitions']/xs:complexType">
 		<class name="Definitions" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions" />
 	</bindings>
+    <bindings node="//xs:element[@name='filter']/xs:complexType">
+		<class name="Filter" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedFilter" />
+	</bindings>
     <bindings node="//xs:element[@name='topology']/xs:complexType">
 		<class name="Topology" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedTopology" />
 	</bindings>
@@ -46,6 +49,9 @@
 	</bindings>
     <bindings node="//xs:element[@name='instance']/xs:complexType">
 		<class name="Instance" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedInstance" />
+	</bindings>
+    <bindings node="//xs:element[@name='apply']/xs:complexType">
+		<class name="Apply" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedApply" />
 	</bindings>
     <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>
