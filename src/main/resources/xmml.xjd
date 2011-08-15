@@ -44,6 +44,9 @@
     <bindings node="//xs:element[@name='coupling']/xs:complexType">
 		<class name="Coupling" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling" />
 	</bindings>
+    <bindings node="//xs:element[@name='instance']/xs:complexType">
+		<class name="Instance" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedInstance" />
+	</bindings>
     <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
 		  <typesafeEnumClass name="type"/>
 	  </bindings>

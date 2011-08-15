@@ -13,8 +13,8 @@ import eu.mapperproject.jmml.specification.Submodel;
  * @author jborgdo1
  */
 public class AnnotatedInstancePort extends InstancePort {
-	private AnnotatedPort port;
-	private AnnotatedInstance instance;
+	private transient AnnotatedPort port;
+	private transient AnnotatedInstance instance;
 	
 	public AnnotatedPort getPort() {
 		return port;

@@ -15,10 +15,19 @@ import java.util.logging.Logger;
  * @author jborgdo1
  */
 public class AnnotatedFormula extends Formula {
-	private InterpretedFormula formula;
+	private transient InterpretedFormula formula;
 
 	public InterpretedFormula interpret() {
-		return formula;
+		if (this.formula == null) {
+			if (value == null) return null;
+			try {
+				this.formula = InterpretedFormula.valueOf(value);
+			} catch (ParseException ex) {
+				this.formula = null;
+				Logger.getLogger(AnnotatedFormula.class.getName()).log(Level.SEVERE, "Could not parse formula: {}", ex);
+			}
+		}
+		return this.formula;
 	}
 	
 	@Override
@@ -27,6 +36,7 @@ public class AnnotatedFormula extends Formula {
 		try {
 			this.formula = InterpretedFormula.valueOf(value);
 		} catch (ParseException ex) {
+			this.formula = null;
 			Logger.getLogger(AnnotatedFormula.class.getName()).log(Level.SEVERE, "Could not parse formula: {}", ex);
 		}
 	}

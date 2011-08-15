@@ -15,18 +15,18 @@ import java.util.List;
  */
 public class UniqueLists<T,V> extends AbstractList<V> {
 	private final List<V> elems;
-	private final Distinguisher<T, V> dist;
+	private final Distinguisher<T, ? super V> dist;
 	private final boolean setNumbers;
 	private final Validator<V> valid;
 	
-	public UniqueLists(Distinguisher<T,V> dist, boolean setNumbers, Validator<V> valid) {
+	public UniqueLists(Distinguisher<T,? super V> dist, boolean setNumbers, Validator<V> valid) {
 		this.elems = new ArrayList<V>();
 		this.dist = dist;
 		this.setNumbers = setNumbers;
 		this.valid = valid;
 	}
 	
-	public UniqueLists(Distinguisher<T,V> dist) {
+	public UniqueLists(Distinguisher<T,? super V> dist) {
 		this(dist, true, null);
 	}
 	

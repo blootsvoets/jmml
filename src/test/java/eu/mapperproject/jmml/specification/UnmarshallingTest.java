@@ -1,10 +1,6 @@
 package eu.mapperproject.jmml.specification;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
+import eu.mapperproject.jmml.specification.annotated.NamespacePrefixMapperImpl;
 import eu.mapperproject.jmml.specification.annotated.ObjectFactoryAnnotated;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +21,7 @@ import org.junit.Test;
 public class UnmarshallingTest {
 	@Test
 	public void testUnmarshalling() throws JAXBException, FileNotFoundException {
-		InputStream xmmlInputStream = new FileInputStream("/Users/bobby/Documents/dev/java/xmml-specification/src/test/resources/isr.xmml");
+		InputStream xmmlInputStream = new FileInputStream("/Users/jborgdo1/Developer/java/xmml-specification/src/test/resources/isr.xmml");
 		
 		JAXBContext context = JAXBContext.newInstance(Model.class);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -34,6 +30,7 @@ public class UnmarshallingTest {
 		
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapperImpl());
 		marshaller.marshal(o, new File("marshalled.xml"));
 	}
 	

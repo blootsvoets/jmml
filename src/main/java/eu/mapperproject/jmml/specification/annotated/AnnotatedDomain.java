@@ -14,7 +14,7 @@ import java.util.List;
  * @author jborgdo1
  */
 public class AnnotatedDomain extends Domain implements Child<AnnotatedDomain> {
-	private AnnotatedDomain parent;
+	private transient AnnotatedDomain parent;
 	
 	public AnnotatedDomain() {
 		super();

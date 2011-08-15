@@ -13,9 +13,12 @@ import java.text.ParseException;
  * @author jborgdo1
  */
 public class AnnotatedUnit extends Unit {
-	private SIUnit unit;
+	private transient SIUnit unit;
 
 	public SIUnit interpret() {
+		if (this.unit == null) {
+			this.unit = value == null ? null : SIUnit.valueOf(value);
+		}
 		return unit;
 	}
 	
@@ -29,11 +32,11 @@ public class AnnotatedUnit extends Unit {
 	public boolean equals(Object o) {
 		if (!o.getClass().equals(getClass())) return false;
 		AnnotatedUnit au = (AnnotatedUnit)o;
-		return (this.unit == null ? au.unit == null : this.unit.equals(au.unit));
+		return (this.interpret() == null ? au.interpret() == null : this.unit.equals(au.unit));
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.unit != null ? this.unit.hashCode() : 0);
+		return (this.interpret() != null ? this.unit.hashCode() : 0);
 	}
 }

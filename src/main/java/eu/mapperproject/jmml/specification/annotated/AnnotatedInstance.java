@@ -14,9 +14,17 @@ import eu.mapperproject.jmml.specification.graph.Numbered;
  * @author jborgdo1
  */
 public class AnnotatedInstance extends Instance implements Numbered {
-	protected int number;
-	protected Mapper mapperInst;
-	protected Submodel submodelInst;
+	private transient int number;
+	private transient Mapper mapperInst;
+	private transient Submodel submodelInst;
+	
+	@Override
+	public String getId() {
+		if (this.id == null) {
+			return this.mapper == null ? this.submodel : this.mapper;
+		}
+		return this.id;
+	}
 	
 	@Override
 	public void setId(String value) {
@@ -36,12 +44,19 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			if (this.id == null) {
 				this.id = map;
 			}
-			this.submodelInst = null;
-			this.mapperInst = ObjectFactoryAnnotated.getModel().getDefinitions().getMapper(mapper);
+			this.mapperInst = ObjectFactoryAnnotated.getModel().getDefinitions().getMapper(this.mapper);
 		}
 	}
 	
 	public Mapper getMapperInstance() {
+		if (this.mapperInst == null) {
+			if (this.mapper == null) {
+				return null;
+			}
+			else {
+				this.mapperInst = ObjectFactoryAnnotated.getModel().getDefinitions().getMapper(this.mapper);
+			}
+		}
 		return this.mapperInst;
 	}
 	
@@ -55,10 +70,19 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			if (this.id == null) {
 				this.id = sub;
 			}
+			this.submodelInst = ObjectFactoryAnnotated.getModel().getDefinitions().getSubmodel(this.submodel);
 		}
 	}
 
 	public Submodel getSubmodelInstance() {
+		if (this.submodelInst == null) {
+			if (this.submodel == null) {
+				return null;
+			}
+			else {
+				this.submodelInst = ObjectFactoryAnnotated.getModel().getDefinitions().getSubmodel(this.submodel);
+			}
+		}
 		return this.submodelInst;
 	}
 	
