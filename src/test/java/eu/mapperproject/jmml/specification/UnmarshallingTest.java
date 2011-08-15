@@ -21,7 +21,7 @@ import org.junit.Test;
 public class UnmarshallingTest {
 	@Test
 	public void testUnmarshalling() throws JAXBException, FileNotFoundException {
-		InputStream xmmlInputStream = new FileInputStream("/Users/jborgdo1/Developer/java/xmml-specification/src/test/resources/isr.xmml");
+		InputStream xmmlInputStream = new FileInputStream("src/test/resources/isr.xmml");
 		
 		JAXBContext context = JAXBContext.newInstance(Model.class);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
