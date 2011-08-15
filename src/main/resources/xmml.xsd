@@ -380,7 +380,7 @@
 				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
 			</sequence>
 			<attribute name="filter" type="NCName" use="required"/>
-			<attribute name="factor" type="t:unit"><annotation><documentation>
+			<attribute name="factor" type="t:formula"><annotation><documentation>
 			  Overrides the factor belonging to the filter.
 			  </documentation></annotation></attribute>
 			<anyAttribute processContents="lax"/>
