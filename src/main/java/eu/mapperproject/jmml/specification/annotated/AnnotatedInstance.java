@@ -85,11 +85,13 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	@Override
 	public AnnotatedScale getTimescale() {
-		if (this.timescale != null){
-			return this.timescale;
-		}
-		else if (this.ofSubmodel()) {
-			return (AnnotatedScale) this.getSubmodelInstance().getTimescale();
+		if (this.ofSubmodel()) {
+			if (this.timescale != null){
+				return this.timescale;
+			}
+			else {
+				return (AnnotatedScale) this.getSubmodelInstance().getTimescale();
+			}
 		}
 		return null;
 	}
