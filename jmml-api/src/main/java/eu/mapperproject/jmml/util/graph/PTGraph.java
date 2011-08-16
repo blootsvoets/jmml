@@ -90,6 +90,7 @@ public class PTGraph<T, E extends Edge<T>> {
 	 */
 	public void addNode(T n) {
 		if (n == null) throw new NullPointerException("Node in PTGraph may not be null.");
+		if (this.containsNode(n)) return;
 		this.nodes.add(n);
 	}
 
@@ -101,6 +102,14 @@ public class PTGraph<T, E extends Edge<T>> {
 	/** Get all nodes in the graph */
 	public Collection<T> getNodes() {
 		return this.nodes;
+	}
+	
+	public boolean containsNode(T n) {
+		return this.nodes.contains(n);
+	}
+
+	public boolean containsEdge(E e) {
+		return this.edges.contains(e);
 	}
 
 	/**

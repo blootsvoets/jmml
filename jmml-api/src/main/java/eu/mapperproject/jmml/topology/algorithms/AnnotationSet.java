@@ -1,8 +1,8 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
 import cern.colt.list.IntArrayList;
-import eu.mapperproject.jmml.definitions.Submodel.SEL;
-import eu.mapperproject.jmml.topology.Instance;
+import eu.mapperproject.jmml.specification.SEL;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 
 /**
  * Maintain a set of annotations, for instances, iterations and operators
@@ -15,10 +15,11 @@ class AnnotationSet {
 	private SEL cOper;
 	private Trace anInst, anIter, anOper;
 	private int instNum;
+	private final static SEL[] values = SEL.values();
 
 	/** Create a new empty annotationset */
 	AnnotationSet() {
-		this(0, new Trace(), 0, new Trace(), SEL.finit, new Trace());
+		this(0, new Trace(), 0, new Trace(), SEL.FINIT, new Trace());
 	}
 
 	/** Create a copy of given annotationset */
@@ -70,7 +71,7 @@ class AnnotationSet {
 
 	/** Go to the next value of the requested annotation */
 	void nextOperator() {
-		cOper = SEL.get(anOper.nextInt(instNum));
+		cOper = values[anOper.nextInt(instNum)];
 	}
 
 	/** Reset the value of the requested annotation */
@@ -81,12 +82,12 @@ class AnnotationSet {
 
 	/** Reset the value of the requested annotation */
 	void resetOperator() {
-		cOper = SEL.finit;
+		cOper = SEL.FINIT;
 		anOper.put(instNum, 0);
 	}
 
 	/** Let the current instance be the subject of the annotation set */
-	void setSubject(Instance inst) {
+	void setSubject(AnnotatedInstance inst) {
 		instNum = inst.getNumber();
 		
 		anInst = new Trace(anInst);
@@ -95,7 +96,7 @@ class AnnotationSet {
 
 		cInst = traceCurrent(anInst);
 		cIter = traceCurrent(anIter);
-		cOper = SEL.get(traceCurrent(anOper));
+		cOper = values[traceCurrent(anOper)];
 	}
 
 	void applySubject() {

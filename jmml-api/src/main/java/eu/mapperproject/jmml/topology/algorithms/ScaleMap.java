@@ -2,9 +2,10 @@ package eu.mapperproject.jmml.topology.algorithms;
 
 import cern.colt.list.IntArrayList;
 import eu.mapperproject.jmml.definitions.ScaleSet;
-import eu.mapperproject.jmml.definitions.Submodel;
+import eu.mapperproject.jmml.specification.Submodel;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.util.ArraySet;
 import eu.mapperproject.jmml.topology.CouplingTopology;
-import eu.mapperproject.jmml.topology.Instance;
 import eu.mapperproject.jmml.util.Painter;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -14,7 +15,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * Represent the scales of a coupling topology
@@ -297,10 +297,10 @@ public class ScaleMap implements Painter {
 		}
 	}
 
-	private void addScales(Collection<Instance> insts) {
-		Collection<Submodel> visited = new HashSet<Submodel>();
-		for (Instance inst : insts) {
-			Submodel sub = inst.getSubmodel();
+	private void addScales(Collection<AnnotatedInstance> insts) {
+		Collection<Submodel> visited = new ArraySet<Submodel>();
+		for (AnnotatedInstance inst : insts) {
+			Submodel sub = inst.getSubmodelInstance();
 			if (visited.contains(sub)) continue;
 			if (tryAddScale(sub.getScaleMap(), sub.getId())
 					|| tryAddScale(inst.getScales(), sub.getId())) {
@@ -350,15 +350,16 @@ public class ScaleMap implements Painter {
 
 
 	private void drawString(String text, Graphics g, Alignment align, int x, int y) {
+		int chooseX = x;
 		if (align != Alignment.LEFT) {
 			Rectangle2D bounding = g.getFontMetrics().getStringBounds(text, g);
 			if (align == Alignment.CENTER) {
-				x -= (int)Math.round(bounding.getCenterX());
+				chooseX -= (int)Math.round(bounding.getCenterX());
 			}
 			else {
-				x -= (int)Math.round(bounding.getWidth());
+				chooseX -= (int)Math.round(bounding.getWidth());
 			}
 		}
-		g.drawString(text, x, y);
+		g.drawString(text, chooseX, y);
 	}
 }

@@ -1,7 +1,10 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.topology.Coupling;
-import eu.mapperproject.jmml.topology.Instance;
+import eu.mapperproject.jmml.specification.YesNoChoice;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.util.graph.AnnotatedStyledEdge;
 import eu.mapperproject.jmml.util.graph.Category;
 import eu.mapperproject.jmml.util.graph.GraphDecorator;
@@ -15,7 +18,7 @@ import eu.mapperproject.jmml.util.graph.StyledNode;
  * @author Joris Borgdorff
  *
  */
-public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling> {
+public class CouplingTopologyDecorator extends GraphDecorator<AnnotatedInstancePort, AnnotatedCoupling> {
 	/** A start node. */
 	private final static SimpleNode START = new SimpleNode("start", "label=\"\",shape=circle,fill=black,style=filled,fillcolor=black,width=0.25");
 	/** An end node. */
@@ -26,18 +29,19 @@ public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling
 	}
 
 	@Override
-	public StyledNode decorateNode(Instance node) {
-		return new SimpleNode(node.getId(), "shape=rectangle", Category.getCategory(node.getDomain()));
+	public StyledNode decorateNode(AnnotatedInstancePort node) {
+		Category cat = Category.getCategory((AnnotatedDomain)node.getInstance().getDomain());
+		return new SimpleNode(node.getInstance().getId(), "shape=rectangle", cat);
 	}
 
 	@Override
-	public StyledEdge decorateEdge(Coupling edge, StyledNode from, StyledNode to) {
+	public StyledEdge decorateEdge(AnnotatedCoupling edge, StyledNode from, StyledNode to) {
 		String style = "dir=both arrowtail=";
-		switch (edge.getFromOperator().getOperator()) {
-		case Oi:
+		switch (edge.getFrom().getPort().getOperator()) {
+		case OI:
 			style += "dot";
 			break;
-		case Of:
+		case OF:
 			style += "diamond";
 			break;
 		default:
@@ -45,8 +49,8 @@ public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling
 		}
 		
 		style += " arrowhead=";
-		switch (edge.getToOperator().getOperator()) {
-		case finit:
+		switch (edge.getTo().getPort().getOperator()) {
+		case FINIT:
 			style += "odiamond";
 			break;
 		case B:
@@ -63,23 +67,23 @@ public class CouplingTopologyDecorator extends GraphDecorator<Instance, Coupling
 	}
 
 	@Override
-	public StyledEdge addSourceEdge(Instance node, StyledNode snode) {
-		if (node.isInitial()) {
+	public StyledEdge addSourceEdge(AnnotatedInstancePort node, StyledNode snode) {
+		if (node.getInstance().getInit() == YesNoChoice.YES) {
 			return new SimpleStyledEdge(START, snode);
 		}
 		return null;
 	}
 
 	@Override
-	public StyledEdge addSinkEdge(Instance node, StyledNode snode) {
-		if (node.isFinal()) {
+	public StyledEdge addSinkEdge(AnnotatedInstancePort node, StyledNode snode) {
+		if (node.getInstance().isFinal()) {
 			return new SimpleStyledEdge(snode, END);
 		}
 		return null;
 	}
 
 	@Override
-	public Category categorize(Instance object) {
-		return Category.getCategory(object.getDomain());
+	public Category categorize(AnnotatedInstancePort object) {
+		return Category.getCategory((AnnotatedDomain)object.getInstance().getDomain());
 	}
 }

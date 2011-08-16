@@ -1,8 +1,10 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.definitions.Submodel.SEL;
-import eu.mapperproject.jmml.topology.Coupling;
-import eu.mapperproject.jmml.topology.Instance;
+import eu.mapperproject.jmml.specification.OptionalChoice;
+import eu.mapperproject.jmml.specification.SEL;
+import eu.mapperproject.jmml.specification.YesNoChoice;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 
 /**
  * A process iteration represents one single operator executing of a single submodel
@@ -14,7 +16,7 @@ public class ProcessIteration {
 	private static final ProcessIterationCache cache = new ProcessIterationCache();
 	private AnnotationSet annot;
 	private AnnotationSet annotOut;
-	private final Instance instance;
+	private final AnnotatedInstance instance;
 	// As equals is the most costly operation in processiteration
 	// this cache was added
 	private String asString;
@@ -27,24 +29,25 @@ public class ProcessIteration {
 		INSTANCE, ITERATION;
 	}
 	
-	public ProcessIteration(Instance pd) {
+	public ProcessIteration(AnnotatedInstance pd) {
 		this(pd, null);
 	}
 	
-	ProcessIteration(Instance pd, AnnotationSet annot) {
+	ProcessIteration(AnnotatedInstance pd, AnnotationSet annot) {
 		this.instance = pd;
 		if (annot == null) {
-			annot = new AnnotationSet();
+			this.annot = new AnnotationSet();
 			annot.setSubject(pd);
 			annot.applySubject();
 		}
-		this.annot = annot;
+		else this.annot = annot;
+		
 		this.annotOut = null;
 		this.range = null;
 		
 		this.isfinal = false;
 		this.deadlock = false;
-		this.initial = this.instance.isInitial() && firstInstance() && initializing();
+		this.initial = this.instance.getInit() == YesNoChoice.YES && firstInstance() && initializing();
 		this.asString = this.updateString(true);
 		this.origString = this.updateString(false);
 		this.stateProgressed = false;
@@ -88,14 +91,14 @@ public class ProcessIteration {
 	}
 
 	public boolean instanceCompleted() {
-		return this.annot.getOperator() == SEL.Of;
+		return this.annot.getOperator() == SEL.OF;
 	}
 	
 	public boolean finalLoop() {
-		return this.instance.isCompleted(annot.getIteration()) && annot.getOperator() != SEL.finit;
+		return this.instance.isCompleted(annot.getIteration()) && annot.getOperator() != SEL.FINIT;
 	}
 	
-	public Instance getInstance() {
+	public AnnotatedInstance getInstance() {
 		return this.instance;
 	}
 
@@ -108,11 +111,11 @@ public class ProcessIteration {
 	}
 	
 	public final boolean initializing() {
-		return this.annot.getOperator() == SEL.finit;
+		return this.annot.getOperator() == SEL.FINIT;
 	}
 	
 	public boolean needsState() {
-		return initializing() && !firstInstance() && instance.getSubmodel().isStateful();
+		return initializing() && !firstInstance() && instance.getStateful() != OptionalChoice.NO;
 	}
 
 	public boolean isSingle() {
@@ -127,21 +130,21 @@ public class ProcessIteration {
 		return this.progress(ProgressType.INSTANCE, false);
 	}
 
-	public ProcessIteration nextIteration(Coupling pd) {
+	public ProcessIteration nextIteration(AnnotatedCoupling pd) {
 		if (this.instance.equals(pd.getTo())) {
 			throw new IllegalArgumentException("In a progression that is an internal iteration, an coupling may not be specified.");
 		}
 		return this.progress(pd, ProgressType.ITERATION);
 	}
 	
-	public ProcessIteration nextInstance(Coupling pd) {
+	public ProcessIteration nextInstance(AnnotatedCoupling pd) {
 		return this.progress(pd, ProgressType.INSTANCE);
 	}
 
-	public CouplingInstance calculateCouplingInstance(Coupling cd) {
+	public CouplingInstance calculateCouplingInstance(AnnotatedCoupling cd) {
 		ProcessIteration pnext;
 		
-		if (cd.getToOperator().getOperator() == SEL.finit) {
+		if (cd.getTo().getPort().getOperator() == SEL.FINIT) {
 			pnext = this.nextInstance(cd);
 		}
 		else {
@@ -156,7 +159,7 @@ public class ProcessIteration {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
 		}
 
-		Instance pd = this.instance;
+		AnnotatedInstance pd = this.instance;
 
 		boolean hasEdgesOut = this.annotOut != null;
 		AnnotationSet set = new AnnotationSet(hasEdgesOut ? this.annotOut : this.annot);
@@ -164,7 +167,7 @@ public class ProcessIteration {
 		switch (instance) {
 			case ITERATION:
 				SEL currentOp = this.annot.getOperator();
-				if (currentOp == SEL.Of) {
+				if (currentOp == SEL.OF) {
 					throw new IllegalStateException("Process '" + pd + "' was already finished but is called for a next step, in iteration " + this.annot.getIteration());
 				}
 
@@ -173,7 +176,7 @@ public class ProcessIteration {
 					set.nextOperator();
 				}
 				else {
-					set.setOperater(SEL.Oi);
+					set.setOperater(SEL.OI);
 					set.nextIteration();
 				}
 				break;
@@ -209,19 +212,19 @@ public class ProcessIteration {
 		}
 	}
 	
-	private ProcessIteration progress(Coupling cd, ProgressType instance) {		
+	private ProcessIteration progress(AnnotatedCoupling cd, ProgressType instance) {		
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another processiteration " + cd + " if the state has already progressed.");
 		}
 		
-		Instance pd = cd.getTo();		
+		AnnotatedInstance pd = cd.getTo().getInstance();		
 		AnnotationSet set = new AnnotationSet(this.annot);
 		set.setSubject(pd);
-		SEL nextOp = cd.getToOperator().getOperator();
+		SEL nextOp = cd.getTo().getPort().getOperator();
 		
 		switch (instance) {
 			case ITERATION:
-				if (nextOp == SEL.Of) {
+				if (nextOp == SEL.OF) {
 					throw new IllegalStateException("Process '" + pd + "' was already finished but is called again, in iteration " + set.getIteration());
 				}
 				

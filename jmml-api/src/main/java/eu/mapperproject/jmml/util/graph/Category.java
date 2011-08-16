@@ -1,12 +1,16 @@
 package eu.mapperproject.jmml.util.graph;
 
+import eu.mapperproject.jmml.specification.Domain;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
+import eu.mapperproject.jmml.specification.util.ArrayMap;
+import eu.mapperproject.jmml.specification.util.ArraySet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** A hierarchical category that any object can belong to.
  *
@@ -15,15 +19,12 @@ import java.util.Map;
  */ 
 public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
-	public final static Category NO_CATEGORY = new Category(AnnotatedDomain.GENERIC.getName(), new String[0]);
+	public final static Category NO_CATEGORY = new Category("None", new String[0]);
 
-	private final static Map<String[], Category> categories;
-	private final static List<Category> categoriesDomain;
+	private final static Map<Domain,Category> categoriesDomain;
 	static {
-		categories = new HashMap<String[], Category>();
-		categories.put(new String[] {NO_CATEGORY.name}, NO_CATEGORY);
-		categoriesDomain = new ArrayList<Category>();
-		categoriesDomain.add(NO_CATEGORY);
+		categoriesDomain = new ArrayMap<Domain,Category>();
+		categoriesDomain.put(null, NO_CATEGORY);
 	}
 
 	private final String[] ancenstorNames;
@@ -33,7 +34,12 @@ public class Category implements Child<Category> {
 	private Category(String name, String[] ancestorNames) {
 		this.name = name;
 		this.ancenstorNames = ancestorNames;
-		this.parent = ancestorNames.length == 0 ? null : getCategory(ancestorNames);
+		if ("None".equals(name)) {
+			this.parent = null;
+		}
+		else {
+			this.parent = ancestorNames.length == 0 ? NO_CATEGORY : getCategory(ancestorNames);
+		}
 	}
 
 	/**
@@ -43,25 +49,16 @@ public class Category implements Child<Category> {
 	 * @throws NullPointerException if dom is null
 	 */
 	public static Category getCategory(AnnotatedDomain dom) {
-		int num = dom.getNumber();
-		while (categoriesDomain.size() <= num) {
-			categoriesDomain.add(null);
-		}
-
-		Category c = categoriesDomain.get(num);
+		Category c = categoriesDomain.get(dom);
 		if (c != null) return c;
 		
 		String name = dom.getName();
-		if (name.equals(NO_CATEGORY.name)) {
-			if (dom.isRoot()) {
-				return NO_CATEGORY;
-			}
-		}
-
+		AnnotatedDomain child = dom;
+		
 		List<String> ancestors = new ArrayList<String>();
-		while (!dom.isRoot()) {
-			dom = dom.parent();
-			ancestors.add(dom.getName());
+		while (!child.isRoot()) {
+			child = child.parent();
+			ancestors.add(child.getName());
 		}
 
 		int len = ancestors.size();
@@ -73,7 +70,7 @@ public class Category implements Child<Category> {
 		theseNames[len] = name;
 
 		c = getCategory(theseNames);
-		categoriesDomain.set(num, c);
+		categoriesDomain.put(dom, c);
 		return c;
 	}
 
@@ -86,15 +83,9 @@ public class Category implements Child<Category> {
 	private static Category getCategory(String[] theseNames) {
 		int len = theseNames.length - 1;
 
-		if (categories.containsKey(theseNames)) {
-			return categories.get(theseNames);
-		}
-		else {
-			String[] ancenstorNames = Arrays.copyOf(theseNames, len);
-			Category c = new Category(theseNames[len], ancenstorNames);
-			categories.put(theseNames, c);
-			return c;
-		}
+		String[] ancenstorNames = Arrays.copyOf(theseNames, len);
+		Category c = new Category(theseNames[len], ancenstorNames);
+		return c;
 	}
 
 

@@ -1,6 +1,6 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.topology.Coupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.graph.Edge;
 
 /**
@@ -11,11 +11,11 @@ import eu.mapperproject.jmml.specification.graph.Edge;
 public class CouplingInstance implements Edge<ProcessIteration> {
 	private final ProcessIteration from;
 	private ProcessIteration to;
-	private final Coupling coupling;
+	private final AnnotatedCoupling coupling;
 	private final int hashCode;
 	
 	/** Create an instance of a coupling between one process iteration and another */
-	public CouplingInstance(ProcessIteration from, ProcessIteration to, Coupling cd) {
+	public CouplingInstance(ProcessIteration from, ProcessIteration to, AnnotatedCoupling cd) {
 		if (from == null || to == null) {
 			throw new IllegalArgumentException("Coupling instance may not go from or to null");
 		}
@@ -63,7 +63,7 @@ public class CouplingInstance implements Edge<ProcessIteration> {
 	 * Get the coupling associated to this coupling instance. If this couplinginstance
 	 * represents a state or step null is returned.
 	 */
-	public Coupling getCoupling() {
+	public AnnotatedCoupling getCoupling() {
 		return this.coupling;
 	}
 

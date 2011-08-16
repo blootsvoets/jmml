@@ -3,7 +3,8 @@
  */
 package eu.mapperproject.jmml.topology;
 
-import eu.mapperproject.jmml.definitions.Submodel.SEL;
+import eu.mapperproject.jmml.specification.SEL;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 
 /**
  * Represent one operation of an instance
@@ -11,10 +12,10 @@ import eu.mapperproject.jmml.definitions.Submodel.SEL;
  *
  */
 public class InstanceOperator {
-	private final Instance instance;
+	private final AnnotatedInstance instance;
 	private final SEL operator;
 	
-	public InstanceOperator(Instance instance, SEL operator) {
+	public InstanceOperator(AnnotatedInstance instance, SEL operator) {
 		this.instance = instance;
 		this.operator = operator;
 	}
@@ -44,7 +45,7 @@ public class InstanceOperator {
 	}
 	
 	/** Get the instance */
-	public Instance getInstance() {
+	public AnnotatedInstance getInstance() {
 		return this.instance;
 	}
 }

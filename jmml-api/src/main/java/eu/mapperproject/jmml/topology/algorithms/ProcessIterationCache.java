@@ -3,9 +3,9 @@
  */
 package eu.mapperproject.jmml.topology.algorithms;
 
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import java.util.Map;
 
-import eu.mapperproject.jmml.topology.Instance;
 import eu.mapperproject.jmml.util.PTList;
 
 import java.util.ArrayList;
@@ -24,12 +24,12 @@ public class ProcessIterationCache {
 		processIterations = new ArrayList<Map<AnnotationSet, ProcessIteration>>();
 	}
 
-	void putIteration(Instance instance, AnnotationSet key, ProcessIteration value) {
+	void putIteration(AnnotatedInstance instance, AnnotationSet key, ProcessIteration value) {
 		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getNumber(), processIterations);
 		instMap.put(key, value);
 	}
 
-	ProcessIteration getIteration(Instance instance, AnnotationSet key) {
+	ProcessIteration getIteration(AnnotatedInstance instance, AnnotationSet key) {
 		Map<AnnotationSet, ProcessIteration> instMap = PTList.getMap(instance.getNumber(), processIterations);
 
 		ProcessIteration pi = instMap.get(key);
@@ -44,7 +44,7 @@ public class ProcessIterationCache {
 		return pi;
 	}
 
-	void remove(Instance instance, AnnotationSet key) {
+	void remove(AnnotatedInstance instance, AnnotationSet key) {
 		int num = instance.getNumber();
 		if (processIterations.size() >= num) {
 			Map<AnnotationSet, ProcessIteration> map = processIterations.get(instance.getNumber());

@@ -9,8 +9,7 @@ import eu.mapperproject.jmml.specification.numerical.SIUnit;
  *
  * @author Joris Borgdorff
  */
-public class AnnotatedScale extends Scale {
-
+public class AnnotatedScale extends Scale {	
 	/**
 	 * Calculate the number of steps that can be taken given the ranges
 	 * Returns -1 if delta or max is not set or not definite
@@ -25,7 +24,7 @@ public class AnnotatedScale extends Scale {
 		SIUnit l = (max == null ? total.meanSIUnit() : max.interpret());
 		return (int) Math.round(l.div(d).doubleValue());
 	}
-
+	
 	public boolean deltaIsRegular() {
 		if (this.delta != null) {
 			this.setDelta(delta);
@@ -50,6 +49,11 @@ public class AnnotatedScale extends Scale {
 		else if (this.delta != null) return this.delta.minSIUnit();
 		return null;
 	}
+	public SIUnit getMeanDelta() {
+		if (this.deltaIsRegular()) return ((AnnotatedUnit)this.regularDelta).interpret();
+		else if (this.delta != null) return this.delta.meanSIUnit();
+		return null;
+	}
 	public SIUnit getMaxDelta() {
 		if (this.deltaIsRegular()) return ((AnnotatedUnit)this.regularDelta).interpret();
 		else if (this.delta != null) return this.delta.maxSIUnit();
@@ -58,6 +62,11 @@ public class AnnotatedScale extends Scale {
 	public SIUnit getMinTotal() {
 		if (this.totalIsRegular()) return ((AnnotatedUnit)this.regularTotal).interpret();
 		else if (this.total != null) return this.total.minSIUnit();
+		return null;
+	}
+	public SIUnit getMeanTotal() {
+		if (this.totalIsRegular()) return ((AnnotatedUnit)this.regularTotal).interpret();
+		else if (this.total != null) return this.total.meanSIUnit();
 		return null;
 	}
 	public SIUnit getMaxTotal() {

@@ -1,6 +1,6 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.definitions.Submodel.SEL;
+import eu.mapperproject.jmml.specification.SEL;
 
 /**
  *

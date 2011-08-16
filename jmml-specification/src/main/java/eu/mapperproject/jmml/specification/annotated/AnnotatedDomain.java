@@ -51,6 +51,11 @@ public class AnnotatedDomain extends Domain implements Child<AnnotatedDomain> {
 			return this.parent.getValue() + '.' + this.value;
 		}
     }
+	
+	public String getName() {
+		if (this.parent == null && this.value.contains(".")) this.setValue(value);
+		return this.value;
+	}
 
     /**
      * Sets the value of the value property.

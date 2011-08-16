@@ -1,5 +1,7 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
+import eu.mapperproject.jmml.specification.OptionalChoice;
+import eu.mapperproject.jmml.specification.SEL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,14 +9,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import eu.mapperproject.jmml.definitions.Submodel.SEL;
-import eu.mapperproject.jmml.topology.Coupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.util.ArrayMap;
 import eu.mapperproject.jmml.topology.CouplingTopology;
-import eu.mapperproject.jmml.topology.Instance;
 import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.PTList;
-
-import java.util.TreeMap;
 
 /**
  * Keeps track of the current state in a task graph.
@@ -26,14 +26,14 @@ import java.util.TreeMap;
  */
 public class TaskGraphState implements Iterable<ProcessIteration> {
 	private final List<ProcessIteration> activeProcesses;
-	private final Map<ProcessIteration,Collection<Coupling>> snoozingProcesses;
-	private final Map<Instance,ProcessIteration> states;
+	private final Map<ProcessIteration,Collection<AnnotatedCoupling>> snoozingProcesses;
+	private final Map<AnnotatedInstance,ProcessIteration> states;
 	private final CouplingTopology topology;
 
 	public TaskGraphState(CouplingTopology desc) {
-		this.states = new TreeMap<Instance,ProcessIteration>();
+		this.states = new ArrayMap<AnnotatedInstance,ProcessIteration>();
 		this.activeProcesses = new ArrayList<ProcessIteration>();
-		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<Coupling>>();
+		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<AnnotatedCoupling>>();
 		this.topology = desc;
 	}
 		
@@ -54,9 +54,9 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	/** Tries to initialize a processiteration from a stateful transition. If this succeeds, the
 	 * coupling instance that facilitates this stateful transition is returned
 	 */
-	public CouplingInstance tryStateful(Instance inst) {
+	public CouplingInstance tryStateful(AnnotatedInstance inst) {
 		CouplingInstance ci = null;
-		if (inst.getSubmodel().isStateful()) {
+		if (inst.getStateful() != OptionalChoice.NO) {
 			ProcessIteration prev = states.remove(inst);
 			if (prev != null) {
 				ProcessIteration next = prev.nextState();
@@ -73,7 +73,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	public Collection<ProcessIteration> printDeadlock() {
 		if (this.activeProcesses.isEmpty() && !this.snoozingProcesses.isEmpty()) {
 			System.out.println("Deadlock:");
-			for (Map.Entry<ProcessIteration, Collection<Coupling>> m : snoozingProcesses.entrySet()) {
+			for (Map.Entry<ProcessIteration, Collection<AnnotatedCoupling>> m : snoozingProcesses.entrySet()) {
 				hasAllCouplings(m.getKey(), m.getValue(), true);
 			}
 			return snoozingProcesses.keySet();
@@ -90,8 +90,8 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 * Activate given processiteration if all incoming couplings have been fulfilled
 	 * @throws IllegalStateException if the processiteration has already been activated
 	 */
-	private boolean activateIfNeeded(ProcessIteration pi, Coupling next) {
-		Collection<Coupling> cis = PTList.getSet(pi, snoozingProcesses);
+	private boolean activateIfNeeded(ProcessIteration pi, AnnotatedCoupling next) {
+		Collection<AnnotatedCoupling> cis = PTList.getSet(pi, snoozingProcesses);
 		if (!cis.contains(next)) {
 			cis.add(next);
 			if (hasAllCouplings(pi, cis, false)) {
@@ -106,10 +106,10 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	/**
 	 * Whether all incoming couplings of given process have been fulfilled
 	 */
-	private boolean hasAllCouplings(ProcessIteration pi, Collection<Coupling> cds, boolean print) {
+	private boolean hasAllCouplings(ProcessIteration pi, Collection<AnnotatedCoupling> cds, boolean print) {
 		SEL op = pi.getOperator();
 		
-		if (op.isReceiving()) {
+		if (op != SEL.OI && op != SEL.OF) {
 			// State or operator step
 			if ((pi.needsState() || !pi.initializing()) 
 				&& !cds.contains(null)) {
@@ -123,16 +123,16 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 				return true;
 			}
 			
-			Instance inst = pi.getInstance();
+			AnnotatedInstance inst = pi.getInstance();
 			boolean needInit = topology.needsInitInstances(inst);
-			Collection<Coupling> cs;
+			Collection<AnnotatedCoupling> cs;
 			if (needInit && pi.initializing()) {
 				cs = topology.needsInitCouplings(inst);
 			}
 			else {
 				cs = topology.getTo(new InstanceOperator(inst, op));
 			}
-			for (Coupling cd : cs) {
+			for (AnnotatedCoupling cd : cs) {
 				if (!cds.contains(cd)) {
 					if (print) {
 						System.out.println(pi + " is missing: " + cd);

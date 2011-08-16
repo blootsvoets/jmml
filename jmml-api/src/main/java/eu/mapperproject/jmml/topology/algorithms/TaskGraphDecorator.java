@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
+import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
 import eu.mapperproject.jmml.util.graph.AnnotatedStyledEdge;
 import eu.mapperproject.jmml.util.graph.Category;
 import eu.mapperproject.jmml.util.graph.GraphDecorator;
@@ -71,6 +72,6 @@ public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, Couplin
 
 	@Override
 	public Category categorize(ProcessIteration pi) {
-		return Category.getCategory(pi.getInstance().getDomain());
+		return Category.getCategory((AnnotatedDomain)pi.getInstance().getDomain());
 	}
 }
