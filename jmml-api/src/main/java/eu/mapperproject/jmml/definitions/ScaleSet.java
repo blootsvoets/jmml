@@ -14,10 +14,10 @@ import java.util.Map;
 public class ScaleSet {
 	private Map<String, AnnotatedScale> all;
 	private AnnotatedScale time;
-	private List<AnnotatedScale> space;
-	private List<AnnotatedScale> other;
+	private List<? extends AnnotatedScale> space;
+	private List<? extends AnnotatedScale> other;
 
-	public ScaleSet(AnnotatedScale time, List<AnnotatedScale> space, List<AnnotatedScale> other) {
+	public ScaleSet(AnnotatedScale time, List<? extends AnnotatedScale> space, List<? extends AnnotatedScale> other) {
 		this.time = time;
 		this.space = space;
 		this.other = other;
@@ -62,7 +62,7 @@ public class ScaleSet {
 	 * Get the maximal range of the collection of scales.
 	 * The first element returned is the x-coordinate and the second the width.
 	 */
-	private static float[] getBounds(Collection<AnnotatedScale> scales) {
+	private static float[] getBounds(Collection<? extends AnnotatedScale> scales) {
 		float[] yh, yhMax = {Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
 
 		boolean hasScale = false;

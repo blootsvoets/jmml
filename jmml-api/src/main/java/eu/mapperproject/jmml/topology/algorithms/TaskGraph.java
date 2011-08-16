@@ -46,7 +46,7 @@ public class TaskGraph {
 		for (ProcessIteration pi : state) {
 			i++;
 			if (i % 10000 == 0) {
-				System.out.println("After " + i + " iterations, processing node " + pi + ", which has " + pi.getInstance().getTimescale().getSteps() + " steps.");
+				System.out.println("After " + i + " iterations, processing node " + pi + ", which has " + pi.getInstance().getTimescaleInstance().getSteps() + " steps.");
 			}
 			// Only add to graph if it hasn't been added before
 			if (pi.isSingle()) this.graph.addNode(pi);

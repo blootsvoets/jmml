@@ -302,8 +302,7 @@ public class ScaleMap implements Painter {
 		for (AnnotatedInstance inst : insts) {
 			Submodel sub = inst.getSubmodelInstance();
 			if (visited.contains(sub)) continue;
-			if (tryAddScale(sub.getScaleMap(), sub.getId())
-					|| tryAddScale(inst.getScales(), sub.getId())) {
+			if (tryAddScale(new ScaleSet(inst.getTimescaleInstance(), inst.getSpacescaleInstance(), inst.getOtherscaleInstance()), sub.getId())) {
 				visited.add(sub);
 			}
 		}

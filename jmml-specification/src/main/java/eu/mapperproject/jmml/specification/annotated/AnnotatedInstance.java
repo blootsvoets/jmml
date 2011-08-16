@@ -1,10 +1,19 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import com.sun.istack.logging.Logger;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
+import eu.mapperproject.jmml.specification.MultiDimensionalScale;
 import eu.mapperproject.jmml.specification.OptionalChoice;
+import eu.mapperproject.jmml.specification.Otherscale;
+import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.graph.Numbered;
+import eu.mapperproject.jmml.specification.util.ArrayMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -15,6 +24,8 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
 	private transient boolean isfinal;
+	private final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
+	private final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
 	
 	@Override
 	public String getId() {
@@ -85,17 +96,84 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		}
 	}
 	
-	@Override
-	public AnnotatedScale getTimescale() {
+	public AnnotatedScale getTimescaleInstance() {
 		if (this.ofSubmodel()) {
+			AnnotatedScale as;
 			if (this.timescale != null){
-				return this.timescale;
+				as = this.timescale;
 			}
 			else {
-				return (AnnotatedScale) this.getSubmodelInstance().getTimescale();
+				as = (AnnotatedScale)this.getSubmodelInstance().getTimescale();
 			}
+			if (as.getId() == null) {
+				as.setId("t");
+			}
+			return as;
 		}
 		return null;
+	}
+
+	public List<MultiDimensionalScale> getSpacescaleInstance() {
+		if (this.ofSubmodel()) {
+			if (spacescale == null) {
+				spacescale = new ArrayList<MultiDimensionalScale>();
+			}
+			Map<String,MultiDimensionalScale> scales = new ArrayMap<String, MultiDimensionalScale>();
+			overrideScales(this.submodelInst.getSpacescale(), scales, spaceNames);
+			overrideScales(this.getSpacescale(), scales, spaceNames);
+			
+			return new ArrayList<MultiDimensionalScale>(scales.values());
+		}
+		return null;
+	}
+
+	public List<Otherscale> getOtherscaleInstance() {
+		if (this.ofSubmodel()) {
+			if (otherscale == null) {
+				otherscale = new ArrayList<Otherscale>();
+			}
+			Map<String,Otherscale> scales = new ArrayMap<String, Otherscale>();
+			overrideScales(this.submodelInst.getOtherscale(), scales, otherNames);
+			overrideScales(this.getOtherscale(), scales, otherNames);
+			
+			return new ArrayList<Otherscale>(scales.values());
+		}
+		return null;
+	}
+	
+	private <V extends Scale> void overrideScales(Collection<V> with, Map<String,V> scales, String[] names) {
+		List<V> nameless = new ArrayList<V>();
+		String sid;
+		for (V os : with) {
+			sid = os.getId();
+			if (sid != null) {
+				scales.put(sid, os);
+			} else {
+				nameless.add(os);
+			}
+		}
+		int j = 0;
+		for (V os : nameless) {
+			if (j >= names.length) {
+				Logger.getLogger(AnnotatedInstance.class).warning("With more than 6 scales, please provide names, now random names are used.");
+				sid = names[0] + Math.random();
+			}
+			else {
+				sid = names[j++];
+			}
+			while (scales.containsKey(sid)) {
+				if (j >= names.length) {
+					Logger.getLogger(AnnotatedInstance.class).warning("With more than 6 scales, please provide names, now random names are used.");
+					sid = names[0] + Math.random();
+				}
+				else {
+					sid = names[j++];
+				}
+			}
+
+			os.setId(sid);
+			scales.put(sid, os);
+		}		
 	}
 	
 	@Override
@@ -146,7 +224,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	 */
 	public boolean isCompleted(int steps) {
 		if (this.ofSubmodel()) {
-			return this.getTimescale().getSteps() <= steps + 1;
+			return this.getTimescaleInstance().getSteps() <= steps + 1;
 		}
 		return true;
 	}

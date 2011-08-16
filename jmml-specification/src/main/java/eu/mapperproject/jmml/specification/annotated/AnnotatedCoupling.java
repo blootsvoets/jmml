@@ -69,8 +69,8 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 		}
 		
 		// Check if scales match from one end of the coupling to the other.
-		AnnotatedScale ft = afrom.getInstance().getTimescale();
-		AnnotatedScale tt = ato.getInstance().getTimescale();
+		AnnotatedScale ft = afrom.getInstance().getTimescaleInstance();
+		AnnotatedScale tt = ato.getInstance().getTimescaleInstance();
 		
 		if (ft != null && tt != null) {
 			SEL toOp = toP.getOperator();
