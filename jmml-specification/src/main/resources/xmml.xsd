@@ -1,0 +1,617 @@
+<?xml version="1.0"?>
+<schema
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.mapper-project.eu/xmml"
+  xmlns:t="http://www.mapper-project.eu/xmml"
+  elementFormDefault="qualified">
+
+	<annotation><documentation>
+		Specification of the XML representation of the Multiscale Modeling Language
+	  (xMML). For more information, visit http://www.mapper-project.eu/.
+	  
+	  Every element may be appended with any attributes, and the extra and description
+	  elements also take any element as their children.
+	</documentation></annotation>
+
+  <!-- Element definitions -->
+  
+	<element name="model">
+	  <annotation><documentation>
+	    Root element of a single multiscale model.
+	  </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:description" minOccurs="0" maxOccurs="1"/>
+				<element ref="t:definitions"/>
+				<element ref="t:topology"/>
+			</sequence>
+			<attribute name="id" type="NCName" use="required"/>
+			<attribute name="name" type="string"/>
+			<attribute name="version" type="string"/>
+			<attribute name="xmml_version" fixed="0.3.3" type="t:version"/>
+			<anyAttribute processContents="lax"/>
+		</complexType>
+  
+		<unique name="datatypeId">
+			<selector xpath="t:definitions/t:datatype"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="mapperId">
+			<selector xpath="t:definitions/t:mapper"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="submodelId">
+			<selector xpath="t:definitions/t:submodel"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="filterId">
+			<selector xpath="t:definitions/t:filter"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="instanceId">
+			<selector xpath="t:topology/t:instance"/>
+			<field xpath="@id"/>
+		</unique>
+		
+		<keyref name="datatypeInIdRef" refer="t:datatypeId">
+		  <selector xpath="t:definitions/t:filter"/>
+		  <field xpath="@datatype_in"/>
+	  </keyref>
+		<keyref name="datatypeOutIdRef" refer="t:datatypeId">
+		  <selector xpath="t:definitions/t:filter"/>
+		  <field xpath="@datatype_out"/>
+	  </keyref>
+		<keyref name="datatypePortIdRef" refer="t:datatypeId">
+		  <selector xpath="t:definitions/t:*/t:ports/t:*"/>
+		  <field xpath="@datatype"/>
+	  </keyref>
+		<keyref name="mapperIdRef" refer="t:mapperId">
+		  <selector xpath="t:topology/t:instance"/>
+		  <field xpath="@mapper"/>
+	  </keyref>
+		<keyref name="submodelIdRef" refer="t:submodelId">
+		  <selector xpath="t:topology/t:instance"/>
+		  <field xpath="@submodel"/>
+	  </keyref>
+		<keyref name="filterIdRef" refer="t:filterId">
+		  <selector xpath="t:topology/t:coupling/t:apply"/>
+		  <field xpath="@filter"/>
+	  </keyref>
+	</element>
+
+	<element name="description" type="t:anyContent">
+	  <annotation><documentation>
+	    A short textual description of the parent element.
+	  </documentation></annotation>
+	</element>
+
+	<element name="definitions">
+	  <annotation><documentation>
+	    Type definitions within the model.
+	  </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:datatype" minOccurs="0" maxOccurs="unbounded"/>
+				<choice minOccurs="0" maxOccurs="unbounded">
+					<element ref="t:filter"/>
+					<element ref="t:mapper"/>
+					<element ref="t:submodel"/>
+				</choice>
+			</sequence>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="datatype">
+	  <annotation><documentation>
+	    A datatype definition.
+	  </documentation></annotation>
+		<complexType><complexContent>
+		  <extension base="t:definition">
+  			<attribute name="size_estimate" type="t:formula">
+  			  <annotation><documentation>
+  			    A function in terms of the scales and params of the
+  			    submodel it originated from.
+  			  </documentation></annotation></attribute>
+			</extension>
+		</complexContent></complexType>
+	</element>
+
+	<element name="filter">
+	  <annotation><documentation>
+	    A conduit filter, filtering a type of data and either converting it to
+      another type of data, or reducing the data over a dimension with a
+      certain factor, or interpolating in that dimension.
+    </documentation></annotation>
+		<complexType><complexContent>
+		  <extension base="t:definition">
+  			<sequence>
+  				<element ref="t:description" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
+  				<element ref="t:implementation" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+  			</sequence>
+  			<attribute name="datatype_in" type="NCName"/>
+  			<attribute name="datatype_out" type="NCName"/>
+  			<attribute name="type" use="required">
+  				<simpleType>
+  					<restriction base="NCName">
+  						<enumeration value="interpolation"/>
+  						<enumeration value="reduction"/>
+  						<enumeration value="converter"/>
+  					</restriction>
+  				</simpleType>
+  			</attribute>
+  			<attribute name="dimension" type="string"/>
+  			<attribute name="factor" type="t:formula"/>
+  		</extension>
+		</complexContent></complexType>
+		<unique name="filterParamId">
+			<selector xpath="t:param"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+
+	<element name="mapper">
+	  <annotation><documentation>
+	    A fan-in or fan-out mapper. If the type is fan-in, it may have multiple
+      in ports and one out port, otherwise, one in port and multiple out ports.
+      Implementation details may also be relevant. A fan-in mapper may have
+      the same in port used for a submodel instance with a multiplicity, and
+      conversely for the fan-out mapper. A filter with multiple inputs can be
+      constructed as a fan-in mapper. In and out ports may not have an operator
+      specified.
+    </documentation></annotation>
+		<complexType><complexContent>
+		  <extension base="t:computationalElement">
+  			<sequence>
+  				<element ref="t:description" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
+  				<element ref="t:ports"/>
+  				<element ref="t:implementation" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+  			</sequence>
+  			<attribute name="type" use="required">
+  				<simpleType>
+  					<restriction base="NCName">
+  						<enumeration value="fan-in"/>
+  						<enumeration value="fan-out"/>
+  					</restriction>
+  				</simpleType>
+  			</attribute>
+  		</extension>
+		</complexContent></complexType>
+		<unique name="mapperParamId">
+			<selector xpath="t:param"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+
+	<element name="submodel">
+	  <annotation><documentation>
+	    Definition of a single code of a single submodel. Attributes state whether
+      the submodel should be started at initialization if this is ambiguous,
+      whether it is stateful or not, or that it is optional but may bring some
+      optimization, and whether user interaction is required while running
+      the submodel.
+    </documentation></annotation>
+		<complexType><complexContent>
+		  <extension base="t:computationalElement">
+  			<sequence>
+  				<element ref="t:description" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:timescale"/>
+  				<element ref="t:spacescale" minOccurs="0" maxOccurs="unbounded"/>
+  				<element ref="t:otherscale" minOccurs="0" maxOccurs="unbounded"/>
+  				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
+  				<element ref="t:ports"/>
+  				<element ref="t:implementation" minOccurs="0" maxOccurs="1"/>
+  				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+  			</sequence>
+  			<attribute name="name" type="string"/>
+  			<attribute name="stateful" type="t:OptionalChoice" default="no"/>
+  		</extension>
+		</complexContent></complexType>
+		<unique name="submodelParamId">
+			<selector xpath="t:param"/>
+			<field xpath="@id"/>
+		</unique>
+		<unique name="submodelScaleName">
+			<selector xpath="t:timescale | t:spacescale | t.otherscale"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+
+	<element name="timescale" type="t:scale">
+	  <annotation><documentation>
+	    Temporal scale specification of a submodel. Using the attributes, it is a regular
+	    scale, using child elements it is a full scale specification.
+    </documentation></annotation>
+	</element>
+
+	<element name="spacescale" type="t:multiDimensionalScale">
+		<annotation><documentation>
+	    Spatial scale specification of a submodel. Using the attributes, it is a regular
+	    scale, using child elements it is a full scale specification.
+	    Either all spatial dimensions can be listed separately, or the number of
+	    dimensions can be given as an attribute, using only one tag.
+    </documentation></annotation>
+	</element>
+
+	<element name="otherscale">
+		<annotation><documentation>
+	    General scale specification of a submodel. Using the attributes, it is a regular
+	    scale, using child elements it is a full scale specification.
+	    Either all spatial dimensions can be listed separately, or the number of
+	    dimensions can be given as an attribute, using only one tag.
+    </documentation></annotation>
+	  <complexType><complexContent>
+	    <extension base="t:multiDimensionalScale">
+			  <attribute name="type" type="string"/>
+		  </extension>
+		</complexContent></complexType>
+	</element>
+
+	<element name="param">
+		<annotation><documentation>
+	    Useful for specifying the size of a datatype, or stating a fundamental
+       non-variable fact. It is not meant for completely parameterizing a
+       submodel, since this should be done at time of execution.
+    </documentation></annotation>
+		<complexType>
+			<attribute name="id" type="NCName" use="required"/>
+			<attribute name="value" type="string" use="required"/>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="extra" type="t:anyContent">
+	  <annotation><documentation>
+	    Any information about an element not captured by any of the other tags.
+      If this is used, possibly the information therein can also be included
+      in the official format; if so, please contact me.
+	  </documentation></annotation></element>
+
+	<element name="ports">
+	  <annotation><documentation>
+	    All in and out ports of a computational element.
+	    If the parent element is a submodel, the ports should include an SEL operator.
+    </documentation></annotation>
+		<complexType>
+			<choice minOccurs="0" maxOccurs="unbounded">
+      	<element name="in" type="t:port"/>
+      	<element name="out" type="t:port"/>
+			</choice>
+		</complexType>
+		<unique name="portId">
+			<selector xpath="*"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+
+	<element name="topology">
+	  <annotation><documentation>
+	    The instantiation of computational elements and the couplings between them.
+    </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:instance" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:coupling" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="instance">
+	  <annotation><documentation>
+  	  An instance of a submodel or mapper, by default using the same id as the
+      element it instantiates. A submodel instance may override some of the scale
+      information that was supplied in the submodel definition. Mappers may not
+      specify a multiplicity or be stateful.
+    </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:timescale" minOccurs="0" maxOccurs="1"/>
+				<element ref="t:spacescale" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:otherscale" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
+			<attribute name="id" type="NCName"/>
+			<attribute name="submodel" type="NCName"/>
+			<attribute name="mapper" type="NCName"/>
+			<attribute name="domain" type="t:domain"><annotation><documentation>
+			  A domain name may be supplied, used to identify single domain interaction.
+			  </documentation></annotation></attribute>
+			<attribute name="init" type="t:YesNoChoice"/>
+			<attribute name="interactive" type="t:OptionalChoice"/>
+			<attribute name="stateful" type="t:OptionalChoice"/>
+			<attribute name="multiplicity">
+			  <annotation><documentation>
+			    A multiplicity is a number that specifies how many instances should be
+          created. If this argument is used and not 1, it should be connected
+          using mappers. Alternatively, different instances can be addressed using
+          array notation, for instance: instanceA[0].</documentation></annotation>
+				<simpleType>
+					<restriction base="NCName">
+						<pattern value="[0-9]+|dynamic"/>
+					</restriction>
+				</simpleType>
+			</attribute>
+			<anyAttribute processContents="lax"/>
+		</complexType>
+		<unique name="instanceParamId">
+			<selector xpath="t:param"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+
+	<element name="coupling">
+	  <annotation><documentation>
+  	  A coupling from one submodel instance or mapper to the other.
+      Notation: instance1.outport to instance2.inport. .
+    </documentation></annotation>
+	  <complexType>
+			<sequence>
+				<element ref="t:apply" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
+			<attribute name="name" type="string"/>
+			<attribute name="from" type="t:instancePort" use="required"/>
+			<attribute name="to" type="t:instancePort" use="required"/>
+			<attribute name="size" type="t:unit"><annotation><documentation>
+			  Size can be specified if not already done in the datatypes.
+			  </documentation></annotation></attribute>
+			<attribute name="interactive" type="t:OptionalChoice" default="no">
+			    <annotation><documentation>
+  			  Whether the data that is sent through the conduit must be evaluated manually
+          before it can be passed to the next.</documentation></annotation></attribute>
+			<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="apply">
+	  <annotation><documentation>
+  	  Specify filters that will be applied to the conduit. The order that they
+      are specified in is preserved.
+    </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:param" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:extra" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
+			<attribute name="filter" type="NCName" use="required"/>
+			<attribute name="factor" type="t:formula"><annotation><documentation>
+			  Overrides the factor belonging to the filter.
+			  </documentation></annotation></attribute>
+			<anyAttribute processContents="lax"/>
+		</complexType>
+		<unique name="applyParamId">
+			<selector xpath="t:param"/>
+			<field xpath="@id"/>
+		</unique>
+	</element>
+ 
+  <!-- Implementation details -->
+  
+	<element name="implementation">
+	  <annotation><documentation>
+	    Implementation details of the submodel.
+	  </documentation></annotation>
+		<complexType>
+			<sequence>
+				<element ref="t:platform" minOccurs="0" maxOccurs="unbounded"/>
+				<element ref="t:library" minOccurs="0" maxOccurs="unbounded"/>
+			</sequence>
+			<attribute name="size" type="t:unit"><annotation><documentation>
+			  Size of the compiled code.
+			  </documentation></annotation></attribute>
+			<attribute name="runtime" type="t:unit"><annotation><documentation>
+			  Typical estimated runtime on the preferred platform.
+			  </documentation></annotation></attribute>             
+			<attribute name="memory" type="t:unit"/>
+			<attribute name="cores" type="positiveInteger"/>
+			<attribute name="language" type="string"><annotation><documentation>
+			  The programming language that is used.</documentation></annotation></attribute>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="platform">
+		<complexType>
+			<attribute name="arch" type="string"/>
+			<attribute name="os" type="string" use="required"/>
+			<attribute name="preferred" type="t:YesNoChoice"/>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+
+	<element name="library">
+		<complexType>
+			<attribute name="name" type="string" use="required"/>
+  		<anyAttribute processContents="lax"/>
+		</complexType>
+	</element>
+	
+	<!-- Shared attributes -->
+	
+	<complexType name="scale">
+		<sequence>
+			<element name="delta" type="t:range" minOccurs="0" maxOccurs="1"/>
+			<element name="total" type="t:range" minOccurs="0" maxOccurs="1"/>
+		</sequence>
+		<attribute name="id" type="NCName"/>
+		<attribute name="delta" type="t:unit"/>
+		<attribute name="total" type="t:unit"/>
+		<attribute name="characteristic" type="t:unit"/>
+		<anyAttribute processContents="lax"/>
+	</complexType>
+ 
+ 	<complexType name="multiDimensionalScale"><complexContent>
+    <extension base="t:scale">
+		  <attribute name="dimensions" type="positiveInteger"/>
+	  </extension></complexContent>
+	</complexType>
+ 
+  <complexType name="definition">
+    <annotation><documentation>
+      Represent an implemented entity.
+    </documentation></annotation>
+		<attribute name="id" type="NCName" use="required"/>
+		<attribute name="class" type="string"/>
+		<attribute name="version" type="string"/>
+		<anyAttribute processContents="lax"/>		
+  </complexType>
+
+  <complexType name="computationalElement">
+    <annotation><documentation>
+      Represent a computational element.
+    </documentation></annotation>
+    <complexContent><extension base="t:definition">
+      <attribute name="init" type="t:YesNoChoice" default="no"/>
+			<attribute name="interactive" type="t:OptionalChoice" default="no"/>
+    </extension></complexContent>
+  </complexType>
+
+  <!-- Shared options -->
+  
+	<simpleType name="YesNoChoice">
+		<annotation>
+	    <documentation>A choice between yes and no.</documentation>
+	  </annotation>
+    <restriction base="NCName">
+			<enumeration value="yes"/>
+			<enumeration value="no"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="OptionalChoice">
+	  <annotation>
+	    <documentation>An `optional' option added to yes-no
+	      choice.</documentation>
+	  </annotation>
+		<restriction base="NCName">
+			<enumeration value="yes"/>
+			<enumeration value="no"/>
+			<enumeration value="optional"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="SEL">
+	  <annotation><documentation>
+	    Operators in a submodel execution loop.
+	  </documentation></annotation>
+	  <restriction base="NCName">
+			<enumeration value="finit"/>
+			<enumeration value="Oi"/>
+			<enumeration value="S"/>
+			<enumeration value="B"/>
+			<enumeration value="Of"/>
+		</restriction>
+	</simpleType>
+ 
+  <!-- Enforce specific contents of xMML attributes -->
+  
+	<simpleType name="unit">
+		<annotation>
+	    <documentation>
+	      An SI unit, written in scientific notation, but also accepting bits, bytes,
+	      and human-readable time indication. Conformance is evaluated with pattern
+	      `-?[0-9.]+([eE]-?[0-9]+)?\s*\w*'.
+	    </documentation>
+	  </annotation>
+		<restriction base="string">
+			<whiteSpace value="collapse"/>
+			<pattern value="-?[0-9.]+([eE]-?[0-9]+)?\s*\w*"/>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="instancePort">
+	  <annotation><documentation>
+	    The port of an instance, indicated as `instance.port'.
+    </documentation></annotation>		
+		<restriction base="string">
+			<pattern value="(\p{Pc}|\p{Pd}|\p{L}|\p{N})+\.(\p{Pc}|\p{Pd}|\p{L}|\p{N})+"/>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="domain">
+	  <annotation><documentation>
+	      A domain and all its super-domains, separated by periods like
+	      `domain.subdomain.subsubdomain'.
+	    </documentation>
+	  </annotation>
+		<restriction base="string">
+			<pattern value="(\p{Pc}|\p{Pd}|\p{L}|\p{N})+(\.(\p{Pc}|\p{Pd}|\p{L}|\p{N})+)*"/>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="version">
+	  <annotation><documentation>
+	    Version number of xMML.
+	  </documentation></annotation>
+	  <restriction base="string">
+	    <pattern value="\p{N}+(\.\p{N}+)*(\.\p{N}+-?(\p{L}|\p{N})+)?"/>
+	  </restriction>
+	</simpleType>
+
+	<simpleType name="formula">
+	  <annotation><documentation>
+	    A formula with variables and some standard operators.
+	  </documentation></annotation>
+	  <restriction base="string"/>
+	</simpleType>
+
+	<!-- Shared attributes and elements -->
+	
+	<complexType name="anyContent" mixed="true">
+	  <annotation>
+	    <documentation>Any content is possible within this type</documentation>
+	  </annotation>
+		<sequence>
+			<any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+		</sequence>
+		<anyAttribute processContents="lax"/>
+	</complexType>
+
+	<complexType name="port">
+	  <annotation>
+	    <documentation>
+	      The id, submodel execution loop operator and datatype of a port. If it
+         concerns the port of a mapper, an operator should not be specified. The 
+         optional type can be used to specify whether it concerns a port that only
+         transfers a state or a regular one.
+      </documentation>
+    </annotation>
+    
+		<attribute name="id" type="NCName" use="required"/>
+		<attribute name="operator" type="t:SEL"/>
+		<attribute name="datatype" type="NCName"/>
+		<attribute name="type" default="normal">
+			<simpleType>
+				<restriction base="NCName">
+					<enumeration value="state"/>
+					<enumeration value="normal"/>
+				</restriction>
+			</simpleType>
+		</attribute>
+		<anyAttribute processContents="lax"/>
+	</complexType>
+ 
+	<complexType name="range">
+	  <annotation><documentation>
+	       A scale range, with an optional minimum and maximum value. If the type
+         is fixed, then during runtime this value will not vary and must be
+         specified for each submodel instance that uses it.
+    </documentation></annotation>
+    
+		<attribute name="type" default="variable">
+			<simpleType>
+				<restriction base="NCName">
+					<enumeration value="variable"/>
+					<enumeration value="fixed"/>
+				</restriction>
+			</simpleType>
+		</attribute>
+		<attribute name="min" type="t:unit"/>
+		<attribute name="max" type="t:unit"/>
+		<anyAttribute processContents="lax"/>
+	</complexType>
+</schema>

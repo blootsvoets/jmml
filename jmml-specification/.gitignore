@@ -1,0 +1,4 @@
+/target
+/src/main/java/eu/mapperproject/mad
+/src/main/java/eu/mapperproject/jmml/specification/*.java
+/marshalled.xml

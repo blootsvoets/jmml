@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<bindings version="2.0"
+  xmlns="http://java.sun.com/xml/ns/jaxb"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xmml="http://www.mapper-project.eu/xmml"
+  elementFormDefault="qualified">
+  <globalBindings typesafeEnumBase="xs:NCName"/>
+  
+  <bindings schemaLocation="mad.xsd">
+	  <schemaBindings>
+      <package name="eu.mapperproject.mad.specification"/>
+    </schemaBindings>
+  </bindings>
+
+  <bindings schemaLocation="xmml.xsd">
+    <schemaBindings>
+      <package name="eu.mapperproject.jmml.specification"/>
+    </schemaBindings>
+    <bindings node="//xs:complexType[@name='scale']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedScale"/>
+	</bindings>
+    <bindings node="//xs:complexType[@name='range']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedRange"/>
+	</bindings>
+	<bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='delta']">
+      <property name="RegularDelta" />
+    </bindings>
+    <bindings node="//xs:complexType[@name='scale']//xs:attribute[@name='total']">
+      <property name="RegularTotal" />
+    </bindings>
+	
+	<bindings node="//xs:complexType[@name='definition']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinition" />
+	</bindings>
+    <bindings node="//xs:complexType[@name='port']">
+		<class implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedPort" />
+	</bindings>
+    <bindings node="//xs:element[@name='definitions']/xs:complexType">
+		<class name="Definitions" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions" />
+	</bindings>
+    <bindings node="//xs:element[@name='filter']/xs:complexType">
+		<class name="Filter" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedFilter" />
+	</bindings>
+    <bindings node="//xs:element[@name='topology']/xs:complexType">
+		<class name="Topology" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedTopology" />
+	</bindings>
+    <bindings node="//xs:element[@name='coupling']/xs:complexType">
+		<class name="Coupling" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling" />
+	</bindings>
+    <bindings node="//xs:element[@name='instance']/xs:complexType">
+		<class name="Instance" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedInstance" />
+	</bindings>
+    <bindings node="//xs:element[@name='apply']/xs:complexType">
+		<class name="Apply" implClass="eu.mapperproject.jmml.specification.annotated.AnnotatedApply" />
+	</bindings>
+    <bindings node="//xs:element[@name='mapper']//xs:attribute[@name='type']/xs:simpleType">
+		  <typesafeEnumClass name="type"/>
+	  </bindings>
+    <bindings node="//xs:element[@name='filter']//xs:attribute[@name='type']/xs:simpleType">
+		  <typesafeEnumClass name="type"/>
+	  </bindings>
+    <bindings node="//xs:complexType[@name='port']//xs:attribute[@name='type']/xs:simpleType">
+		  <typesafeEnumClass name="type"/>
+	  </bindings>
+    <bindings node="//xs:complexType[@name='range']//xs:attribute[@name='type']/xs:simpleType">
+		  <typesafeEnumClass name="type"/>
+	  </bindings>
+	  
+    <bindings node="//xs:simpleType[@name='unit']">
+		  <class name="unit"/>
+	  </bindings>
+	  <bindings node="//xs:simpleType[@name='version']">
+      <class name="version"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='domain']">
+      <class name="domain"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='instancePort']">
+      <class name="instancePort"/>
+    </bindings>
+    <bindings node="//xs:simpleType[@name='formula']">
+      <class name="formula"/>
+    </bindings>
+  </bindings>
+</bindings>

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+xjc -b ../resources/xmml.xjd ../resources/xmml.xsd ../resources/mad.xsd
+  
