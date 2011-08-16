@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>eu.mapperproject</groupId>
-  <artifactId>jmml</artifactId>
+  <artifactId>jmml-api</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>jmml</name>
+  <name>jmml-api</name>
   <url>http://maven.apache.org</url>
     <build>
         <plugins>
