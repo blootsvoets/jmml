@@ -1,5 +1,7 @@
 package eu.mapperproject.jmml.util.graph;
 
+import eu.mapperproject.jmml.specification.graph.Edge;
+
 /**
  * A hierarchical clustering, based on a category.
  * @author Joris Borgdorff

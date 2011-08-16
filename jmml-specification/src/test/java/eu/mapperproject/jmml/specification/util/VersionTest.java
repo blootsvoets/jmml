@@ -1,24 +1,23 @@
-package eu.mapperproject.jmml.util;
+package eu.mapperproject.jmml.specification.util;
 
+import eu.mapperproject.jmml.specification.numerical.InterpretedVersion;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.mapperproject.jmml.util.Version;
-
 public class VersionTest {
-	private Version definiteA, definiteB, rangeA, rangeB, rangeC, rangeD, listA, listB;
+	private InterpretedVersion definiteA, definiteB, rangeA, rangeB, rangeC, rangeD, listA, listB;
 	@Before
 	public void setUp() {
-		definiteA = new Version("0.1");
-		definiteB = new Version("0.1.1");
-		rangeA = new Version("0.1.x");
-		rangeB = new Version("0.0-1.x");
-		rangeC = new Version("0.0.x");
-		rangeD = new Version("0.1.[2-3]");
-		listA = new Version(new String[] {"0.1.x", "0.2.x"});
-		listB = new Version(new String[] {"0.0.x", "0.2.x"});
+		definiteA = new InterpretedVersion("0.1");
+		definiteB = new InterpretedVersion("0.1.1");
+		rangeA = new InterpretedVersion("0.1.x");
+		rangeB = new InterpretedVersion("0.0-1.x");
+		rangeC = new InterpretedVersion("0.0.x");
+		rangeD = new InterpretedVersion("0.1.[2-3]");
+		listA = new InterpretedVersion(new String[] {"0.1.x", "0.2.x"});
+		listB = new InterpretedVersion(new String[] {"0.0.x", "0.2.x"});
 	}
 	
 	@Test

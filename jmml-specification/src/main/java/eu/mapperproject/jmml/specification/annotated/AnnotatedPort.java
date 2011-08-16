@@ -37,4 +37,14 @@ public class AnnotatedPort extends Port implements Identifiable {
 	public int hashCode() {
 		return id.hashCode();
 	}
+	
+	@Override
+	public String toString() {
+		if (this.operator != null) {
+			return this.id + "(" + this.operator + ")";
+		}
+		else {
+			return this.id;
+		}
+	}
 }

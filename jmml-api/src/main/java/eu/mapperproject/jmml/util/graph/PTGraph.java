@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.util.graph;
 
+import eu.mapperproject.jmml.specification.graph.Edge;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;

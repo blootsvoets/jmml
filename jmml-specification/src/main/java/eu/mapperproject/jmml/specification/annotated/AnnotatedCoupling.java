@@ -7,13 +7,14 @@ import eu.mapperproject.jmml.specification.Datatype;
 import eu.mapperproject.jmml.specification.Filter;
 import eu.mapperproject.jmml.specification.InstancePort;
 import eu.mapperproject.jmml.specification.SEL;
+import eu.mapperproject.jmml.specification.graph.Edge;
 import eu.mapperproject.jmml.specification.numerical.InterpretedFormula;
 
 /**
  *
  * @author Joris Borgdorff
  */
-public class AnnotatedCoupling extends Coupling {
+public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstancePort> {
 	private transient final static Logger logger = Logger.getLogger(Coupling.class);
 	private transient boolean validated = false;
 	
@@ -115,4 +116,11 @@ public class AnnotatedCoupling extends Coupling {
 		hashCode = 31 * hashCode + this.to.hashCode();
 		return hashCode;
 	}
+		
+	/** Returns a copy of this coupling with a different receiving operator. */
+	public Coupling copyWithToOperator(SEL op) {
+		throw new UnsupportedOperationException("Can not just copy a coupling.");
+	//	return new Coupling(this.name, this.from, new InstanceOperator(this.to.getInstance(), op), this.filters);
+	}
+
 }

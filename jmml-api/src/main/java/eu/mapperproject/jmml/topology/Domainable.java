@@ -3,6 +3,8 @@
  */
 package eu.mapperproject.jmml.topology;
 
+import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
+
 /**
  * An interface for any classes that have a domain
  * @author Joris Borgdorff
@@ -10,5 +12,5 @@ package eu.mapperproject.jmml.topology;
  */
 public interface Domainable {
 	/** Get the domain */
-	public Domain getDomain();
+	public AnnotatedDomain getDomain();
 }

@@ -2,6 +2,7 @@ package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
+import eu.mapperproject.jmml.specification.OptionalChoice;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.graph.Numbered;
 
@@ -13,6 +14,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	private transient int number;
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
+	private transient boolean isfinal;
 	
 	@Override
 	public String getId() {
@@ -128,5 +130,39 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			+ "(" + (ofSubmodel() ? "submodel " : "mapper ")
 			+ this.id
 			+ "<" + (ofSubmodel() ? submodel : mapper) + ">)";
+	}
+	
+	public boolean isFinal() {
+		return isfinal;
+	}
+
+	public void isFinal(boolean isfinal) {
+		this.isfinal = isfinal;
+	}
+	
+	/**
+	 * Whether this instance should be completed after a given number of timesteps
+	 * @param steps the number of timesteps so far
+	 */
+	public boolean isCompleted(int steps) {
+		if (this.ofSubmodel()) {
+			return this.getTimescale().getSteps() <= steps + 1;
+		}
+		return true;
+	}
+	
+	@Override
+	public OptionalChoice getStateful() {
+		if (this.ofSubmodel()) {
+			if (this.stateful == null) {
+				return this.getSubmodelInstance().getStateful();
+			}
+			else {
+				return this.stateful;
+			}
+		}
+		else {
+			return null;
+		}
 	}
 }

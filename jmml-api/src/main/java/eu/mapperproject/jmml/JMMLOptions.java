@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Joris Borgdorff
  */
-public class MMLOptions {
+public class JMMLOptions {
 	@Parameter(names={"--no-collapse","-C"})
 	public boolean nocollapse = false;
 	
@@ -36,7 +36,7 @@ public class MMLOptions {
 	@Parameter(description="XMML_FILE",validateWith=ReadableFile.class,arity=1)
 	private List<String> xmmlFile = new ArrayList<String>();
 	
-	public MMLOptions(String... args) {
+	public JMMLOptions(String... args) {
 		JCommander jcom = new JCommander(this);
 		try {
 			jcom.parse(args);

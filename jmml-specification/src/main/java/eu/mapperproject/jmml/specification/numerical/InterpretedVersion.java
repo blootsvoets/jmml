@@ -1,19 +1,19 @@
 /**
  * 
  */
-package eu.mapperproject.jmml.util;
+package eu.mapperproject.jmml.specification.numerical;
 
 /**
  * Indicate a version or range of versions
  * 
  * @author Joris Borgdorff
  */
-public class Version {
+public class InterpretedVersion {
 	private final VersionRange[] version;
-	private final Version[] multiversion;
+	private final InterpretedVersion[] multiversion;
 	
 	/** Create a version or version range from a string */
-	public Version(String version) {
+	public InterpretedVersion(String version) {
 		this.multiversion = null;
 		String[] versions = version.split("\\.");
 		this.version = new VersionRange[versions.length];
@@ -23,12 +23,12 @@ public class Version {
 	}
 	
 	/** Create a version range from multiple strings */
-	public Version(String[] versions) {
+	public InterpretedVersion(String[] versions) {
 		this.version = null;
-		this.multiversion = new Version[versions.length];
+		this.multiversion = new InterpretedVersion[versions.length];
 		
 		for (int i = 0; i < versions.length; i++) {
-			this.multiversion[i] = new Version(versions[i]);
+			this.multiversion[i] = new InterpretedVersion(versions[i]);
 		}
 	}
 	
@@ -38,10 +38,10 @@ public class Version {
 	 * If the version number given contains more elements, it is not contained in this range.
 	 * @throws IllegalArgumentException if the version given is not a definite one
 	 */
-	public boolean contains(Version v) {
+	public boolean contains(InterpretedVersion v) {
 		// With multiple versions, delegate
 		if (this.hasMultiple()) {
-			for (Version version : this.multiversion) {
+			for (InterpretedVersion version : this.multiversion) {
 				if (version.contains(v)) return true;
 			}
 			return false;
@@ -97,7 +97,7 @@ public class Version {
 		StringBuilder builder = new StringBuilder();
 		// With multiple versions, comma delimited string
 		if (this.hasMultiple()) {
-			for (Version v : this.multiversion) {
+			for (InterpretedVersion v : this.multiversion) {
 				builder.append(v.versionString());
 				builder.append(", ");
 			}

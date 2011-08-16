@@ -1,7 +1,6 @@
 package eu.mapperproject.jmml.topology.algorithms;
 import cern.colt.list.IntArrayList;
-import eu.mapperproject.jmml.topology.algorithms.Trace;
-import eu.mapperproject.jmml.util.Numbered;
+import eu.mapperproject.jmml.specification.graph.Numbered;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -44,6 +43,11 @@ public class TraceTest {
 		@Override
 		public boolean deepEquals(Object o) {
 			return this.equals(o);
+		}
+
+		@Override
+		public void setNumber(int num) {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 

@@ -1,8 +1,6 @@
-package eu.mapperproject.jmml.util.numerical;
+package eu.mapperproject.jmml.specification.numerical;
 
-import eu.mapperproject.jmml.util.numerical.SIUnit;
-import eu.mapperproject.jmml.util.numerical.ScaleModifier;
-import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
+import eu.mapperproject.jmml.specification.numerical.ScaleModifier.Dimension;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
@@ -30,32 +28,32 @@ public class SIUnitTest {
 	
 	@Test
 	public void parseSingle() {
-		SIUnit.parseSIUnit("1");
+		SIUnit.valueOf("1");
 	}
 
 	@Test
 	public void parseSci() {
-		SIUnit.parseSIUnit("1E-64");
+		SIUnit.valueOf("1E-64");
 	}
 	
 	@Test
 	public void parseTime() {
-		SIUnit t = SIUnit.parseSIUnit("1 sec");
+		SIUnit t = SIUnit.valueOf("1 sec");
 		assertEquals(t, o1s);
 		assertEquals(Dimension.TIME, t.getDimension());
-		t = SIUnit.parseSIUnit("1 min");
+		t = SIUnit.valueOf("1 min");
 		assertEquals(t, o1min);
-		SIUnit.parseSIUnit("1 hour");
-		SIUnit.parseSIUnit("1 week");
-		SIUnit.parseSIUnit("1 month");
-		SIUnit.parseSIUnit("1 year");
+		SIUnit.valueOf("1 hour");
+		SIUnit.valueOf("1 week");
+		SIUnit.valueOf("1 month");
+		SIUnit.valueOf("1 year");
 	}
 
 	@Test
 	public void parseData() {
-		SIUnit.parseSIUnit("1 kbit");
-		SIUnit.parseSIUnit("1 MB");
-		assertEquals(SIUnit.parseSIUnit("8 bit"), SIUnit.parseSIUnit("1 byte"));
+		SIUnit.valueOf("1 kbit");
+		SIUnit.valueOf("1 MB");
+		assertEquals(SIUnit.valueOf("8 bit"), SIUnit.valueOf("1 byte"));
 	}
 	
 	@Test

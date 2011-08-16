@@ -1,6 +1,5 @@
-package eu.mapperproject.jmml.util.numerical;
+package eu.mapperproject.jmml.specification.numerical;
 
-import eu.mapperproject.jmml.util.numerical.Formula;
 import static org.junit.Assert.*;
 
 import java.text.ParseException;
@@ -14,7 +13,7 @@ import org.junit.Test;
 
 public class FormulaTest {
 	double x, y;
-	private Formula xy, log, plus, pow, sizeof, parensA, parensB;
+	private InterpretedFormula xy, log, plus, pow, sizeof, parensA, parensB;
 	private Set<String> xySet;
 	private Map<String,Integer> xyGive;
 	@Before
@@ -23,13 +22,13 @@ public class FormulaTest {
 		y = 3d;
 		
 		try {
-			xy = Formula.parseFormula("x*y");
-			log = Formula.parseFormula("log(x)");
-			plus = Formula.parseFormula("y*y+x*y-x+x*log(x)-sqrt(x)-sqrt(y)");
-			pow = Formula.parseFormula("x^2");
-			sizeof = Formula.parseFormula("x*sizeof(double)");
-			parensA = Formula.parseFormula("x*sizeof(double) + (x+y)/-x");
-			parensB = Formula.parseFormula("((x+x)*3 + (x+y)/x)");
+			xy = InterpretedFormula.valueOf("x*y");
+			log = InterpretedFormula.valueOf("log(x)");
+			plus = InterpretedFormula.valueOf("y*y+x*y-x+x*log(x)-sqrt(x)-sqrt(y)");
+			pow = InterpretedFormula.valueOf("x^2");
+			sizeof = InterpretedFormula.valueOf("x*sizeof(double)");
+			parensA = InterpretedFormula.valueOf("x*sizeof(double) + (x+y)/-x");
+			parensB = InterpretedFormula.valueOf("((x+x)*3 + (x+y)/x)");
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

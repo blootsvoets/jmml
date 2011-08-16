@@ -1,5 +1,7 @@
 package eu.mapperproject.jmml.util.graph;
 
+import eu.mapperproject.jmml.specification.graph.Edge;
+
 /**
  * The simplest implementation of an Edge
  * @author Joris Borgdorff

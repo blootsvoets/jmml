@@ -1,3 +1,4 @@
 */target/
 nbactions-Canal.xml
 !.gitignore
+/target/

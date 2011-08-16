@@ -7,24 +7,22 @@ import java.util.logging.Level;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import eu.mapperproject.jmml.definitions.MMLDefinitions;
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
 import eu.mapperproject.jmml.io.XMMLDocumentImporter;
-import eu.mapperproject.jmml.topology.Coupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.topology.CouplingTopology;
-import eu.mapperproject.jmml.topology.Instance;
 import eu.mapperproject.jmml.topology.algorithms.CouplingInstance;
 import eu.mapperproject.jmml.topology.algorithms.CouplingTopologyDecorator;
 import eu.mapperproject.jmml.topology.algorithms.DomainDecorator;
 import eu.mapperproject.jmml.topology.algorithms.ProcessIteration;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraph;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraphDecorator;
-import eu.mapperproject.jmml.util.Version;
+import eu.mapperproject.jmml.specification.numerical.InterpretedVersion;
 import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.util.graph.Edge;
+import eu.mapperproject.jmml.specification.graph.Edge;
 import eu.mapperproject.jmml.util.graph.PTGraph;
-import eu.mapperproject.jmml.util.graph.Tree;
 
 import java.util.logging.Logger;
 
@@ -49,20 +47,20 @@ import java.util.logging.Logger;
  * @author Joris Borgdorff
  *
  */
-public class MMLDocument {
+public class JMML {
 	public enum GraphType {
 		DOMAIN, TASK, TOPOLOGY;
 	}
 	
-	private final static Logger logger = Logger.getLogger(MMLDocument.class.getName());
+	private final static Logger logger = Logger.getLogger(JMML.class.getName());
 	private final ModelMetadata model;
-	private final Version xmmlVersion;
+	private final InterpretedVersion xmmlVersion;
 	
 	private final MMLDefinitions definitions;
 	private final CouplingTopology topology;
 
 	/** Create a new xMML document */
-	public MMLDocument(ModelMetadata model, MMLDefinitions definitions, CouplingTopology topology, Version xmmlVersion) {
+	public JMML(ModelMetadata model, MMLDefinitions definitions, CouplingTopology topology, InterpretedVersion xmmlVersion) {
 		this.model = model;
 		this.definitions = definitions;
 		this.topology = topology;
@@ -102,21 +100,21 @@ public class MMLDocument {
 	}
 
 	/** Generate a domain graph */
-	public PTGraph<Cluster<Instance,Coupling>,Edge<Cluster<Instance,Coupling>>> getDomainGraph() {
-		PTGraph<Instance, Coupling> graph;
-		graph = this.topology.getGraph();
-		Tree<Cluster<Instance,Coupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
-		return PTGraph.graphFromTree(clTree);
+	public PTGraph<Cluster<AnnotatedInstancePort,AnnotatedCoupling>,Edge<Cluster<AnnotatedInstancePort,AnnotatedCoupling>>> getDomainGraph() {
+		PTGraph<AnnotatedInstancePort, AnnotatedCoupling> graph;
+		//graph = this.topology.getGraph();
+		//Tree<Cluster<AnnotatedInstancePort,AnnotatedCoupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
+		return null; //PTGraph.graphFromTree(clTree);
 	}
 	public static void main(String[] args) throws IOException {
-		MMLOptions opt = new MMLOptions(args);
+		JMMLOptions opt = new JMMLOptions(args);
 		
 		if (opt.wantsOutput()) {
 			File xmml = opt.getXMMLFile();
 			File dot = opt.getDotFile();
 			
 			// Generating an XMML document and exporting it
-			MMLDocument doc = null;
+			JMML doc = null;
 			try {
 				doc = new XMMLDocumentImporter().parse(xmml);
 			} catch (ValidityException e) {

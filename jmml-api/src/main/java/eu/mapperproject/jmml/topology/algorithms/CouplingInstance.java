@@ -1,7 +1,7 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
 import eu.mapperproject.jmml.topology.Coupling;
-import eu.mapperproject.jmml.util.graph.Edge;
+import eu.mapperproject.jmml.specification.graph.Edge;
 
 /**
  * Represents an actual data transfer over a coupling from one processiteration to the other.

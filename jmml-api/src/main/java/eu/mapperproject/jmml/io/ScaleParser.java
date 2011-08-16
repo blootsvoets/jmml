@@ -9,11 +9,10 @@ import java.util.logging.Logger;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
-import eu.mapperproject.jmml.definitions.Scale;
 import eu.mapperproject.jmml.definitions.ScaleSet;
-import eu.mapperproject.jmml.util.numerical.SIRange;
-import eu.mapperproject.jmml.util.numerical.SIUnit;
-import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
+import eu.mapperproject.jmml.specification.numerical.SIRange;
+import eu.mapperproject.jmml.specification.numerical.SIUnit;
+import eu.mapperproject.jmml.specification.numerical.ScaleModifier.Dimension;
 
 /**
  * Parse the scales of a submodel or instance

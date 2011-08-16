@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.jmml.util.graph;
+package eu.mapperproject.jmml.specification.graph;
 
 /**
  * A basic edge of a graph

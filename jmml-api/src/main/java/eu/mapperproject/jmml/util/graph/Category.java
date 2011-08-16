@@ -1,10 +1,9 @@
 package eu.mapperproject.jmml.util.graph;
 
+import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import eu.mapperproject.jmml.topology.Domain;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Map;
  */ 
 public class Category implements Child<Category> {
 	/** A non-category, for specifying anything uncategorized */
-	public final static Category NO_CATEGORY = new Category(Domain.GENERIC.getName(), new String[0]);
+	public final static Category NO_CATEGORY = new Category(AnnotatedDomain.GENERIC.getName(), new String[0]);
 
 	private final static Map<String[], Category> categories;
 	private final static List<Category> categoriesDomain;
@@ -43,7 +42,7 @@ public class Category implements Child<Category> {
 	 * twice only create one Category objects.
 	 * @throws NullPointerException if dom is null
 	 */
-	public static Category getCategory(Domain dom) {
+	public static Category getCategory(AnnotatedDomain dom) {
 		int num = dom.getNumber();
 		while (categoriesDomain.size() <= num) {
 			categoriesDomain.add(null);

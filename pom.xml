@@ -1,31 +1,69 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>eu.mapperproject.jmml</groupId>
-  <artifactId>jmml</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>jmml</name>
-  <dependencyManagement>
-    <dependencies>
-     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
-	  <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>colt</groupId>
-      <artifactId>colt</artifactId>
-      <version>1.2.0</version>
-	  <type>jar</type>
-    </dependency>
-    </dependencies>
-  </dependencyManagement>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>eu.mapperproject.jmml</groupId>
+	<artifactId>jmml</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>jmml</name>
+	
+	<distributionManagement>
+		<repository>
+			<id>uva-scs-mvnrepo</id>
+			<name>UvA SCS Repository</name>
+			<url>scp://mvn@napoli.science.uva.nl/var/www/mvn</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>uva-scs-mvnrepo</id>
+			<name>UvA SCS Repository</name>
+			<url>http://napoli.science.uva.nl/mvn</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+	
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+	</build>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.8.2</version>
+				<scope>test</scope>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>colt</groupId>
+				<artifactId>colt</artifactId>
+				<version>1.2.0</version>
+				<type>jar</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
   
-   <modules>
-    <module>jmml-api</module>
-    <module>jmml-specification</module>
-  </modules>
+	<modules>
+		<module>jmml-api</module>
+		<module>jmml-specification</module>
+	</modules>
 </project>

@@ -20,7 +20,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 import eu.mapperproject.jmml.ModelMetadata;
 import eu.mapperproject.jmml.Param;
-import eu.mapperproject.jmml.MMLDocument;
+import eu.mapperproject.jmml.JMML;
 import eu.mapperproject.jmml.definitions.Converter;
 import eu.mapperproject.jmml.definitions.Datatype;
 import eu.mapperproject.jmml.definitions.Port;
@@ -34,7 +34,7 @@ import eu.mapperproject.jmml.topology.Domain;
 import eu.mapperproject.jmml.topology.Filter;
 import eu.mapperproject.jmml.topology.Instance;
 import eu.mapperproject.jmml.topology.InstancePort;
-import eu.mapperproject.jmml.util.Version;
+import eu.mapperproject.jmml.specification.numerical.InterpretedVersion;
 import eu.mapperproject.jmml.util.numerical.Formula;
 import eu.mapperproject.jmml.util.numerical.SIUnit;
 import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
@@ -55,7 +55,7 @@ public class XMMLDocumentImporter {
 	private Builder parser;
 	
 	/** Versions of the xMML format that are supported by this importer, inclusive. */
-	private static final Version SUPPORTED_VERSIONS = new Version("0.1.x");
+	private static final InterpretedVersion SUPPORTED_VERSIONS = new InterpretedVersion("0.1.x");
 	
 	/** Create a simple XOM parser to do the import */
 	public XMMLDocumentImporter() {
@@ -63,19 +63,19 @@ public class XMMLDocumentImporter {
 	}
 	
 	/** Parse an xMML file using the XOM library */
-	public MMLDocument parse(File f) throws ValidityException, ParsingException, IOException {
+	public JMML parse(File f) throws ValidityException, ParsingException, IOException {
 		return this.parse(this.parser.build(f));
 	}
 	
 	/** Parse an xMML file from an input stream using the XOM library */
-	public MMLDocument parse(InputStream stream) throws ValidityException, ParsingException, IOException {
+	public JMML parse(InputStream stream) throws ValidityException, ParsingException, IOException {
 		return this.parse(this.parser.build(stream));
 	}
 	
 	/** Parse an xMML document using the XOM library */
-	private MMLDocument parse(Document doc) {
+	private JMML parse(Document doc) {
 		Element model = doc.getRootElement();
-		Version xmmlVersion = new Version(model.getAttributeValue("xmml_version"));
+		InterpretedVersion xmmlVersion = new InterpretedVersion(model.getAttributeValue("xmml_version"));
 		
 		if (!SUPPORTED_VERSIONS.contains(xmmlVersion)) {
 			throw new IllegalArgumentException("Document xMML format " + xmmlVersion + " is not supported, only versions " +
@@ -85,7 +85,7 @@ public class XMMLDocumentImporter {
 		MMLDefinitions def = this.parseDefinitions(model.getFirstChildElement("definitions"));
 		CouplingTopology ct = this.parseTopology(model.getFirstChildElement("topology"), def);
 		
-		return new MMLDocument(mm, def, ct, xmmlVersion);
+		return new JMML(mm, def, ct, xmmlVersion);
 	}
 	
 	/** Parses and returns the metadata of a model */
@@ -96,9 +96,9 @@ public class XMMLDocumentImporter {
 		String description = eDescription == null ? null : eDescription.getValue();
 		
 		String versionString = model.getAttributeValue("version");
-		Version modelVersion = null;
+		InterpretedVersion modelVersion = null;
 		if (versionString != null) {
-			modelVersion = new Version(versionString);
+			modelVersion = new InterpretedVersion(versionString);
 		}
 		
 		return new ModelMetadata(id, name, description, modelVersion);
