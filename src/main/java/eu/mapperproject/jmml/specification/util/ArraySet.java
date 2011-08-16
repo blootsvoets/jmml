@@ -6,6 +6,7 @@ package eu.mapperproject.jmml.specification.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -194,12 +195,16 @@ public class ArraySet<V> implements Set<V> {
 		@Override
 		public V next() {
 			i++;
+			if (i >= size) {
+				throw new NoSuchElementException("Iterator has no next element.");
+			}
 			return values[i];
 		}
 
 		@Override
 		public void remove() {
 			ArraySet.this.remove(i);
+			i--;
 		}
 	}
 }

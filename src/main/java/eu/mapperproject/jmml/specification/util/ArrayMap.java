@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -368,10 +369,14 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 	private class MapIterator<T> implements Iterator<T> {
 		private int i;
 		private IteratorType type;
+		private MapEntry entry;
 		
 		public MapIterator(IteratorType type) {
 			i = -1;
 			this.type = type;
+			if (type == IteratorType.ENTRY) {
+				entry = new MapEntry(0);
+			}
 		}
 		
 		@Override
@@ -383,16 +388,22 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		@SuppressWarnings({"unchecked", "unchecked"})
 		public T next() {
 			i++;
+			if (i >= size) {
+				throw new NoSuchElementException("Iterator has no next element.");
+			}
 			switch (type) {
 				case KEYS: return (T)keys[i];
 				case VALUES: return (T)values[i];
-				default: return (T)new MapEntry(i);
+				default:
+					entry.setIndex(i);
+					return (T)entry;
 			}
 		}
 
 		@Override
 		public void remove() {
 			ArrayMap.this.remove(i);
+			i--;
 		}
 	}
 	
@@ -402,6 +413,10 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		MapEntry(int i) {
 			this.i = i;
 		}
+		private void setIndex(int i) {
+			this.i = i;
+		}
+		
 		@Override
 		public K getKey() {
 			return keys[i];
