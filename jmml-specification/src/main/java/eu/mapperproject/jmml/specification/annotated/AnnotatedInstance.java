@@ -1,6 +1,5 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import com.sun.istack.logging.Logger;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.MultiDimensionalScale;
@@ -14,12 +13,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Joris Borgdorff
  */
 public class AnnotatedInstance extends Instance implements Numbered {
+	private transient final static Logger logger = Logger.getLogger(AnnotatedInstance.class.getName());
 	private transient int number;
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
@@ -147,6 +149,9 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		for (V os : with) {
 			sid = os.getId();
 			if (sid != null) {
+				if (scales.containsKey(sid)) {
+					logger.log(Level.WARNING, "Multiple scales with the same id have been defined in submodel ''{0}''. Scales should have a unique id per submodel.", submodel);
+				}
 				scales.put(sid, os);
 			} else {
 				nameless.add(os);
@@ -155,7 +160,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		int j = 0;
 		for (V os : nameless) {
 			if (j >= names.length) {
-				Logger.getLogger(AnnotatedInstance.class).warning("With more than 6 scales, please provide names, now random names are used.");
+				logger.warning("With more than 6 scales, please provide names, now random names are used.");
 				sid = names[0] + Math.random();
 			}
 			else {
@@ -163,7 +168,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			}
 			while (scales.containsKey(sid)) {
 				if (j >= names.length) {
-					Logger.getLogger(AnnotatedInstance.class).warning("With more than 6 scales, please provide names, now random names are used.");
+					logger.warning("With more than 6 scales, please provide names, now random names are used.");
 					sid = names[0] + Math.random();
 				}
 				else {

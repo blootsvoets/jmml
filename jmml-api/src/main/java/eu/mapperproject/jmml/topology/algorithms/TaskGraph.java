@@ -7,21 +7,21 @@ import java.util.List;
 import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
-import eu.mapperproject.jmml.topology.CouplingTopology;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 
 public class TaskGraph {
 	private final PTGraph<ProcessIteration, CouplingInstance> graph;
-	private final CouplingTopology topology;
+	private final AnnotatedTopology topology;
 	private final boolean collapse;
 	
-	public TaskGraph(CouplingTopology topology) {
+	public TaskGraph(AnnotatedTopology topology) {
 		this(topology, true, false, false);
 	}
 	
-	public TaskGraph(CouplingTopology topology, boolean collapse, boolean horizontal, boolean subgraphs) {
+	public TaskGraph(AnnotatedTopology topology, boolean collapse, boolean horizontal, boolean subgraphs) {
 		this.topology = topology;
 		this.graph = new PTGraph<ProcessIteration, CouplingInstance>(true);
 		this.collapse = collapse;
@@ -88,25 +88,23 @@ public class TaskGraph {
 		Collection<AnnotatedCoupling> cds = this.topology.getFrom(new InstanceOperator(pi.getInstance(), ct));
 		
 		for (AnnotatedCoupling cd : cds) {
-			if (pi.firstLoop() && topology.needsInitInstances(cd.getTo())) {
-				cd = cd.copyWithToOperator(SEL.FINIT);
-			}
+			boolean needInit = (pi.firstLoop() && topology.needsInitInstances(cd.getTo()));
 
-			this.calculateTo(pi, cd, state);
+			this.calculateTo(pi, cd, state, needInit);
 		}
 		
 		return !cds.isEmpty();
 	}
 	
 	/** Create an instance of a normal coupling between one process iteration the next */
-	private void calculateTo(ProcessIteration from, AnnotatedCoupling cd, TaskGraphState state) {
+	private void calculateTo(ProcessIteration from, AnnotatedCoupling cd, TaskGraphState state, boolean needInit) {
 		CouplingInstance ci;
-		if (cd.getTo().getPort().getOperator() == SEL.FINIT) {
-			ci = state.tryStateful(cd.getTo());
+		if (needInit || cd.getTo().getPort().getOperator() == SEL.FINIT) {
+			ci = state.tryStateful(cd.getTo().getInstance());
 			if (ci != null) this.addToGraph(ci, state);
 		}
 		
-		ci = from.calculateCouplingInstance(cd);
+		ci = from.calculateCouplingInstance(cd, needInit);
 		this.addToGraph(ci, state);
 	}
 

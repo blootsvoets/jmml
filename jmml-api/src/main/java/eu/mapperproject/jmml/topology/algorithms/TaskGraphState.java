@@ -11,8 +11,8 @@ import java.util.Map;
 
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.specification.util.ArrayMap;
-import eu.mapperproject.jmml.topology.CouplingTopology;
 import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.PTList;
 
@@ -28,9 +28,9 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	private final List<ProcessIteration> activeProcesses;
 	private final Map<ProcessIteration,Collection<AnnotatedCoupling>> snoozingProcesses;
 	private final Map<AnnotatedInstance,ProcessIteration> states;
-	private final CouplingTopology topology;
+	private final AnnotatedTopology topology;
 
-	public TaskGraphState(CouplingTopology desc) {
+	public TaskGraphState(AnnotatedTopology desc) {
 		this.states = new ArrayMap<AnnotatedInstance,ProcessIteration>();
 		this.activeProcesses = new ArrayList<ProcessIteration>();
 		this.snoozingProcesses = new HashMap<ProcessIteration,Collection<AnnotatedCoupling>>();

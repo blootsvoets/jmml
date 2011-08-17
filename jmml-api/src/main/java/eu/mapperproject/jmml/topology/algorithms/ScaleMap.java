@@ -2,10 +2,11 @@ package eu.mapperproject.jmml.topology.algorithms;
 
 import cern.colt.list.IntArrayList;
 import eu.mapperproject.jmml.definitions.ScaleSet;
+import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.specification.util.ArraySet;
-import eu.mapperproject.jmml.topology.CouplingTopology;
 import eu.mapperproject.jmml.util.Painter;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,12 +43,12 @@ public class ScaleMap implements Painter {
 	private final static float[] prefixTimeLog = {1.77815125f, 3.556302501f, 4.936513742f, 5.781611782f, 6.419922721f, 7.498806607f, 8.498806607f, 9.498806607f, 10.498806607f};
 	private final IntArrayList tickPlacement;
 
-	public ScaleMap(CouplingTopology topology) {
+	public ScaleMap(AnnotatedTopology topology) {
 		this.bounds = null;
 		this.scales = new ArrayList<NamedRectangle>();
 		this.tickPlacement = new IntArrayList();
 
-		this.addScales(topology.getInstances());
+		this.addScales(topology.getInstance());
 	}
 
 	@Override
@@ -297,12 +298,13 @@ public class ScaleMap implements Painter {
 		}
 	}
 
-	private void addScales(Collection<AnnotatedInstance> insts) {
+	private void addScales(Collection<Instance> insts) {
 		Collection<Submodel> visited = new ArraySet<Submodel>();
-		for (AnnotatedInstance inst : insts) {
-			Submodel sub = inst.getSubmodelInstance();
+		for (Instance inst : insts) {
+			AnnotatedInstance ainst = (AnnotatedInstance)inst;
+			Submodel sub = ainst.getSubmodelInstance();
 			if (visited.contains(sub)) continue;
-			if (tryAddScale(new ScaleSet(inst.getTimescaleInstance(), inst.getSpacescaleInstance(), inst.getOtherscaleInstance()), sub.getId())) {
+			if (tryAddScale(new ScaleSet(ainst.getTimescaleInstance(), ainst.getSpacescaleInstance(), ainst.getOtherscaleInstance()), sub.getId())) {
 				visited.add(sub);
 			}
 		}

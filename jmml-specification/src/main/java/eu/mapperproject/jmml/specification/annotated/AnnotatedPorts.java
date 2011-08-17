@@ -27,19 +27,16 @@ public class AnnotatedPorts extends Ports {
 	public List<JAXBElement<Port>> getInOrOut() {
         return this.inOrOut;
     }
-	
-	@SuppressWarnings("unchecked")
+
 	public AnnotatedPort getPort(String id) {
-		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(id)).getValue();
+		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(id)).getValue();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public AnnotatedPort getInPort(String id) {
-		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(0, id)).getValue();
+		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(0, id)).getValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	public AnnotatedPort getOutPort(String id) {
-		return ((JAXBElement<AnnotatedPort>)((UniqueLists)inOrOut).getById(1, id)).getValue();
+		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(1, id)).getValue();
 	}
 }

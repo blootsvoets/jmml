@@ -131,7 +131,7 @@ public class ProcessIteration {
 	}
 
 	public ProcessIteration nextIteration(AnnotatedCoupling pd) {
-		if (this.instance.equals(pd.getTo())) {
+		if (this.instance.equals(pd.getTo().getInstance())) {
 			throw new IllegalArgumentException("In a progression that is an internal iteration, an coupling may not be specified.");
 		}
 		return this.progress(pd, ProgressType.ITERATION);
@@ -141,10 +141,10 @@ public class ProcessIteration {
 		return this.progress(pd, ProgressType.INSTANCE);
 	}
 
-	public CouplingInstance calculateCouplingInstance(AnnotatedCoupling cd) {
+	public CouplingInstance calculateCouplingInstance(AnnotatedCoupling cd, boolean nextInstance) {
 		ProcessIteration pnext;
 		
-		if (cd.getTo().getPort().getOperator() == SEL.FINIT) {
+		if (nextInstance || cd.getTo().getPort().getOperator() == SEL.FINIT) {
 			pnext = this.nextInstance(cd);
 		}
 		else {

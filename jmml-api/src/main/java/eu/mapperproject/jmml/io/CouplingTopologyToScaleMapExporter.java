@@ -1,6 +1,6 @@
 package eu.mapperproject.jmml.io;
 
-import eu.mapperproject.jmml.topology.CouplingTopology;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.topology.algorithms.ScaleMap;
 import eu.mapperproject.jmml.util.PaintedPanel;
 
@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 public class CouplingTopologyToScaleMapExporter extends AbstractExporter {
 	private final ScaleMap sm;
 
-	public CouplingTopologyToScaleMapExporter(CouplingTopology ct) {
+	public CouplingTopologyToScaleMapExporter(AnnotatedTopology ct) {
 		this.sm = new ScaleMap(ct);
 	}
 

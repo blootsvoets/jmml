@@ -1,21 +1,20 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import com.sun.istack.logging.Logger;
 import eu.mapperproject.jmml.specification.Apply;
 import eu.mapperproject.jmml.specification.Coupling;
 import eu.mapperproject.jmml.specification.Datatype;
-import eu.mapperproject.jmml.specification.Filter;
 import eu.mapperproject.jmml.specification.InstancePort;
 import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.graph.Edge;
-import eu.mapperproject.jmml.specification.numerical.InterpretedFormula;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Joris Borgdorff
  */
 public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstancePort> {
-	private transient final static Logger logger = Logger.getLogger(Coupling.class);
+	private transient final static Logger logger = Logger.getLogger(Coupling.class.getName());
 	private transient boolean validated = false;
 	
 	@Override
@@ -59,13 +58,13 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 			AnnotatedFilter f = ((AnnotatedApply)a).getFilterInstance();
 			Datatype next = f.getDatatypeInInstance();
 			if (!d.equals(next)) {
-				logger.warning("Datatypes in coupling " + this + " are not converted correctly by applied filter " + f.getId() + ": " + next.getId() + " expected and " + d.getId() + " received.");
+				logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly by applied filter {1}: {2} expected and {3} received.", new Object[]{this, f.getId(), next.getId(), d.getId()});
 			}
 			d = f.getDatatypeOutInstance();
 		}
 		
 		if (!d.equals(toP.getDatatypeInstance())) {
-			logger.warning("Datatypes in coupling " + this + " are not converted correctly: " + toP.getDatatype() + " expected and " + d.getId() + " received.");
+			logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly: {1} expected and {2} received.", new Object[]{this, toP.getDatatype(), d.getId()});
 		}
 		
 		// Check if scales match from one end of the coupling to the other.

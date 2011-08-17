@@ -4,22 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
+import javax.xml.bind.JAXBException;
 
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
-import eu.mapperproject.jmml.io.XMMLDocumentImporter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
-import eu.mapperproject.jmml.topology.CouplingTopology;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.topology.algorithms.CouplingInstance;
 import eu.mapperproject.jmml.topology.algorithms.CouplingTopologyDecorator;
 import eu.mapperproject.jmml.topology.algorithms.DomainDecorator;
 import eu.mapperproject.jmml.topology.algorithms.ProcessIteration;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraph;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraphDecorator;
-import eu.mapperproject.jmml.specification.numerical.InterpretedVersion;
 import eu.mapperproject.jmml.util.graph.Cluster;
 import eu.mapperproject.jmml.specification.graph.Edge;
 import eu.mapperproject.jmml.util.graph.PTGraph;
@@ -53,18 +52,16 @@ public class JMML {
 	}
 	
 	private final static Logger logger = Logger.getLogger(JMML.class.getName());
-	private final ModelMetadata model;
-	private final InterpretedVersion xmmlVersion;
+	private final AnnotatedModel model;
 	
-	private final MMLDefinitions definitions;
-	private final CouplingTopology topology;
+	private final AnnotatedDefinitions definitions;
+	private final AnnotatedTopology topology;
 
 	/** Create a new xMML document */
-	public JMML(ModelMetadata model, MMLDefinitions definitions, CouplingTopology topology, InterpretedVersion xmmlVersion) {
+	public JMML(AnnotatedModel model) {
 		this.model = model;
-		this.definitions = definitions;
-		this.topology = topology;
-		this.xmmlVersion = xmmlVersion;
+		this.definitions = model.getDefinitions();
+		this.topology = model.getTopology();
 	}
 
 	/**
@@ -81,7 +78,8 @@ public class JMML {
 				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph(collapse));
 				break;
 			default:
-				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), this.topology.getGraph(), true, false, true);
+				PTGraph graph = CouplingTopologyDecorator.constructTopologyGraph(topology);
+				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), graph, true, false, true);
 				break;
 		}
 		
@@ -116,13 +114,10 @@ public class JMML {
 			// Generating an XMML document and exporting it
 			JMML doc = null;
 			try {
-				doc = new XMMLDocumentImporter().parse(xmml);
-			} catch (ValidityException e) {
-				logger.log(Level.SEVERE, "The xMML file provided did not contain valid XML: {}", e);
-				System.exit(2);
-			} catch (ParsingException e) {
-				logger.log(Level.SEVERE, "The xMML file could not be parsed: {}", e);
-				System.exit(3);
+				AnnotatedModel model = AnnotatedModel.getModel(xmml);
+				doc = new JMML(model);
+			} catch (JAXBException ex) {
+				logger.log(Level.SEVERE, "The xMML file could not be parsed or loaded: {}", ex);
 			}
 			
 			try {
