@@ -7,6 +7,7 @@ import eu.mapperproject.jmml.specification.OptionalChoice;
 import eu.mapperproject.jmml.specification.Otherscale;
 import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Submodel;
+import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.graph.Numbered;
 import eu.mapperproject.jmml.specification.util.ArrayMap;
 import java.util.ArrayList;
@@ -26,8 +27,17 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
 	private transient boolean isfinal;
-	private final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
-	private final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
+	private transient boolean isinitial;
+	private transient final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
+	private transient final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
+	
+	public AnnotatedInstance() {
+		super();
+		this.isfinal = false;
+		this.isinitial = false;
+		this.mapperInst = null;
+		this.submodelInst = null;
+	}
 	
 	@Override
 	public String getId() {
@@ -234,8 +244,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		return true;
 	}
 	
-	@Override
-	public OptionalChoice getStateful() {
+	public OptionalChoice isStateful() {
 		if (this.ofSubmodel()) {
 			if (this.stateful == null) {
 				return this.getSubmodelInstance().getStateful();
@@ -246,6 +255,18 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		}
 		else {
 			return null;
+		}
+	}
+	
+	public boolean isInit() {
+		if (this.init == null && this.ofSubmodel()) {
+			return this.getSubmodelInstance().getInit() == YesNoChoice.YES;
+		}
+		else if (this.init == null && this.mapper != null) {
+			return this.getMapperInstance().getInit() == YesNoChoice.YES;
+		}
+		else {
+			return this.init == YesNoChoice.YES;
 		}
 	}
 }

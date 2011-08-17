@@ -2,8 +2,11 @@ package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Topology;
+import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
 import eu.mapperproject.jmml.specification.util.UniqueLists;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,6 +26,17 @@ public class AnnotatedTopology extends Topology {
 	
 	public AnnotatedInstance getInstance(String id) {
 		return (AnnotatedInstance)((UniqueLists)this.instance).getById(0, id);
+	}
+	
+	public Collection<AnnotatedInstance> getInitialInstances() {
+		Collection<AnnotatedInstance> insts = new ArrayList<AnnotatedInstance>();
+		for (Instance inst : instance) {
+			AnnotatedInstance ainst = (AnnotatedInstance)inst;
+			if (ainst.isInit()) {
+				insts.add(ainst);
+			}
+		}
+		return insts;
 	}
 	
 		/** Put the from and to couplings in the right place */
