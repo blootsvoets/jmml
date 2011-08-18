@@ -78,7 +78,7 @@ public class CouplingTopologyDecorator extends GraphDecorator<AnnotatedInstanceP
 
 	@Override
 	public StyledEdge addSourceEdge(AnnotatedInstancePort node, StyledNode snode) {
-		if (node.getInstance().getInit() == YesNoChoice.YES) {
+		if (node.getInstance().isInit()) {
 			return new SimpleStyledEdge(START, snode);
 		}
 		return null;

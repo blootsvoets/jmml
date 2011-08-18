@@ -47,7 +47,7 @@ public class ProcessIteration {
 		
 		this.isfinal = false;
 		this.deadlock = false;
-		this.initial = this.instance.getInit() == YesNoChoice.YES && firstInstance() && initializing();
+		this.initial = this.instance.isInit() && firstInstance() && initializing();
 		this.asString = this.updateString(true);
 		this.origString = this.updateString(false);
 		this.stateProgressed = false;
