@@ -1,6 +1,8 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.specification.Coupling;
 import eu.mapperproject.jmml.specification.Instance;
+import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Topology;
 import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
@@ -35,9 +37,79 @@ public class AnnotatedTopology extends Topology {
 			if (ainst.isInit()) {
 				insts.add(ainst);
 			}
+			else if (!hasIncomingCouplings(ainst)) {
+				insts.add(ainst);
+			}
 		}
 		return insts;
 	}
+	
+	public boolean needsExternalInitialization(AnnotatedInstance ainst) {
+		if (ainst.isInit()) {
+			return false;
+		}
+		boolean hasIncoming = false;
+		for (Coupling c : this.coupling) {
+			AnnotatedInstancePort ato = (AnnotatedInstancePort) c.getTo();
+			if (ato.getInstance().equals(ainst)) {
+				if (ato.getPort().getOperator() == SEL.FINIT) return false;
+				else hasIncoming = true;
+			}
+		}
+		return hasIncoming;
+	}
+	
+	public Collection<AnnotatedCoupling> externalInitializationCouplings(AnnotatedInstance ainst) {
+		if (ainst.isInit()) {
+			return null;
+		}
+		Collection<AnnotatedCoupling> incoming = new ArrayList<AnnotatedCoupling>(7);
+		for (Coupling c : this.coupling) {
+			AnnotatedInstancePort ato = (AnnotatedInstancePort) c.getTo();
+			if (ato.getInstance().equals(ainst)) {
+				if (ato.getPort().getOperator() == SEL.FINIT) return null;
+				incoming.add((AnnotatedCoupling)c);
+			}
+		}
+		return incoming.isEmpty() ? null : incoming;
+	}
+
+
+	private boolean hasIncomingCouplings(AnnotatedInstance ainst) {
+		for (Coupling c : this.coupling) {
+			if (((AnnotatedInstancePort)c.getTo()).getInstance().equals(ainst)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Collection<AnnotatedCoupling> getCouplingsTo(AnnotatedInstance ainst, SEL operator) {
+		Collection<AnnotatedCoupling> cts = new ArrayList<AnnotatedCoupling>(7);
+		for (Coupling c : this.coupling) {
+			AnnotatedCoupling ac = (AnnotatedCoupling) c;
+			if (ac.getTo().getInstance().equals(ainst)) {
+				if (operator == null || ac.getTo().getPort().getOperator() == operator) {
+					cts.add(ac);
+				}
+			}
+		}
+		return cts;
+	}
+	
+	public Collection<AnnotatedCoupling> getCouplingsFrom(AnnotatedInstance ainst, SEL operator) {
+		Collection<AnnotatedCoupling> cts = new ArrayList<AnnotatedCoupling>(7);
+		for (Coupling c : this.coupling) {
+			AnnotatedCoupling ac = (AnnotatedCoupling) c;
+			if (ac.getFrom().getInstance().equals(ainst)) {
+				if (operator == null || ac.getFrom().getPort().getOperator() == operator) {
+					cts.add(ac);
+				}
+			}
+		}
+		return cts;
+	}
+	
 	
 		/** Put the from and to couplings in the right place */
 //	private void initialize() {

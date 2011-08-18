@@ -3,6 +3,7 @@ package eu.mapperproject.jmml.specification.util;
 import eu.mapperproject.jmml.specification.graph.Numbered;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -44,7 +45,18 @@ public class UniqueLists<T,V> extends AbstractList<V> {
 	public V get(int i) {
 		return this.elems.get(i);
 	}
-		
+	
+	public boolean hasType(T type) {
+		return hasType(dist.getTypeIndex(type));
+	}
+	
+	public boolean hasType(int i) {
+		for (V elem : elems) {
+			if (dist.getIndex(elem) == i) return true;
+		}
+		return false;
+	}
+	
 	public V getById(T type, String id) {
 		return getById(dist.getTypeIndex(type), id);
 	}

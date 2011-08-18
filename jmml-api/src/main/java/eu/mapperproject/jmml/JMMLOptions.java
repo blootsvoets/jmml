@@ -15,6 +15,8 @@ import java.util.List;
  * @author Joris Borgdorff
  */
 public class JMMLOptions {
+	private JCommander jcom;
+	
 	@Parameter(names={"--no-collapse","-C"})
 	public boolean nocollapse = false;
 	
@@ -37,7 +39,7 @@ public class JMMLOptions {
 	private List<String> xmmlFile = new ArrayList<String>();
 	
 	public JMMLOptions(String... args) {
-		JCommander jcom = new JCommander(this);
+		this.jcom = new JCommander(this);
 		try {
 			jcom.parse(args);
 		} catch (ParameterException ex) {
@@ -49,6 +51,10 @@ public class JMMLOptions {
 	
 	public boolean wantsOutput() {
 		return this.topology != null || this.taskgraph != null || this.ssm != null || this.domain != null;
+	}
+	
+	public void printUsage() {
+		jcom.usage();
 	}
 	
 	public File getDotFile() throws IOException {

@@ -93,18 +93,18 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	}
 	
 	public boolean ofSubmodel() {
-		return this.submodelInst != null;
+		return this.getSubmodelInstance() != null;
 	}
 	
 	public AnnotatedPorts getPorts() {
-		if (this.submodelInst != null) {
+		if (this.ofSubmodel()) {
 			return (AnnotatedPorts)this.submodelInst.getPorts();
 		}
-		else if (this.mapperInst != null) {
+		else if (this.getMapperInstance() != null) {
 			return (AnnotatedPorts)this.mapperInst.getPorts();
 		}
 		else {
-			return null;
+			throw new IllegalStateException("Instance " + getId() + " does can not return ports, since it does not have a mapper or submodel to point to.");
 		}
 	}
 	
@@ -260,10 +260,12 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	public boolean isInit() {
 		if (this.init == null && this.ofSubmodel()) {
-			return this.getSubmodelInstance().getInit() == YesNoChoice.YES;
+			Submodel sub = this.getSubmodelInstance();
+			return sub.getInit() == YesNoChoice.YES || !((AnnotatedPorts)sub.getPorts()).hasInPort();
 		}
 		else if (this.init == null && this.mapper != null) {
-			return this.getMapperInstance().getInit() == YesNoChoice.YES;
+			Mapper map = this.getMapperInstance();
+			return this.getMapperInstance().getInit() == YesNoChoice.YES || !((AnnotatedPorts)map.getPorts()).hasInPort();
 		}
 		else {
 			return this.init == YesNoChoice.YES;

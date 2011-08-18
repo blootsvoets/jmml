@@ -54,13 +54,18 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 		// Check if datatypes match from one end of the coupling to the other.
 		Datatype d = fromP.getDatatypeInstance();
 		
-		for (Apply a : apply) {
+		for (Apply a : this.getApply()) {
 			AnnotatedFilter f = ((AnnotatedApply)a).getFilterInstance();
 			Datatype next = f.getDatatypeInInstance();
-			if (!d.equals(next)) {
+			// An empty datatype is assumed to match
+			if (next != null && !d.equals(next)) {
 				logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly by applied filter {1}: {2} expected and {3} received.", new Object[]{this, f.getId(), next.getId(), d.getId()});
 			}
-			d = f.getDatatypeOutInstance();
+			next = f.getDatatypeOutInstance();
+			// An empty datatype is assumed to mean ''unchanged''.
+			if (next != null) {
+				d = next;
+			}
 		}
 		
 		if (!d.equals(toP.getDatatypeInstance())) {
@@ -77,17 +82,17 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 			if (ft.isSeparated(tt) || ft.isContiguous(tt)) {
 				if (ft.hasGreaterOrEqualMaximumTo(tt)) {
 					if (toOp != SEL.FINIT) {
-						logger.warning("There is temporal scale separation in coupling  " + this + " but the coupling template used is not call (Oi -> finit) or dispatch (Of -> finit).");
+						logger.log(Level.WARNING, "There is temporal scale separation in coupling {0} but the coupling template used is not call (Oi -> finit) or dispatch (Of -> finit).", this);
 					}
 				}
 				else {
 					if (fromOp != SEL.OF) {
-						logger.warning("There is temporal scale separation in coupling  " + this + " but the coupling template used is not release (Of -> S/B) or dispatch (Of -> finit).");
+						logger.log(Level.WARNING, "There is temporal scale separation in coupling {0} but the coupling template used is not release (Of -> S/B) or dispatch (Of -> finit).", this);
 					}					
 				}
 			}
 			else if (ft.isOverlapping(tt) && !((fromOp == SEL.OF && toOp == SEL.FINIT) || (fromOp == SEL.OI && (toOp == SEL.B || toOp == SEL.S)))) {
-				logger.warning("There is temporal scale overlap in coupling  " + this + " but the coupling template used is not interact (Oi -> S/B) or dispatch (Of -> finit).");
+				logger.log(Level.WARNING, "There is temporal scale overlap in coupling {0} but the coupling template used is not interact (Oi -> S/B) or dispatch (Of -> finit).", this);
 			}
 		}
 		validated = true;

@@ -106,7 +106,6 @@ public class JMML {
 	}
 	public static void main(String[] args) throws IOException {
 		JMMLOptions opt = new JMMLOptions(args);
-		
 		if (opt.wantsOutput()) {
 			File xmml = opt.getXMMLFile();
 			File dot = opt.getDotFile();
@@ -117,7 +116,7 @@ public class JMML {
 				AnnotatedModel model = AnnotatedModel.getModel(xmml);
 				doc = new JMML(model);
 			} catch (JAXBException ex) {
-				logger.log(Level.SEVERE, "The xMML file could not be parsed or loaded: {}", ex);
+				logger.log(Level.SEVERE, "The xMML file could not be parsed or loaded.", ex);
 			}
 			
 			try {
@@ -136,12 +135,15 @@ public class JMML {
 					exp.export(opt.ssm);
 				}
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file: {}", e);
+				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file.", e);
 				System.exit(4);
 			} catch (InterruptedException ex) {
-				logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted: {}", ex);
+				logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted.", ex);
 				System.exit(5);
 			}
+		}
+		else {
+			opt.printUsage();
 		}
 	}
 }

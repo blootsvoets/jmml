@@ -124,13 +124,13 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			}
 			
 			AnnotatedInstance inst = pi.getInstance();
-			boolean needInit = topology.needsInitInstances(inst);
+			boolean needInit = topology.needsExternalInitialization(inst);
 			Collection<AnnotatedCoupling> cs;
 			if (needInit && pi.initializing()) {
-				cs = topology.needsInitCouplings(inst);
+				cs = topology.externalInitializationCouplings(inst);
 			}
 			else {
-				cs = topology.getTo(new InstanceOperator(inst, op));
+				cs = topology.getCouplingsTo(inst, op);
 			}
 			for (AnnotatedCoupling cd : cs) {
 				if (!cds.contains(cd)) {
@@ -153,7 +153,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 		Iterator<ProcessIteration> i = snoozingProcesses.keySet().iterator();
 		while (i.hasNext()) {
 			ProcessIteration pi = i.next();
-			boolean needInit = topology.needsInitInstances(pi.getInstance());
+			boolean needInit = topology.needsExternalInitialization(pi.getInstance());
 			if (needInit && pi.finalLoop()) {
 				i.remove();
 				return pi;

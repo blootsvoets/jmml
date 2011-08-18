@@ -85,10 +85,10 @@ public class TaskGraph {
 	 */
 	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi, boolean complete) {
 		SEL ct = complete ? SEL.OF : SEL.OI;
-		Collection<AnnotatedCoupling> cds = this.topology.getFrom(new InstanceOperator(pi.getInstance(), ct));
+		Collection<AnnotatedCoupling> cds = this.topology.getCouplingsFrom(pi.getInstance(), ct);
 		
 		for (AnnotatedCoupling cd : cds) {
-			boolean needInit = (pi.firstLoop() && topology.needsInitInstances(cd.getTo()));
+			boolean needInit = (pi.firstLoop() && topology.needsExternalInitialization(cd.getTo().getInstance()));
 
 			this.calculateTo(pi, cd, state, needInit);
 		}

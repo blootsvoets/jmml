@@ -29,14 +29,34 @@ public class AnnotatedPorts extends Ports {
     }
 
 	public AnnotatedPort getPort(String id) {
-		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(id)).getValue();
+		JAXBElement res = (JAXBElement)((UniqueLists)inOrOut).getById(id);
+		if (res == null) {
+			throw new IllegalArgumentException("Port with id " + id + " does not exist.");
+		}
+		return (AnnotatedPort)res.getValue();
 	}
 	
 	public AnnotatedPort getInPort(String id) {
-		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(0, id)).getValue();
+		JAXBElement res = (JAXBElement)((UniqueLists)inOrOut).getById(0, id);
+		if (res == null) {
+			throw new IllegalArgumentException("In port with id " + id + " does not exist.");
+		}
+		return (AnnotatedPort)res.getValue();
 	}
 
 	public AnnotatedPort getOutPort(String id) {
-		return (AnnotatedPort)((JAXBElement)((UniqueLists)inOrOut).getById(1, id)).getValue();
+		JAXBElement res = (JAXBElement)((UniqueLists)inOrOut).getById(1, id);
+		if (res == null) {
+			throw new IllegalArgumentException("Out port with id " + id + " does not exist.");
+		}
+		return (AnnotatedPort)res.getValue();
+	}
+	
+	public boolean hasInPort() {
+		return ((UniqueLists)inOrOut).hasType(0);
+	}
+	
+	public boolean hasOutPort() {
+		return ((UniqueLists)inOrOut).hasType(1);
 	}
 }

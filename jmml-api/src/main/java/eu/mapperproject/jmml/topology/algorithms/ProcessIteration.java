@@ -37,8 +37,8 @@ public class ProcessIteration {
 		this.instance = pd;
 		if (annot == null) {
 			this.annot = new AnnotationSet();
-			annot.setSubject(pd);
-			annot.applySubject();
+			this.annot.setSubject(pd);
+			this.annot.applySubject();
 		}
 		else this.annot = annot;
 		
