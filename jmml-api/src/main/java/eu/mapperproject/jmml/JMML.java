@@ -23,6 +23,7 @@ import eu.mapperproject.jmml.util.graph.Cluster;
 import eu.mapperproject.jmml.specification.graph.Edge;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -52,15 +53,11 @@ public class JMML {
 	}
 	
 	private final static Logger logger = Logger.getLogger(JMML.class.getName());
-	private final AnnotatedModel model;
 	
-	private final AnnotatedDefinitions definitions;
 	private final AnnotatedTopology topology;
 
 	/** Create a new xMML document */
 	public JMML(AnnotatedModel model) {
-		this.model = model;
-		this.definitions = model.getDefinitions();
 		this.topology = model.getTopology();
 	}
 
@@ -83,7 +80,7 @@ public class JMML {
 				break;
 		}
 		
-		System.out.println("Exporting graphviz file visualizing the " + gt + "...");
+		System.out.println("Exporting graphviz file visualizing the " + gt + " to " + pdf.getAbsolutePath() + "...");
 		
 		exporter.export(dot, pdf);
 		
@@ -105,6 +102,7 @@ public class JMML {
 		return null; //PTGraph.graphFromTree(clTree);
 	}
 	public static void main(String[] args) throws IOException {
+		System.getProperties().list(System.out);
 		JMMLOptions opt = new JMMLOptions(args);
 		if (opt.wantsOutput()) {
 			File xmml = opt.getXMMLFile();

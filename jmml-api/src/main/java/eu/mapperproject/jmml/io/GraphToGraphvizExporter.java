@@ -12,6 +12,12 @@ import eu.mapperproject.jmml.util.graph.PTGraph;
 import eu.mapperproject.jmml.util.graph.StyledEdge;
 import eu.mapperproject.jmml.util.graph.StyledNode;
 import eu.mapperproject.jmml.util.graph.Tree;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Can export a PTGraph to graphviz
@@ -20,11 +26,12 @@ import eu.mapperproject.jmml.util.graph.Tree;
 public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExporter {
 	private final Indent tab;
 	private final boolean cluster, horizontal, edgeLabel;
-	private final static String DOT_EXEC = System.getProperty("eu.mapperproject.jmml.io.dot.path", "dot");
+	private final static String DOT_EXEC = System.getProperty("eu.mapperproject.jmml.io.dot.path", "/usr/local/bin/dot");
 	private final static int SB_NODES = 1000;
 	private final GraphDecorator<V, E> decorator;
 	private final PTGraph<V,E> graph;
 	private boolean hasSink, hasSource;
+	private final static Logger logger = Logger.getLogger(GraphToGraphvizExporter.class.getName());
 	
 	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph, boolean cluster, boolean horizontal, boolean edgeLabel) {
 		this.tab = new Indent(4);
@@ -39,11 +46,36 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		this(decorator, graph, false, false, true);
 	}
 
+	@SuppressWarnings("LoggerStringConcat")
 	public void export(File f, File pdf) throws IOException, InterruptedException {
 		this.export(f);
-		System.out.println("Converting to PDF...");
+		logger.info("Converting to PDF...");
 		String[] dot = {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()};
-		Runtime.getRuntime().exec(dot).waitFor();
+		if (logger.isLoggable(Level.FINE)) {
+			logger.fine("Executing {0}" + join(Arrays.asList(dot), " "));
+		}
+		BufferedReader output = null;
+		try {
+			Process exe = new ProcessBuilder().command(dot).redirectErrorStream(true).start();
+			output = new BufferedReader(new InputStreamReader(exe.getInputStream()));
+			exe.waitFor();
+		}
+		catch(IOException e) {
+			logger.severe("Graphviz is not installed in /usr/local. Please provide a correct location for dot by specifying\n-Deu.mapperproject.jmml.io.dot.path=/path/to/bin/dot on the command-line when running JMML.");
+		}
+		
+		if (output != null) {
+			String line;
+			while (output.ready()) {
+				line = output.readLine();
+				if (line.contains("png")) {
+					logger.severe("Graphviz is not installed with PDF support. Before installing graphviz, please ensure that cairo and pango are installed.");
+				}
+				else {
+					logger.info(output.readLine());
+				}
+			}
+		}
 	}
 	
 	private void edgeTemplate(StringBuilder sb, StyledEdge e, boolean directed) {
@@ -194,4 +226,17 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		sb.append("}\n");
 		print(sb);
 	}
+	
+	private static String join(Iterable<? extends CharSequence> s, String delimiter) {
+		StringBuilder buffer = new StringBuilder();
+		Iterator<? extends CharSequence> iter = s.iterator();
+		if (iter.hasNext()) {
+			buffer.append(iter.next());
+			while (iter.hasNext()) {
+				buffer.append(delimiter);
+				buffer.append(iter.next());
+			}
+		}
+		return buffer.toString();
+    }
 }

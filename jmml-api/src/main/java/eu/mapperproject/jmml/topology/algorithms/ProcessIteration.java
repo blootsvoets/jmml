@@ -2,7 +2,6 @@ package eu.mapperproject.jmml.topology.algorithms;
 
 import eu.mapperproject.jmml.specification.OptionalChoice;
 import eu.mapperproject.jmml.specification.SEL;
-import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 
@@ -36,8 +35,9 @@ public class ProcessIteration {
 	ProcessIteration(AnnotatedInstance pd, AnnotationSet annot) {
 		this.instance = pd;
 		if (annot == null) {
-			this.annot = new AnnotationSet();
-			this.annot.setSubject(pd);
+			SEL defOp = instance.ofSubmodel() ? SEL.FINIT : null;
+			this.annot = new AnnotationSet(defOp);
+			this.annot.setSubject(pd, defOp);
 			this.annot.applySubject();
 		}
 		else this.annot = annot;
@@ -91,11 +91,11 @@ public class ProcessIteration {
 	}
 
 	public boolean instanceCompleted() {
-		return this.annot.getOperator() == SEL.OF;
+		return !this.instance.ofSubmodel() || this.annot.getOperator() == SEL.OF;
 	}
 	
 	public boolean finalLoop() {
-		return this.instance.isCompleted(annot.getIteration()) && annot.getOperator() != SEL.FINIT;
+		return !this.instance.ofSubmodel() || this.instance.isCompleted(annot.getIteration()) && annot.getOperator() != SEL.FINIT;
 	}
 	
 	public AnnotatedInstance getInstance() {
@@ -107,15 +107,15 @@ public class ProcessIteration {
 	}
 
 	public boolean firstLoop() {
-		return this.annot.getIteration() == 0 && this.annot.getOperator().compareTo(SEL.B) <= 0;
+		return !this.instance.ofSubmodel() || this.annot.getIteration() == 0 && this.annot.getOperator().compareTo(SEL.B) <= 0;
 	}
 	
 	public final boolean initializing() {
-		return this.annot.getOperator() == SEL.FINIT;
+		return !this.instance.ofSubmodel() || this.annot.getOperator() == SEL.FINIT;
 	}
 	
 	public boolean needsState() {
-		return initializing() && !firstInstance() && instance.getStateful() != OptionalChoice.NO;
+		return instance.ofSubmodel() && initializing() && !firstInstance() && instance.getStateful() != OptionalChoice.NO;
 	}
 
 	public boolean isSingle() {
@@ -123,14 +123,17 @@ public class ProcessIteration {
 	}
 	
 	public ProcessIteration nextStep(boolean collapse) {
+		if (!this.instance.ofSubmodel()) throw new IllegalStateException("Can not make a step with a mapper.");
 		return this.progress(ProgressType.ITERATION, collapse);
 	}
 	
 	public ProcessIteration nextState() {
+		if (!this.instance.ofSubmodel()) throw new IllegalStateException("Can not store a state with a mapper.");
 		return this.progress(ProgressType.INSTANCE, false);
 	}
 
 	public ProcessIteration nextIteration(AnnotatedCoupling pd) {
+		if (!pd.getTo().getInstance().ofSubmodel()) throw new IllegalStateException("Can not go to an iteration of a mapper.");
 		if (this.instance.equals(pd.getTo().getInstance())) {
 			throw new IllegalArgumentException("In a progression that is an internal iteration, an coupling may not be specified.");
 		}
@@ -219,7 +222,7 @@ public class ProcessIteration {
 		
 		AnnotatedInstance pd = cd.getTo().getInstance();		
 		AnnotationSet set = new AnnotationSet(this.annot);
-		set.setSubject(pd);
+		set.setSubject(pd, pd.ofSubmodel() ? SEL.FINIT : null);
 		SEL nextOp = cd.getTo().getPort().getOperator();
 		
 		switch (instance) {
@@ -303,7 +306,8 @@ public class ProcessIteration {
 		StringBuilder sb = new StringBuilder(id.length() + 30);
 		sb.append(id);
 		if (this.range == null) {
-			this.annot.appendToStringBuilder(sb, true);
+			                                     // Mappers can do with simple notation.
+			this.annot.appendToStringBuilder(sb, instance.ofSubmodel());
 		}
 		else {
 			this.annot.appendToStringBuilder(sb, false);

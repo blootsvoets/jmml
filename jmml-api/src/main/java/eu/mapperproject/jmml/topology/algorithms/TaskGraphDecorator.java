@@ -29,7 +29,7 @@ public class TaskGraphDecorator extends GraphDecorator<ProcessIteration, Couplin
 		if (node.hasDeadlock()) {
 			return this.decorateMissingNode(node);
 		}
-		return new SimpleNode(node.toString(), null, categorize(node));
+		return new SimpleNode(node.toString(), node.getInstance().ofSubmodel() ? null : "shape=hectagon", categorize(node));
 	}
 
 	@Override
