@@ -1,4 +1,6 @@
-package eu.mapperproject.jmml.specification.graph;
+package eu.mapperproject.jmml.specification.annotated;
+
+import eu.mapperproject.jmml.specification.annotated.Identifiable;
 
 /**
  * An interface for uniquely numbered classes.

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.mapperproject.jmml.specification.graph;
+package eu.mapperproject.jmml.specification.annotated;
 
 /**
  * An object with an ID.
