@@ -9,7 +9,6 @@ import javax.xml.bind.JAXBException;
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
@@ -23,6 +22,8 @@ import eu.mapperproject.jmml.util.graph.Cluster;
 import eu.mapperproject.jmml.specification.graph.Edge;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -54,13 +55,13 @@ public class JMML {
 	
 	private final static Logger logger = Logger.getLogger(JMML.class.getName());
 	
-	private final AnnotatedTopology topology;
+	private AnnotatedTopology topology;
 
 	/** Create a new xMML document */
 	public JMML(AnnotatedModel model) {
 		this.topology = model.getTopology();
 	}
-
+	
 	/**
 	 * Export a graph of a given type of this document to a dot file
 	 * and make a pdf file out of it.
@@ -69,14 +70,14 @@ public class JMML {
 		GraphToGraphvizExporter<?,?> exporter;
 		switch (gt) {
 			case DOMAIN:
-				exporter = new GraphToGraphvizExporter(new DomainDecorator(), this.getDomainGraph());
+				exporter = new GraphToGraphvizExporter<Cluster,Edge<Cluster>>(new DomainDecorator(), this.getDomainGraph());
 				break;
 			case TASK:
-				exporter = new GraphToGraphvizExporter(new TaskGraphDecorator(), this.getTaskGraph(collapse));
+				exporter = new GraphToGraphvizExporter<ProcessIteration, CouplingInstance>(new TaskGraphDecorator(), this.getTaskGraph(collapse));
 				break;
 			default:
-				PTGraph graph = CouplingTopologyDecorator.constructTopologyGraph(topology);
-				exporter = new GraphToGraphvizExporter(new CouplingTopologyDecorator(), graph, true, false, true);
+				PTGraph<AnnotatedInstancePort, AnnotatedCoupling> graph = CouplingTopologyDecorator.constructTopologyGraph(topology);
+				exporter = new GraphToGraphvizExporter<AnnotatedInstancePort, AnnotatedCoupling>(new CouplingTopologyDecorator(), graph, true, false, true);
 				break;
 		}
 		
@@ -95,14 +96,15 @@ public class JMML {
 	}
 
 	/** Generate a domain graph */
-	public PTGraph<Cluster<AnnotatedInstancePort,AnnotatedCoupling>,Edge<Cluster<AnnotatedInstancePort,AnnotatedCoupling>>> getDomainGraph() {
+	public PTGraph<Cluster,Edge<Cluster>> getDomainGraph() {
 		PTGraph<AnnotatedInstancePort, AnnotatedCoupling> graph;
 		//graph = this.topology.getGraph();
 		//Tree<Cluster<AnnotatedInstancePort,AnnotatedCoupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
 		return null; //PTGraph.graphFromTree(clTree);
 	}
 	public static void main(String[] args) throws IOException {
-		System.getProperties().list(System.out);
+		readConfiguration();
+		
 		JMMLOptions opt = new JMMLOptions(args);
 		if (opt.wantsOutput()) {
 			File xmml = opt.getXMMLFile();
@@ -118,7 +120,6 @@ public class JMML {
 			}
 			
 			try {
-				File out;
 				if (opt.topology != null) {
 					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
 				}
@@ -136,12 +137,34 @@ public class JMML {
 				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file.", e);
 				System.exit(4);
 			} catch (InterruptedException ex) {
-				logger.log(Level.SEVERE, "A pdf document could not be created as the process was interrupted.", ex);
+				logger.log(Level.SEVERE, "A PDF document could not be created as the process was interrupted.", ex);
 				System.exit(5);
 			}
 		}
 		else {
 			opt.printUsage();
+		}
+	}
+	
+	private static void readConfiguration() {
+		ClassLoader cl = JMML.class.getClassLoader();
+		InputStream is = cl.getResourceAsStream("META-INF/application.properties");
+		Properties inputProperties = new Properties(); 
+
+		try {
+			inputProperties.load(is);
+			System.getProperties().putAll(inputProperties);
+		} 
+		catch (IOException ex) {
+			logger.log(Level.WARNING, "External properties not loaded.", ex);
+		}
+		
+		is = cl.getResourceAsStream( "META-INF/logging.properties" ); 
+		
+		try {
+			LogManager.getLogManager().readConfiguration(is);
+		} catch (Exception ex) {
+			logger.log(Level.WARNING, "Custom logging properties not loaded.", ex);
 		}
 	}
 }
