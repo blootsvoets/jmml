@@ -122,6 +122,10 @@ public class ProcessIteration {
 		return this.range == null;
 	}
 	
+	public boolean isSending() {
+		return this.annot.getOperator() == null || this.annot.getOperator() == SEL.OI || this.annot.getOperator() == SEL.OF;
+	}
+	
 	public ProcessIteration nextStep(boolean collapse) {
 		if (!this.instance.ofSubmodel()) throw new IllegalStateException("Can not make a step with a mapper.");
 		return this.progress(ProgressType.ITERATION, collapse);
@@ -147,7 +151,8 @@ public class ProcessIteration {
 	public CouplingInstance calculateCouplingInstance(AnnotatedCoupling cd, boolean nextInstance) {
 		ProcessIteration pnext;
 		
-		if (nextInstance || cd.getTo().getPort().getOperator() == SEL.FINIT) {
+		SEL nextOp = cd.getTo().getPort().getOperator();
+		if (nextInstance || nextOp == null || nextOp == SEL.FINIT) {
 			pnext = this.nextInstance(cd);
 		}
 		else {

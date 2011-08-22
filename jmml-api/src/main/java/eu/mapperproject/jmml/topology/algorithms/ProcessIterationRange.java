@@ -60,7 +60,7 @@ public class ProcessIterationRange {
 			sb.append('-'); sb.append(rangeToIter);
 		}
 		sb.append(',');
-		sb.append(rangeFromOper); sb.append('-'); sb.append(rangeToOper);
+		sb.append(rangeFromOper.value()); sb.append('-'); sb.append(rangeToOper.value());
 		sb.append(')');
 	}
 }

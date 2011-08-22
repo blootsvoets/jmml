@@ -154,9 +154,9 @@ class AnnotationSet {
 
 	/** Remove the traces from the AnnotationSet */
 	public void freeTraces() {
-		this.anInst = null;
-		this.anIter = null;
-		this.anOper = null;
+//		this.anInst = null;
+//		this.anIter = null;
+//		this.anOper = null;
 	}
 
 	/** Append a string of this counter to a StringBuilder.

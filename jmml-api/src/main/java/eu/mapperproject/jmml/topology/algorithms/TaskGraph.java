@@ -7,6 +7,7 @@ import java.util.List;
 import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedScale;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.graph.PTGraph;
@@ -46,15 +47,22 @@ public class TaskGraph {
 		for (ProcessIteration pi : state) {
 			i++;
 			if (i % 10000 == 0) {
-				System.out.println("After " + i + " iterations, processing node " + pi + ", which has " + pi.getInstance().getTimescaleInstance().getSteps() + " steps.");
+				System.out.print("After " + i + " iterations, processing node " + pi);
+				AnnotatedScale sc = pi.getInstance().getTimescaleInstance();
+				if (sc != null) {
+					System.out.println(", which has " + pi.getInstance().getTimescaleInstance().getSteps() + " steps.");
+				}
+				else {
+					System.out.println();
+				}
 			}
 			// Only add to graph if it hasn't been added before
 			if (pi.isSingle()) this.graph.addNode(pi);
 			
 			boolean complete = pi.instanceCompleted();
 			// There are only couplings out if the operator can send
-			if (pi.getOperator() == SEL.OI || pi.getOperator() == SEL.OF) {
-				boolean hasNext = this.computeNextIteration(state, pi, complete);
+			if (pi.isSending()) {
+				boolean hasNext = this.computeNextIteration(state, pi);
 
 				if (complete && !hasNext) {
 					pi.setFinal();
@@ -83,9 +91,8 @@ public class TaskGraph {
 	 * Computes the next iteration given the current process iteration
 	 * @return whether a next iteration could be computed
 	 */
-	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi, boolean complete) {
-		SEL ct = complete ? SEL.OF : SEL.OI;
-		Collection<AnnotatedCoupling> cds = this.topology.getCouplingsFrom(pi.getInstance(), ct);
+	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi) {
+		Collection<AnnotatedCoupling> cds = this.topology.getCouplingsFrom(pi.getInstance(), pi.getOperator());
 		
 		for (AnnotatedCoupling cd : cds) {
 			boolean needInit = (pi.firstLoop() && topology.needsExternalInitialization(cd.getTo().getInstance()));
@@ -99,7 +106,8 @@ public class TaskGraph {
 	/** Create an instance of a normal coupling between one process iteration the next */
 	private void calculateTo(ProcessIteration from, AnnotatedCoupling cd, TaskGraphState state, boolean needInit) {
 		CouplingInstance ci;
-		if (needInit || cd.getTo().getPort().getOperator() == SEL.FINIT) {
+		SEL nextOp = cd.getTo().getPort().getOperator();
+		if (needInit || nextOp == null || nextOp == SEL.FINIT) {
 			ci = state.tryStateful(cd.getTo().getInstance());
 			if (ci != null) this.addToGraph(ci, state);
 		}

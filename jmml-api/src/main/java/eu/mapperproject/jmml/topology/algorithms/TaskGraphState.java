@@ -58,7 +58,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 */
 	public CouplingInstance tryStateful(AnnotatedInstance inst) {
 		CouplingInstance ci = null;
-		if (inst.getStateful() != OptionalChoice.NO) {
+		if (inst.isStateful() == OptionalChoice.YES || inst.isStateful() == OptionalChoice.OPTIONAL) {
 			ProcessIteration prev = states.remove(inst);
 			if (prev != null) {
 				ProcessIteration next = prev.nextState();
