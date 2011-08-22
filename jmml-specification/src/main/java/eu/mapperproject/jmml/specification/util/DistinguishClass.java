@@ -1,12 +1,12 @@
 package eu.mapperproject.jmml.specification.util;
 
-import eu.mapperproject.jmml.specification.graph.Identifiable;
+import eu.mapperproject.jmml.specification.annotated.Identifiable;
 
 /**
  *
  * @author Joris Borgdorff
  */
-public class DistinguishClass extends Distinguisher<Class,Identifiable> {
+public class DistinguishClass extends Distinguisher<Class<?>,Identifiable> {
 	public DistinguishClass(Class[] clazzs) {
 		super(clazzs);
 	}
@@ -16,7 +16,7 @@ public class DistinguishClass extends Distinguisher<Class,Identifiable> {
 		return element.getClass();
 	}
 	@Override
-	protected boolean belongsToPartition(int p, Class type) {
+	protected boolean belongsToPartition(int p, Class<?> type) {
 		return partition[p].isAssignableFrom(type);
 	}
 	@Override

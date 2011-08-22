@@ -1,9 +1,8 @@
 package eu.mapperproject.jmml.specification.util;
 
-import eu.mapperproject.jmml.specification.graph.Numbered;
+import eu.mapperproject.jmml.specification.annotated.Numbered;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

@@ -14,29 +14,29 @@ import eu.mapperproject.jmml.util.graph.StyledNode;
  * @author Joris Borgdorff
  *
  */
-public class DomainDecorator extends GraphDecorator<Cluster<?,?>, Edge<Cluster<?,?>>> {
+public class DomainDecorator extends GraphDecorator<Cluster, Edge<Cluster>> {
 	public DomainDecorator() {
 		super(true);
 	}
 
 	@Override
-	public StyledNode decorateNode(Cluster<?,?> node) {
+	public StyledNode decorateNode(Cluster node) {
 		return new SimpleNode(node.getName(), null, node.getCategory());
 	}
 
 	@Override
-	public StyledEdge decorateEdge(Edge<Cluster<?,?>> edge,
+	public StyledEdge decorateEdge(Edge<Cluster> edge,
 			StyledNode fromNode, StyledNode toNode) {
 		return new SimpleStyledEdge(fromNode, toNode);
 	}
 
 	@Override
-	public StyledNode decorateMissingNode(Cluster<?,?> node) {
+	public StyledNode decorateMissingNode(Cluster node) {
 		return new SimpleNode("None", "shape=rectangle");
 	}
 
 	@Override
-	public Category categorize(Cluster<?,?> node) {
+	public Category categorize(Cluster node) {
 		return node.getCategory();
 	}
 }

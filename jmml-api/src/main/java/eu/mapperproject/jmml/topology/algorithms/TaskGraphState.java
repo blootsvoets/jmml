@@ -13,8 +13,9 @@ import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.specification.util.ArrayMap;
-import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.PTList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Keeps track of the current state in a task graph.
@@ -29,6 +30,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	private final Map<ProcessIteration,Collection<AnnotatedCoupling>> snoozingProcesses;
 	private final Map<AnnotatedInstance,ProcessIteration> states;
 	private final AnnotatedTopology topology;
+	private final static Logger logger = Logger.getLogger(TaskGraphState.class.getName());
 
 	public TaskGraphState(AnnotatedTopology desc) {
 		this.states = new ArrayMap<AnnotatedInstance,ProcessIteration>();
@@ -72,7 +74,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 */
 	public Collection<ProcessIteration> printDeadlock() {
 		if (this.activeProcesses.isEmpty() && !this.snoozingProcesses.isEmpty()) {
-			System.out.println("Deadlock:");
+			logger.log(Level.WARNING, "Deadlock:");
 			for (Map.Entry<ProcessIteration, Collection<AnnotatedCoupling>> m : snoozingProcesses.entrySet()) {
 				hasAllCouplings(m.getKey(), m.getValue(), true);
 			}
@@ -114,7 +116,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			if ((pi.needsState() || !pi.initializing()) 
 				&& !cds.contains(null)) {
 				if (print) {
-					System.out.println(pi + " is missing state");
+					logger.log(Level.WARNING, "{0} is missing state", pi);
 					pi.setDeadlock();
 				}
 				return false;
@@ -135,7 +137,7 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 			for (AnnotatedCoupling cd : cs) {
 				if (!cds.contains(cd)) {
 					if (print) {
-						System.out.println(pi + " is missing: " + cd);
+						logger.log(Level.WARNING, "{0} is missing: {1}", new Object[] {pi, cd});
 						pi.setDeadlock();
 					}
 					return false;

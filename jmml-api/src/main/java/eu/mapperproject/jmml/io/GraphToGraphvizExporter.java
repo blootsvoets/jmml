@@ -52,7 +52,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		logger.info("Converting to PDF...");
 		String[] dot = {DOT_EXEC, "-Tpdf", "-o" + pdf.getAbsolutePath(), f.getAbsolutePath()};
 		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("Executing {0}" + join(Arrays.asList(dot), " "));
+			logger.fine("Executing " + join(Arrays.asList(dot), " "));
 		}
 		BufferedReader output = null;
 		try {
@@ -61,7 +61,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 			exe.waitFor();
 		}
 		catch(IOException e) {
-			logger.severe("Graphviz is not installed in /usr/local. Please provide a correct location for dot by specifying\n-Deu.mapperproject.jmml.io.dot.path=/path/to/bin/dot on the command-line when running JMML.");
+			logger.log(Level.SEVERE, "Graphviz is not installed in /usr/local. Please provide a correct location for dot by specifying\n-Deu.mapperproject.jmml.io.dot.path=/path/to/bin/dot on the command-line when running JMML.", e);
 		}
 		
 		if (output != null) {
@@ -72,7 +72,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 					logger.severe("Graphviz is not installed with PDF support. Before installing graphviz, please ensure that cairo and pango are installed.");
 				}
 				else {
-					logger.info(output.readLine());
+					logger.warning(line);
 				}
 			}
 		}

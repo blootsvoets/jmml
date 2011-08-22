@@ -1,6 +1,6 @@
 package eu.mapperproject.jmml.specification.util;
 
-import eu.mapperproject.jmml.specification.graph.Identifiable;
+import eu.mapperproject.jmml.specification.annotated.Identifiable;
 import javax.xml.bind.JAXBElement;
 
 /**
