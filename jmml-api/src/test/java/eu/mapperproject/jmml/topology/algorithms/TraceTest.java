@@ -1,6 +1,6 @@
 package eu.mapperproject.jmml.topology.algorithms;
 import cern.colt.list.IntArrayList;
-import eu.mapperproject.jmml.specification.graph.Numbered;
+import eu.mapperproject.jmml.specification.annotated.Numbered;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
