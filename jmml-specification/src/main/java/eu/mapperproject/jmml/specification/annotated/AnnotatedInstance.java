@@ -8,7 +8,6 @@ import eu.mapperproject.jmml.specification.Otherscale;
 import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.YesNoChoice;
-import eu.mapperproject.jmml.specification.graph.Numbered;
 import eu.mapperproject.jmml.specification.util.ArrayMap;
 import java.util.ArrayList;
 import java.util.Collection;

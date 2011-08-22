@@ -5,7 +5,6 @@ import eu.mapperproject.jmml.specification.Definitions;
 import eu.mapperproject.jmml.specification.Filter;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.Submodel;
-import eu.mapperproject.jmml.specification.graph.Identifiable;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
 import eu.mapperproject.jmml.specification.util.Distinguisher;
 import eu.mapperproject.jmml.specification.util.UniqueLists;

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.mapperproject.jmml.specification.annotated;
 
 /**

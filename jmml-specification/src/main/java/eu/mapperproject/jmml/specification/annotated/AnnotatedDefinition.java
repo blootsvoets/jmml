@@ -1,8 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Definition;
-import eu.mapperproject.jmml.specification.graph.Identifiable;
-import eu.mapperproject.jmml.specification.graph.Numbered;
 
 /**
  *
