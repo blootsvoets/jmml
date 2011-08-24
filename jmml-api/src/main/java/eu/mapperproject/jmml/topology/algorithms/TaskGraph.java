@@ -107,7 +107,7 @@ public class TaskGraph {
 	private void calculateTo(ProcessIteration from, AnnotatedCoupling cd, TaskGraphState state, boolean needInit) {
 		CouplingInstance ci;
 		SEL nextOp = cd.getTo().getPort().getOperator();
-		if (needInit || nextOp == null || nextOp == SEL.FINIT) {
+		if (needInit || nextOp == SEL.FINIT) {
 			ci = state.tryStateful(cd.getTo().getInstance());
 			if (ci != null) this.addToGraph(ci, state);
 		}

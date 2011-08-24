@@ -4,6 +4,7 @@ import eu.mapperproject.jmml.specification.Coupling;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.Port;
+import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
@@ -41,37 +42,31 @@ public class CouplingTopologyDecorator extends GraphDecorator<AnnotatedInstanceP
 	@Override
 	public StyledNode decorateNode(AnnotatedInstancePort node) {
 		Category cat = Category.getCategory((AnnotatedDomain)node.getInstance().getDomain());
-		return new SimpleNode(node.getInstance().getId(), "shape=rectangle", cat);
+		return new SimpleNode(node.getInstance().getId(), node.getInstance().ofSubmodel() ? "shape=rectangle" : "shape=hexagon", cat);
 	}
 
 	@Override
 	public StyledEdge decorateEdge(AnnotatedCoupling edge, StyledNode from, StyledNode to) {
 		String style = "dir=both arrowtail=";
-		switch (edge.getFrom().getPort().getOperator()) {
-		case OI:
+		SEL op = edge.getFrom().getPort().getOperator();
+		if (op == SEL.OI)
 			style += "dot";
-			break;
-		case OF:
+		else if (op == SEL.OF)
 			style += "diamond";
-			break;
-		default:
+		else
 			style += "none";
-		}
 		
 		style += " arrowhead=";
-		switch (edge.getTo().getPort().getOperator()) {
-		case FINIT:
+		op = edge.getTo().getPort().getOperator();
+		
+		if (op == SEL.FINIT)
 			style += "odiamond";
-			break;
-		case B:
+		else if (op == SEL.B)
 			style += "onormal";
-			break;
-		case S:
+		else if (op == SEL.S)
 			style += "odot";
-			break;
-		default:
+		else
 			style += "vee";
-		}
 		
 		return new AnnotatedStyledEdge(from, to, style, edge.getName());
 	}

@@ -32,18 +32,18 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 	
 	@Override
 	public AnnotatedInstancePort getFrom() {
-		this.validateCouplings();
+		if (!validated) this.validateCouplings();
 		return (AnnotatedInstancePort)from;
 	}
 	@Override
 	public AnnotatedInstancePort getTo() {
-		this.validateCouplings();
+		if (!validated) this.validateCouplings();
 		return (AnnotatedInstancePort)to;
 	}
 
 	
 	protected void validateCouplings() {
-		if (validated || from == null || to == null) return;
+		if (from == null || to == null) return;
 		
 		AnnotatedInstancePort afrom = (AnnotatedInstancePort)from;
 		AnnotatedInstancePort ato = (AnnotatedInstancePort)to;
@@ -98,9 +98,6 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 		validated = true;
 	}
 	
-	private void processFilters() {
-		
-	}
 	@Override
 	public String toString() {
 		return from.getValue() + " -> " + to.getValue(); 

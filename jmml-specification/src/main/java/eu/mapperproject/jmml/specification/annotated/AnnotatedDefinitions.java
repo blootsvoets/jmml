@@ -16,10 +16,10 @@ import eu.mapperproject.jmml.specification.util.UniqueLists;
 public class AnnotatedDefinitions extends Definitions {
 	
 	public AnnotatedDefinitions() {
-		Distinguisher<Class,Identifiable> dist = new DistinguishClass(new Class[] {Filter.class, Mapper.class, Submodel.class});
-		filterOrMapperOrSubmodel = new UniqueLists<Class,AnnotatedDefinition>(dist);
+		Distinguisher<Class<?>,Identifiable> dist = new DistinguishClass(new Class[] {Filter.class, Mapper.class, Submodel.class});
+		filterOrMapperOrSubmodel = new UniqueLists<Class<?>,AnnotatedDefinition>(dist);
 		dist = new DistinguishClass(new Class[] {Datatype.class});
-		this.datatype = new UniqueLists<Class,Datatype>(dist);
+		this.datatype = new UniqueLists<Class<?>,Datatype>(dist);
 	}
 	
 	public Mapper getMapper(String id) {

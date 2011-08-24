@@ -9,20 +9,30 @@ import eu.mapperproject.jmml.specification.numerical.SIUnit;
  *
  * @author Joris Borgdorff
  */
-public class AnnotatedScale extends Scale {	
+public class AnnotatedScale extends Scale {
+	private transient int steps;
+	
+	public AnnotatedScale() {
+		super();
+		this.steps = -1;
+	}
+	
 	/**
 	 * Calculate the number of steps that can be taken given the ranges
 	 * Returns -1 if delta or max is not set or not definite
 	 */
 	public int getSteps() {
-		AnnotatedUnit dt = getRegularDelta(), max = getRegularTotal();
-		if ((dt == null && !delta.isDefinite()) || (max == null && !total.isDefinite())) {
-			return -1;
-		}
+		if (steps == -1) {
+			AnnotatedUnit dt = getRegularDelta(), max = getRegularTotal();
+			if ((dt == null && !delta.isDefinite()) || (max == null && !total.isDefinite())) {
+				return -1;
+			}
 
-		SIUnit d = (dt == null ? delta.meanSIUnit() : dt.interpret());
-		SIUnit l = (max == null ? total.meanSIUnit() : max.interpret());
-		return (int) Math.round(l.div(d).doubleValue());
+			SIUnit d = (dt == null ? delta.meanSIUnit() : dt.interpret());
+			SIUnit l = (max == null ? total.meanSIUnit() : max.interpret());
+			steps = (int) Math.round(l.div(d).doubleValue());
+		}
+		return steps;
 	}
 	
 	public boolean deltaIsRegular() {
@@ -104,6 +114,7 @@ public class AnnotatedScale extends Scale {
 	@Override
 	public void setRegularDelta(Unit u) {
 		if (this.delta == null) {
+			this.steps = -1;
 			this.regularDelta = (AnnotatedUnit) u;
 		}
 	}
@@ -111,12 +122,15 @@ public class AnnotatedScale extends Scale {
 	@Override
 	public void setRegularTotal(Unit u) {
 		if (this.total == null) {
+			this.steps = -1;
 			this.regularTotal = (AnnotatedUnit) u;
 		}
 	}
 
 	@Override
 	public void setTotal(Range r) {
+		this.steps = -1;
+		
 		AnnotatedRange ar = (AnnotatedRange) r;
 		if (ar != null & ar.isRegular()) {
 			this.regularTotal = ar.getMin();
@@ -129,6 +143,8 @@ public class AnnotatedScale extends Scale {
 
 	@Override
 	public void setDelta(Range r) {
+		this.steps = -1;
+		
 		AnnotatedRange ar = (AnnotatedRange) r;
 		if (ar != null & ar.isRegular()) {
 			this.regularDelta = ar.getMin();

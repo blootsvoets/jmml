@@ -91,7 +91,11 @@ public class JMML {
 	/** Generate a task graph */
 	public PTGraph<ProcessIteration, CouplingInstance> getTaskGraph(boolean collapse) {
 		TaskGraph task = new TaskGraph(this.topology, collapse, false, false);
-		task.computeGraph();
+		try {
+			task.computeGraph();
+		} catch (IllegalStateException ex) {
+			logger.log(Level.WARNING, "The taskgraph was not correctly constructed.", ex);
+		}
 		return task.getGraph();
 	}
 

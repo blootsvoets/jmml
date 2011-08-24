@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.util;
 
+import eu.mapperproject.jmml.specification.util.ArrayMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class PTList {
 	public static <P,Q,R> Map<Q,R> getMap(P key, Map<P,Map<Q,R>> map) {
 		Map<Q,R> nm = map.get(key);
 		if (nm == null) {
-			nm = new HashMap<Q,R>();
+			nm = new ArrayMap<Q,R>();
 			map.put(key, nm);
 		}
 		return nm;
@@ -40,7 +41,7 @@ public class PTList {
 
 	public static <Q,R> Map<Q,R> getMap(int key, List<Map<Q,R>> list) {
 		while (key >= list.size()) {
-			list.add(new HashMap<Q,R>());
+			list.add(new ArrayMap<Q,R>());
 		}
 		return list.get(key);
 	}

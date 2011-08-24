@@ -115,7 +115,7 @@ public class ProcessIteration {
 	}
 	
 	public boolean needsState() {
-		return instance.ofSubmodel() && initializing() && !firstInstance() && instance.getStateful() != OptionalChoice.NO;
+		return initializing() && !firstInstance() && (instance.getStateful() == OptionalChoice.YES || instance.getStateful() == OptionalChoice.OPTIONAL);
 	}
 
 	public boolean isSingle() {
@@ -162,6 +162,7 @@ public class ProcessIteration {
 		return new CouplingInstance(this, pnext, cd);
 	}
 
+	// Progression of the same submodel instance
 	private ProcessIteration progress(ProgressType instance, boolean collapse) {		
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
@@ -204,6 +205,7 @@ public class ProcessIteration {
 			this.annotOut = null;
 			this.annot.freeTraces();
 			this.stateProgressed = true;
+			cache.remove(this.instance, this.annot);
 
 			return cache.getIteration(pd, set);
 		}
@@ -212,6 +214,7 @@ public class ProcessIteration {
 				range = new ProcessIterationRange(this.annot);
 			}
 			this.range.updateRange(set, false);
+			cache.remove(this.instance, this.annot);
 			this.annot = set;
 			cache.putIteration(pd, set, this);
 			this.asString = this.updateString(true);
@@ -220,6 +223,7 @@ public class ProcessIteration {
 		}
 	}
 	
+	// Progression of the same submodel instance
 	private ProcessIteration progress(AnnotatedCoupling cd, ProgressType instance) {		
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another processiteration " + cd + " if the state has already progressed.");

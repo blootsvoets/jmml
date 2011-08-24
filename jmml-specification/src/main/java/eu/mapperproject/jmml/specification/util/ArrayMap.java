@@ -22,6 +22,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 	}
 
 	private int size;
+	private int[] hashes;
 	private K[] keys;
 	private V[] values;
 	
@@ -29,6 +30,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		this(map.size());
 		if (map instanceof ArrayMap) {
 			ArrayMap<? extends K, ? extends V> amap = (ArrayMap<? extends K, ? extends V>)map;
+			hashes = Arrays.copyOf(amap.hashes, map.size());
 			keys = Arrays.copyOf(amap.keys, map.size());
 			values = Arrays.copyOf(amap.values, map.size());
 		}
@@ -37,6 +39,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 			for (int i = 0; i < map.size(); i++) {
 				Entry<? extends K, ? extends V>entry = iter.next();
 				keys[i] = entry.getKey();
+				hashes[i] = keys[i] == null ? -1 : keys[i].hashCode();
 				values[i] = entry.getValue();				
 			}
 		}
@@ -48,6 +51,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 	
 	@SuppressWarnings({"unchecked", "unchecked"})
 	public ArrayMap(int initialCapacity) {
+		hashes = new int[initialCapacity];
 		keys = (K[])new Object[initialCapacity];
 		values = (V[])new Object[initialCapacity];
 	}
@@ -64,23 +68,38 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 	@Override
 	public boolean containsKey(Object o) {
-		return indexOf(o, keys) >= 0;
+		return indexOfKey(o) >= 0;
 	}
 
 	@Override
 	public boolean containsValue(Object o) {
-		return indexOf(o, values) >= 0;
+		return indexOfValue(o) >= 0;
 	}
 
-	private int indexOf(Object o, Object[] os) {
+	private int indexOfKey(Object o) {
 		if (o == null) {
 			for (int i = 0; i < size; i++) {
-				if (os[i] == null) return i;
+				if (keys[i] == null) return i;
+			}
+		}
+		else {
+			int hash = o.hashCode();
+			for (int i = 0; i < size; i++) {
+				if (hashes[i] == hash && o.equals(keys[i])) return i;
+			}
+		}
+		return -1;
+	}
+
+	private int indexOfValue(Object o) {
+		if (o == null) {
+			for (int i = 0; i < size; i++) {
+				if (values[i] == null) return i;
 			}
 		}
 		else {
 			for (int i = 0; i < size; i++) {
-				if (o.equals(os[i])) return i;
+				if (o.equals(values[i])) return i;
 			}
 		}
 		return -1;
@@ -88,16 +107,17 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 	
 	@Override
 	public V get(Object o) {
-		int index = indexOf(o, keys);
+		int index = indexOfKey(o);
 		if (index == -1) return null;
 		return values[index];
 	}
 
 	@Override
 	public V put(K k, V v) {
-		int index = indexOf(k, keys);
+		int index = indexOfKey(k);
 		if (index == -1) {
 			this.ensureCapacity(size + 1);
+			this.hashes[size] = k == null ? -1 : k.hashCode();
 			this.keys[size] = k;
 			this.values[size] = v;
 			this.size++;
@@ -112,13 +132,14 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 	@Override
 	public V remove(Object o) {
-		int index = indexOf(o, keys);
+		int index = indexOfKey(o);
 		if (index == -1) return null;
 		return remove(index);
 	}
 
 	V remove(int index) {
 		V tmp = values[index];
+		System.arraycopy(hashes, index + 1, hashes, index, size - index - 1);
 		System.arraycopy(keys, index + 1, keys, index, size - index - 1);
 		System.arraycopy(values, index + 1, values, index, size - index - 1);
 		size--;
@@ -131,9 +152,10 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		this.ensureCapacity(map.size() + size);
 				
 		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-			int index = indexOf(entry.getKey(), keys);
+			int index = indexOfKey(entry.getKey());
 			if (index == -1) {
 				this.keys[size] = entry.getKey();
+				this.hashes[size] = keys[size] == null ? -1 : keys[size].hashCode();
 				this.values[size] = entry.getValue();
 				this.size++;
 			}
@@ -166,6 +188,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 	private void ensureCapacity(int newSize) {
 		if (newSize > keys.length) {
 			int newCapacity = Math.max(newSize, keys.length*2 + 1);
+			hashes = Arrays.copyOf(hashes, newCapacity);
 			keys = Arrays.copyOf(keys, newCapacity);
 			values = Arrays.copyOf(values, newCapacity);
 		}
@@ -216,7 +239,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 		@Override
 		public boolean remove(Object o) {
-			int index = indexOf(o, keys);
+			int index = indexOfKey(o);
 			if (index == -1) return false;
 			ArrayMap.this.remove(index);
 			return true;
@@ -253,7 +276,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public boolean removeAll(Collection<?> clctn) {
 			int initial = size;
 			for (Object o : clctn) {
-				remove(o);
+				this.remove(o);
 			}
 			return initial == size;
 		}
@@ -280,7 +303,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public boolean contains(Object o) {
 			if (!(o instanceof Entry)) throw new ClassCastException("Only contains Map.Entry.");
 			Entry me = (Entry)o;
-			int index = indexOf(me.getKey(), keys);
+			int index = indexOfKey(me.getKey());
 			if (index == -1) return false;
 			return (values[index] == null ? me.getValue() == null : values[index].equals(me.getValue()));
 		}
@@ -315,7 +338,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public boolean remove(Object o) {
 			if (!(o instanceof Entry)) throw new ClassCastException("Only contains Map.Entry.");
 			Entry e = (Entry)o;
-			int index = indexOf(o, keys);
+			int index = indexOfKey(o);
 			if (index == -1) return false;
 			if (values[index] == null ? e.getValue() != null : !values[index].equals(e.getValue())) return false;
 			ArrayMap.this.remove(index);
@@ -475,7 +498,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		
 		@Override
 		public boolean remove(Object o) {
-			int index = indexOf(o, values);
+			int index = indexOfValue(o);
 			if (index == -1) return false;
 			ArrayMap.this.remove(index);
 			return true;

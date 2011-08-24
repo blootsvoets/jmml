@@ -173,13 +173,14 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		}
 
 		for (Cluster<V,E> subc : clusters.getChildren(c)) {
+			sb.append(tab);
 			sb.append("subgraph \"cluster_");
 			sb.append(subc.getName());
 			sb.append("\" {");
 			tab.increase();
 			sb.append(tab); sb.append("label=\"");
 			sb.append(subc.getName());
-			sb.append("\",labeljust=l"); sb.append(';');
+			sb.append("\"; labeljust=l;");
 			sb.append(tab); sb.append("style=dashed; fontcolor=\"dimgray\";\n");
 			print(sb);
 

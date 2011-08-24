@@ -121,9 +121,6 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 				}
 				return false;
 			}
-			else if (pi.instanceCompleted()) {
-				return true;
-			}
 			
 			AnnotatedInstance inst = pi.getInstance();
 			boolean needInit = topology.needsExternalInitialization(inst);

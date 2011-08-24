@@ -143,7 +143,7 @@ class AnnotationSet {
 		int hash = 3;
 		hash = 23 * hash + cInst;
 		hash = 23 * hash + cIter;
-		hash = 23 * hash + (cOper == null ? 0 : cOper.ordinal());
+		hash = 23 * hash + (cOper == null ? 5 : cOper.ordinal());
 		return hash;
 	}
 
@@ -154,9 +154,9 @@ class AnnotationSet {
 
 	/** Remove the traces from the AnnotationSet */
 	public void freeTraces() {
-//		this.anInst = null;
-//		this.anIter = null;
-//		this.anOper = null;
+		this.anInst = null;
+		this.anIter = null;
+		this.anOper = null;
 	}
 
 	/** Append a string of this counter to a StringBuilder.

@@ -46,9 +46,9 @@ public class ProcessIterationCache {
 
 	void remove(AnnotatedInstance instance, AnnotationSet key) {
 		int num = instance.getNumber();
-		if (processIterations.size() >= num) {
-			Map<AnnotationSet, ProcessIteration> map = processIterations.get(instance.getNumber());
-			if (map != null && map.containsKey(key)) map.remove(key);
+		if (processIterations.size() > num) {
+			Map<AnnotationSet, ProcessIteration> map = processIterations.get(num);
+			if (map != null) map.remove(key);
 		}
 	}
 }

@@ -16,9 +16,13 @@ import java.util.List;
  * @author Joris Borgdorff
  */
 public class AnnotatedTopology extends Topology {
+	private transient List<AnnotatedCoupling> tmpList;
+	
 	@SuppressWarnings("unchecked")
 	public AnnotatedTopology() {
+		super();
 		this.instance = new UniqueLists(new DistinguishClass(new Class[]{Instance.class}));
+		this.tmpList = new ArrayList<AnnotatedCoupling>(10);
 	}
 	
 	@Override
@@ -63,15 +67,15 @@ public class AnnotatedTopology extends Topology {
 		if (ainst.isInit()) {
 			return null;
 		}
-		Collection<AnnotatedCoupling> incoming = new ArrayList<AnnotatedCoupling>(7);
+		tmpList.clear();
 		for (Coupling c : this.coupling) {
 			AnnotatedInstancePort ato = (AnnotatedInstancePort) c.getTo();
 			if (ato.getInstance().equals(ainst)) {
 				if (ato.getPort().getOperator() == SEL.FINIT) return null;
-				incoming.add((AnnotatedCoupling)c);
+				tmpList.add((AnnotatedCoupling)c);
 			}
 		}
-		return incoming.isEmpty() ? null : incoming;
+		return tmpList.isEmpty() ? null : tmpList;
 	}
 
 
@@ -85,29 +89,29 @@ public class AnnotatedTopology extends Topology {
 	}
 	
 	public Collection<AnnotatedCoupling> getCouplingsTo(AnnotatedInstance ainst, SEL operator) {
-		Collection<AnnotatedCoupling> cts = new ArrayList<AnnotatedCoupling>(7);
+		tmpList.clear();
 		for (Coupling c : this.coupling) {
 			AnnotatedCoupling ac = (AnnotatedCoupling) c;
 			if (ac.getTo().getInstance().equals(ainst)) {
 				if (operator == null || ac.getTo().getPort().getOperator() == operator) {
-					cts.add(ac);
+					tmpList.add(ac);
 				}
 			}
 		}
-		return cts;
+		return tmpList;
 	}
 	
 	public Collection<AnnotatedCoupling> getCouplingsFrom(AnnotatedInstance ainst, SEL operator) {
-		Collection<AnnotatedCoupling> cts = new ArrayList<AnnotatedCoupling>(7);
+		tmpList.clear();
 		for (Coupling c : this.coupling) {
 			AnnotatedCoupling ac = (AnnotatedCoupling) c;
 			if (ac.getFrom().getInstance().equals(ainst)) {
 				if (operator == null || ac.getFrom().getPort().getOperator() == operator) {
-					cts.add(ac);
+					tmpList.add(ac);
 				}
 			}
 		}
-		return cts;
+		return tmpList;
 	}
 	
 	
