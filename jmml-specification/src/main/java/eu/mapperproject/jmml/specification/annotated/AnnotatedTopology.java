@@ -6,6 +6,7 @@ import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Topology;
 import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
+import eu.mapperproject.jmml.specification.util.FastArrayList;
 import eu.mapperproject.jmml.specification.util.UniqueLists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,8 +35,8 @@ public class AnnotatedTopology extends Topology {
 		return (AnnotatedInstance)((UniqueLists)this.instance).getById(0, id);
 	}
 	
-	public Collection<AnnotatedInstance> getInitialInstances() {
-		Collection<AnnotatedInstance> insts = new ArrayList<AnnotatedInstance>();
+	public List<AnnotatedInstance> getInitialInstances() {
+		List<AnnotatedInstance> insts = new FastArrayList<AnnotatedInstance>();
 		for (Instance inst : instance) {
 			AnnotatedInstance ainst = (AnnotatedInstance)inst;
 			if (ainst.isInit()) {
@@ -63,7 +64,7 @@ public class AnnotatedTopology extends Topology {
 		return hasIncoming;
 	}
 	
-	public Collection<AnnotatedCoupling> externalInitializationCouplings(AnnotatedInstance ainst) {
+	public List<AnnotatedCoupling> externalInitializationCouplings(AnnotatedInstance ainst) {
 		if (ainst.isInit()) {
 			return null;
 		}
@@ -88,12 +89,12 @@ public class AnnotatedTopology extends Topology {
 		return false;
 	}
 	
-	public Collection<AnnotatedCoupling> getCouplingsTo(AnnotatedInstance ainst, SEL operator) {
+	public List<AnnotatedCoupling> getCouplingsTo(AnnotatedInstance ainst, SEL operator) {
 		tmpList.clear();
 		for (Coupling c : this.coupling) {
 			AnnotatedCoupling ac = (AnnotatedCoupling) c;
 			if (ac.getTo().getInstance().equals(ainst)) {
-				if (operator == null || ac.getTo().getPort().getOperator() == operator) {
+				if (ac.getTo().getPort().getOperator() == operator) {
 					tmpList.add(ac);
 				}
 			}
@@ -101,12 +102,12 @@ public class AnnotatedTopology extends Topology {
 		return tmpList;
 	}
 	
-	public Collection<AnnotatedCoupling> getCouplingsFrom(AnnotatedInstance ainst, SEL operator) {
+	public List<AnnotatedCoupling> getCouplingsFrom(AnnotatedInstance ainst, SEL operator) {
 		tmpList.clear();
 		for (Coupling c : this.coupling) {
 			AnnotatedCoupling ac = (AnnotatedCoupling) c;
 			if (ac.getFrom().getInstance().equals(ainst)) {
-				if (operator == null || ac.getFrom().getPort().getOperator() == operator) {
+				if (ac.getFrom().getPort().getOperator() == operator) {
 					tmpList.add(ac);
 				}
 			}

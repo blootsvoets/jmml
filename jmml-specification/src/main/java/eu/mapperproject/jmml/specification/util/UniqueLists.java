@@ -10,13 +10,13 @@ import java.util.List;
  * @author Joris Borgdorff
  */
 public class UniqueLists<T,V> extends AbstractList<V> {
-	private final List<V> elems;
+	private final FastArrayList<V> elems;
 	private final Distinguisher<T, ? super V> dist;
 	private final boolean setNumbers;
 	private final Validator<V> valid;
 	
 	public UniqueLists(Distinguisher<T,? super V> dist, boolean setNumbers, Validator<V> valid) {
-		this.elems = new ArrayList<V>();
+		this.elems = new FastArrayList<V>();
 		this.dist = dist;
 		this.setNumbers = setNumbers;
 		this.valid = valid;
@@ -50,8 +50,9 @@ public class UniqueLists<T,V> extends AbstractList<V> {
 	}
 	
 	public boolean hasType(int i) {
-		for (V elem : elems) {
-			if (dist.getIndex(elem) == i) return true;
+		final V[] back = elems.getBackingArray();
+		for (int j = 0; j < elems.size(); j++) {
+			if (dist.getIndex(back[j]) == i) return true;
 		}
 		return false;
 	}
@@ -62,9 +63,10 @@ public class UniqueLists<T,V> extends AbstractList<V> {
 	
 	public V getById(int i, String id) {
 		if (i >= 0) {
-			for (V elem : elems) {
-				if (dist.getIndex(elem) == i && dist.getId(elem).equals(id)) {
-					return elem;
+			final V[] back = elems.getBackingArray();
+			for (int j = 0; j < elems.size(); j++) {
+				if (dist.getIndex(back[j]) == i && dist.getId(back[j]).equals(id)) {
+					return back[j];
 				}
 			}
 		}
@@ -72,9 +74,10 @@ public class UniqueLists<T,V> extends AbstractList<V> {
 	}
 
 	public V getById(String id) {
-		for (V elem : elems) {
-			if (dist.getId(elem).equals(id)) {
-				return elem;
+		final V[] back = elems.getBackingArray();
+		for (int j = 0; j < elems.size(); j++) {
+			if (dist.getId(back[j]).equals(id)) {
+				return back[j];
 			}
 		}
 		return null;	

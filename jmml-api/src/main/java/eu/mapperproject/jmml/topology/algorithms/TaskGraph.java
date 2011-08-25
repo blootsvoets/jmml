@@ -50,7 +50,7 @@ public class TaskGraph {
 				System.out.print("After " + i + " iterations, processing node " + pi);
 				AnnotatedScale sc = pi.getInstance().getTimescaleInstance();
 				if (sc != null) {
-					System.out.println(", which has " + pi.getInstance().getTimescaleInstance().getSteps() + " steps.");
+					System.out.println(", which is at " + ((int)(1000*pi.getIteration() / (double)pi.getInstance().getTimescaleInstance().getSteps()))/10d + "% of its computation.");
 				}
 				else {
 					System.out.println();
@@ -92,7 +92,9 @@ public class TaskGraph {
 	 * @return whether a next iteration could be computed
 	 */
 	private boolean computeNextIteration(TaskGraphState state, ProcessIteration pi) {
-		Collection<AnnotatedCoupling> cds = this.topology.getCouplingsFrom(pi.getInstance(), pi.getOperator());
+		Collection<AnnotatedCoupling> couplingsFrom = this.topology.getCouplingsFrom(pi.getInstance(), pi.getOperator());
+		AnnotatedCoupling[] cds = new AnnotatedCoupling[couplingsFrom.size()];
+		couplingsFrom.toArray(cds);
 		
 		for (AnnotatedCoupling cd : cds) {
 			boolean needInit = (pi.firstLoop() && topology.needsExternalInitialization(cd.getTo().getInstance()));
@@ -100,7 +102,7 @@ public class TaskGraph {
 			this.calculateTo(pi, cd, state, needInit);
 		}
 		
-		return !cds.isEmpty();
+		return cds.length > 0;
 	}
 	
 	/** Create an instance of a normal coupling between one process iteration the next */
@@ -133,7 +135,7 @@ public class TaskGraph {
 		this.graph.addEdge(ci);
 	}
 	
-	public static List<ProcessIteration> descriptionToIteration(Collection<AnnotatedInstance> pds) {
+	public static List<ProcessIteration> descriptionToIteration(List<AnnotatedInstance> pds) {
 		ArrayList<ProcessIteration> pis = new ArrayList<ProcessIteration>(pds.size());
 		for (AnnotatedInstance pd : pds) {
 			pis.add(new ProcessIteration(pd));

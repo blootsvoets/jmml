@@ -23,6 +23,7 @@ public class ProcessIteration {
 	private boolean initial, isfinal, deadlock;
 	private ProcessIterationRange range;
 	private boolean stateProgressed;
+	private final static StringBuilder stringUpdater = new StringBuilder(50);;
 
 	public enum ProgressType {
 		INSTANCE, ITERATION;
@@ -167,11 +168,29 @@ public class ProcessIteration {
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another state of " + this + " if the state has already progressed.");
 		}
+		
+		// The current instance moves on and can not be used again
+		cache.remove(this.instance, this.annot);
 
 		AnnotatedInstance pd = this.instance;
 
-		boolean hasEdgesOut = this.annotOut != null;
-		AnnotationSet set = new AnnotationSet(hasEdgesOut ? this.annotOut : this.annot);
+		final boolean hasEdgesOut = this.annotOut != null;
+		final boolean progressToOtherIteration = !collapse || hasEdgesOut || instance == ProgressType.INSTANCE;
+		AnnotationSet set;
+		if (progressToOtherIteration) {
+			set = new AnnotationSet(hasEdgesOut ? this.annotOut : this.annot);
+			// Since no more progress may be made by this submodel, we can free the annotations
+			this.stateProgressed = true;
+			this.annot.freeTraces();
+			this.annotOut = null;
+		}
+		else {
+			// We can reuse the current annotation, with associated traces.
+			set = this.annot;
+			if (range == null) {
+				this.range = new ProcessIterationRange(this.annot);
+			}
+		}
 
 		switch (instance) {
 			case ITERATION:
@@ -200,22 +219,11 @@ public class ProcessIteration {
 
 		set.applySubject();
 
-		if (!collapse || hasEdgesOut || instance == ProgressType.INSTANCE) {
-			// Since no more progress may be made, we can free the annotations
-			this.annotOut = null;
-			this.annot.freeTraces();
-			this.stateProgressed = true;
-			cache.remove(this.instance, this.annot);
-
+		if (progressToOtherIteration) {
 			return cache.getIteration(pd, set);
 		}
 		else {
-			if (range == null) {
-				range = new ProcessIterationRange(this.annot);
-			}
 			this.range.updateRange(set, false);
-			cache.remove(this.instance, this.annot);
-			this.annot = set;
 			cache.putIteration(pd, set, this);
 			this.asString = this.updateString(true);
 
@@ -223,7 +231,7 @@ public class ProcessIteration {
 		}
 	}
 	
-	// Progression of the same submodel instance
+	// Progression of a different submodel instance
 	private ProcessIteration progress(AnnotatedCoupling cd, ProgressType instance) {		
 		if (this.stateProgressed) {
 			throw new IllegalStateException("Can not progress to another processiteration " + cd + " if the state has already progressed.");
@@ -261,7 +269,6 @@ public class ProcessIteration {
 
 		if (this.annotOut == null) {
 			this.annotOut = new AnnotationSet(this.annot);
-			cache.remove(this.instance, this.annot);
 		}
 		this.annotOut.merge(set);
 
@@ -312,16 +319,16 @@ public class ProcessIteration {
 
 	private String updateString(boolean useId) {
 		String id = useId ? this.instance.getId() : Integer.toString(this.instance.getNumber());
-		StringBuilder sb = new StringBuilder(id.length() + 30);
-		sb.append(id);
+		stringUpdater.setLength(0);
+		stringUpdater.append(id);
 		if (this.range == null) {
 			                                     // Mappers can do with simple notation.
-			this.annot.appendToStringBuilder(sb, instance.ofSubmodel());
+			this.annot.appendToStringBuilder(stringUpdater, instance.ofSubmodel());
 		}
 		else {
-			this.annot.appendToStringBuilder(sb, false);
-			this.range.appendToStringBuilder(sb);
+			this.annot.appendToStringBuilder(stringUpdater, false);
+			this.range.appendToStringBuilder(stringUpdater);
 		}
-		return sb.toString();
+		return stringUpdater.toString();
 	}
 }

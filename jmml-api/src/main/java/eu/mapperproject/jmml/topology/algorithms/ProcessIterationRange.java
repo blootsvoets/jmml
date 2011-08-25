@@ -6,7 +6,7 @@ import eu.mapperproject.jmml.specification.SEL;
  *
  * @author Joris Borgdorff
  */
-public class ProcessIterationRange {
+class ProcessIterationRange {
 	private SEL rangeFromOper, rangeToOper;
 	private int rangeFromIter, rangeToIter;
 
