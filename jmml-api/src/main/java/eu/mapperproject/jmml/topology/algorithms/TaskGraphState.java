@@ -12,7 +12,7 @@ import java.util.Map;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
-import eu.mapperproject.jmml.specification.util.ArrayMap;
+import eu.mapperproject.jmml.util.ArrayMap;
 import eu.mapperproject.jmml.util.PTList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,13 +94,11 @@ public class TaskGraphState implements Iterable<ProcessIteration> {
 	 */
 	private boolean activateIfNeeded(ProcessIteration pi, AnnotatedCoupling next) {
 		Collection<AnnotatedCoupling> cis = PTList.getSet(pi, snoozingProcesses);
-		if (!cis.contains(next)) {
-			cis.add(next);
-			if (hasAllCouplings(pi, cis, false)) {
-				snoozingProcesses.remove(pi);
-				activeProcesses.add(pi);
-				return true;
-			}
+		boolean change = cis.add(next);
+		if (change &&  hasAllCouplings(pi, cis, false)) {
+			snoozingProcesses.remove(pi);
+			activeProcesses.add(pi);
+			return true;
 		}
 		return false;
 	}

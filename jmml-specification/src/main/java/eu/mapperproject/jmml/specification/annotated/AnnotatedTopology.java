@@ -4,12 +4,10 @@ import eu.mapperproject.jmml.specification.Coupling;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Topology;
-import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
-import eu.mapperproject.jmml.specification.util.FastArrayList;
-import eu.mapperproject.jmml.specification.util.UniqueLists;
+import eu.mapperproject.jmml.util.FastArrayList;
+import eu.mapperproject.jmml.util.UniqueLists;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,7 +21,8 @@ public class AnnotatedTopology extends Topology {
 	public AnnotatedTopology() {
 		super();
 		this.instance = new UniqueLists(new DistinguishClass(new Class[]{Instance.class}));
-		this.tmpList = new ArrayList<AnnotatedCoupling>(10);
+		this.coupling = new FastArrayList<Coupling>();
+		this.tmpList = new FastArrayList<AnnotatedCoupling>(10);
 	}
 	
 	@Override

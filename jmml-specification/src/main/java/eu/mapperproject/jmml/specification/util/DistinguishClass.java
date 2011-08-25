@@ -1,6 +1,7 @@
 package eu.mapperproject.jmml.specification.util;
 
-import eu.mapperproject.jmml.specification.annotated.Identifiable;
+import eu.mapperproject.jmml.util.Distinguisher;
+import eu.mapperproject.jmml.util.Identifiable;
 
 /**
  *

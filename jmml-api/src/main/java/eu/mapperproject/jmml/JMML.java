@@ -19,7 +19,7 @@ import eu.mapperproject.jmml.topology.algorithms.ProcessIteration;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraph;
 import eu.mapperproject.jmml.topology.algorithms.TaskGraphDecorator;
 import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.specification.graph.Edge;
+import eu.mapperproject.jmml.util.graph.Edge;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 
 import java.io.InputStream;

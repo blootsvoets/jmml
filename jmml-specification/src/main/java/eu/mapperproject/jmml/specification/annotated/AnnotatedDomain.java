@@ -1,7 +1,7 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Domain;
-import eu.mapperproject.jmml.specification.graph.Child;
+import eu.mapperproject.jmml.util.graph.Child;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -52,6 +52,7 @@ public class AnnotatedDomain extends Domain implements Child<AnnotatedDomain> {
 		}
     }
 	
+	@Override
 	public String getName() {
 		if (this.parent == null && this.value.contains(".")) this.setValue(value);
 		return this.value;

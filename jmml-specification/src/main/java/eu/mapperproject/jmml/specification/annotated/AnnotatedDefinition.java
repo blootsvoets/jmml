@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.util.Numbered;
 import eu.mapperproject.jmml.specification.Definition;
 
 /**

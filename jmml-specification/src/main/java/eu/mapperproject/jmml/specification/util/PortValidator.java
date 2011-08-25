@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.util;
 
+import eu.mapperproject.jmml.util.Validator;
 import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.specification.SEL;
 import java.util.logging.Level;

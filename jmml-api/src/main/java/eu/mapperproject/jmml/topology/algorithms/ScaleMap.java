@@ -1,12 +1,12 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
 import cern.colt.list.IntArrayList;
-import eu.mapperproject.jmml.definitions.ScaleSet;
+import eu.mapperproject.jmml.topology.ScaleSet;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
-import eu.mapperproject.jmml.specification.util.ArraySet;
+import eu.mapperproject.jmml.util.ArraySet;
 import eu.mapperproject.jmml.util.Painter;
 import java.awt.Color;
 import java.awt.Dimension;

@@ -1,7 +1,7 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Formula;
-import eu.mapperproject.jmml.specification.numerical.InterpretedFormula;
+import eu.mapperproject.jmml.util.numerical.InterpretedFormula;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

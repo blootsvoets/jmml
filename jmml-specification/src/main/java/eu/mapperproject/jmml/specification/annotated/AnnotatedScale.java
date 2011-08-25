@@ -3,7 +3,7 @@ package eu.mapperproject.jmml.specification.annotated;
 import eu.mapperproject.jmml.specification.Range;
 import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Unit;
-import eu.mapperproject.jmml.specification.numerical.SIUnit;
+import eu.mapperproject.jmml.util.numerical.SIUnit;
 
 /**
  *

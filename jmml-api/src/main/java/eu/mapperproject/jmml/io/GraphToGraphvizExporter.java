@@ -6,7 +6,7 @@ import java.io.IOException;
 import eu.mapperproject.jmml.util.Indent;
 import eu.mapperproject.jmml.util.graph.Category;
 import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.specification.graph.Edge;
+import eu.mapperproject.jmml.util.graph.Edge;
 import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 import eu.mapperproject.jmml.util.graph.StyledEdge;

@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.util.Identifiable;
 import eu.mapperproject.jmml.specification.Datatype;
 import eu.mapperproject.jmml.specification.Port;
 

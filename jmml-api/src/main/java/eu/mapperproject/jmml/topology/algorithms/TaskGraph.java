@@ -9,7 +9,6 @@ import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedScale;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
-import eu.mapperproject.jmml.topology.InstanceOperator;
 import eu.mapperproject.jmml.util.graph.PTGraph;
 
 /** Describes the coupling topology of a model and can convert it to a task graph */ 

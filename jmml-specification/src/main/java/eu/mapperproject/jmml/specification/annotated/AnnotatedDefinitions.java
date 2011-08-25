@@ -1,13 +1,14 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.util.Identifiable;
 import eu.mapperproject.jmml.specification.Datatype;
 import eu.mapperproject.jmml.specification.Definitions;
 import eu.mapperproject.jmml.specification.Filter;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.util.DistinguishClass;
-import eu.mapperproject.jmml.specification.util.Distinguisher;
-import eu.mapperproject.jmml.specification.util.UniqueLists;
+import eu.mapperproject.jmml.util.Distinguisher;
+import eu.mapperproject.jmml.util.UniqueLists;
 
 /**
  *

@@ -65,5 +65,6 @@
 	<modules>
 		<module>jmml-api</module>
 		<module>jmml-specification</module>
+		<module>jmml-util</module>
 	</modules>
 </project>

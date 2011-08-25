@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.util.Numbered;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.MultiDimensionalScale;
@@ -8,7 +9,7 @@ import eu.mapperproject.jmml.specification.Otherscale;
 import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.YesNoChoice;
-import eu.mapperproject.jmml.specification.util.ArrayMap;
+import eu.mapperproject.jmml.util.ArrayMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
