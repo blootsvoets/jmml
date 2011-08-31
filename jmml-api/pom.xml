@@ -42,12 +42,6 @@
 			<artifactId>colt</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>xom</groupId>
-			<artifactId>xom</artifactId>
-			<version>1.2.5</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
 			<groupId>batik</groupId>
 			<artifactId>batik-svggen</artifactId>
 			<version>1.6-1</version>
