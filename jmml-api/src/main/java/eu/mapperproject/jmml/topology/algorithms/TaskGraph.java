@@ -49,7 +49,7 @@ public class TaskGraph {
 				System.out.print("After " + i + " iterations, processing node " + pi);
 				AnnotatedScale sc = pi.getInstance().getTimescaleInstance();
 				if (sc != null) {
-					System.out.println(", which is at " + ((int)(1000*pi.getIteration() / (double)pi.getInstance().getTimescaleInstance().getSteps()))/10d + "% of its computation.");
+					System.out.println(", which is at " + ((long)(1000l*pi.getIteration() / (double)pi.getInstance().getTimescaleInstance().getSteps()))/10d + "% of its computation.");
 				}
 				else {
 					System.out.println();
