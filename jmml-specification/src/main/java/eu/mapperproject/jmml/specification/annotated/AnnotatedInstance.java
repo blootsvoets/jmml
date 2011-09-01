@@ -1,11 +1,13 @@
 package eu.mapperproject.jmml.specification.annotated;
 
+import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.util.Numbered;
 import eu.mapperproject.jmml.specification.Instance;
 import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.MultiDimensionalScale;
 import eu.mapperproject.jmml.specification.OptionalChoice;
 import eu.mapperproject.jmml.specification.Otherscale;
+import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Scale;
 import eu.mapperproject.jmml.specification.Submodel;
 import eu.mapperproject.jmml.specification.YesNoChoice;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.bind.JAXBElement;
 
 /**
  *
@@ -26,15 +29,11 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	private transient int number;
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
-	private transient boolean isfinal;
-	private transient boolean isinitial;
 	private transient final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
 	private transient final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
 	
 	public AnnotatedInstance() {
 		super();
-		this.isfinal = false;
-		this.isinitial = false;
 		this.mapperInst = null;
 		this.submodelInst = null;
 	}
@@ -219,18 +218,23 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName()
-			+ "(" + (ofSubmodel() ? "submodel " : "mapper ")
+		return (ofSubmodel() ? "submodel " : "mapper ")
 			+ this.id
 			+ "<" + (ofSubmodel() ? submodel : mapper) + ">)";
 	}
 	
 	public boolean isFinal() {
-		return isfinal;
-	}
-
-	public void isFinal(boolean isfinal) {
-		this.isfinal = isfinal;
+		if (this.ofSubmodel()) {
+			Submodel sub = this.getSubmodelInstance();
+			for (JAXBElement<Port> port : ((AnnotatedPorts)sub.getPorts()).getInOrOut()) {
+				if (port.getValue().getOperator() == SEL.OF) return false;
+			}
+			return true;
+		}
+		else {
+			Mapper map = this.getMapperInstance();
+			return !((AnnotatedPorts)map.getPorts()).hasOutPort();
+		}
 	}
 	
 	/**

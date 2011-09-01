@@ -1,8 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.InstancePort;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -11,7 +9,6 @@ import java.util.logging.Logger;
 public class AnnotatedInstancePort extends InstancePort {
 	private transient AnnotatedPort port;
 	private transient AnnotatedInstance instance;
-	private final static Logger logger = Logger.getLogger(InstancePort.class.getName());
 	
 	public AnnotatedInstancePort() {
 		super();
@@ -43,6 +40,9 @@ public class AnnotatedInstancePort extends InstancePort {
 		}
 		else {
 			this.port = this.instance.getPorts().getPort(split[1]);
+			if (this.port == null) {
+				throw new IllegalArgumentException("Instance.Port " + value + " in coupling does not reference an existing port to instance " + this.instance.toString() + ".");				
+			}
 		}
 	}
 	
@@ -56,5 +56,10 @@ public class AnnotatedInstancePort extends InstancePort {
 	@Override
 	public int hashCode() {
 		return this.value.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.getValue();
 	}
 }
