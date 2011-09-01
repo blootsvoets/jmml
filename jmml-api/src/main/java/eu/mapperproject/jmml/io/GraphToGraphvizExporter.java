@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.io;
 
+import eu.mapperproject.jmml.util.FastArrayList;
 import java.io.File;
 import java.io.IOException;
 
@@ -15,7 +16,10 @@ import eu.mapperproject.jmml.util.graph.Tree;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +34,7 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 	private final static int SB_NODES = 1000;
 	private final GraphDecorator<V, E> decorator;
 	private final PTGraph<V,E> graph;
-	private boolean hasSink, hasSource;
+	private List<StyledEdge> sink, source;
 	private final static Logger logger = Logger.getLogger(GraphToGraphvizExporter.class.getName());
 	
 	public GraphToGraphvizExporter(GraphDecorator<V,E> decorator, PTGraph<V,E> graph, boolean cluster, boolean horizontal, boolean edgeLabel) {
@@ -127,27 +131,23 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		boolean directed = this.decorator.isDirected();
 		int i = 0;
 		if (g != null) {
+			Collection<String> sns = new HashSet<String>();
 			// Add nodes
 			for (V n : g.getNodes()) {
 				StyledNode sn = this.decorator.decorateNode(n);
+				if (sns.contains(sn.getName())) continue;
+				else sns.add(sn.getName());
+				
 				this.nodeTemplate(sb, sn);
 
 				// Add source or sink if necessary
 				StyledEdge extremity = this.decorator.addSinkEdge(n, sn);
 				if (extremity != null) {
-					if (!this.hasSink) {
-						this.hasSink = true;
-						this.nodeTemplate(sb, extremity.getTo());
-					}
-					this.edgeTemplate(sb, extremity, directed);
+					this.sink.add(extremity);
 				}
 				extremity = this.decorator.addSourceEdge(n, sn);
 				if (extremity != null) {
-					if (!this.hasSource) {
-						this.hasSource = true;
-						this.nodeTemplate(sb, extremity.getFrom());
-					}
-					this.edgeTemplate(sb, extremity, directed);
+					this.source.add(extremity);
 				}
 
 				// Output temporary results to file
@@ -208,7 +208,9 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 
 	@Override
 	protected void convert() throws IOException {
-		this.hasSink = this.hasSource = false;
+		this.sink = new FastArrayList<StyledEdge>();
+		this.source = new FastArrayList<StyledEdge>();
+		
 		StringBuilder sb = new StringBuilder(200);
 		sb.append(decorator.isDirected() ? "digraph" : "graph");
 		sb.append(" G {");
@@ -221,6 +223,19 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		print(sb);
 
 		this.graphContents(graph);
+		
+		if (!sink.isEmpty()) {
+			this.nodeTemplate(sb, sink.get(0).getTo());
+			for (StyledEdge edge : sink) {
+				this.edgeTemplate(sb, edge, decorator.isDirected());
+			}
+		}
+		if (!source.isEmpty()) {
+			this.nodeTemplate(sb, source.get(0).getFrom());
+			for (StyledEdge edge : source) {
+				this.edgeTemplate(sb, edge, decorator.isDirected());
+			}
+		}
 		
 		tab.decrease();
 		sb.append(tab);

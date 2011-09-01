@@ -77,7 +77,7 @@ public class JMML {
 				break;
 			default:
 				PTGraph<AnnotatedInstancePort, AnnotatedCoupling> graph = CouplingTopologyDecorator.constructTopologyGraph(topology);
-				exporter = new GraphToGraphvizExporter<AnnotatedInstancePort, AnnotatedCoupling>(new CouplingTopologyDecorator(), graph, true, false, true);
+				exporter = new GraphToGraphvizExporter<AnnotatedInstancePort, AnnotatedCoupling>(new CouplingTopologyDecorator(true), graph, true, false, true);
 				break;
 		}
 		
@@ -124,11 +124,11 @@ public class JMML {
 			}
 			
 			try {
-				if (opt.topology != null) {
-					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
-				}
 				if (opt.taskgraph != null) {
 					doc.export(GraphType.TASK, dot, opt.taskgraph, !opt.nocollapse);
+				}
+				if (opt.topology != null) {
+					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
 				}
 				if (opt.domain != null) {
 					doc.export(GraphType.DOMAIN, dot, opt.domain, false);

@@ -42,7 +42,7 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 	}
 
 	
-	protected void validateCouplings() {
+	public void validateCouplings() {
 		if (from == null || to == null) return;
 		
 		AnnotatedInstancePort afrom = (AnnotatedInstancePort)from;

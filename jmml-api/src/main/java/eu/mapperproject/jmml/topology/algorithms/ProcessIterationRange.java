@@ -54,6 +54,9 @@ class ProcessIterationRange {
 
 	/** Append a the counter of this range to given StringBuilder */
 	public void appendToStringBuilder(StringBuilder sb) {
+		// Don't display if it includes the entire range of the instance
+		if (rangeFromOper == SEL.FINIT && rangeToOper == SEL.OF) return;
+		
 		sb.append('(');
 		sb.append(rangeFromIter);
 		if (rangeFromIter < rangeToIter) {

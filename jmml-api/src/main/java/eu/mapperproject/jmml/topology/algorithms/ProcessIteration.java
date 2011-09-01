@@ -267,11 +267,13 @@ public class ProcessIteration {
 
 		set.applySubject();
 
-		if (this.annotOut == null) {
-			this.annotOut = new AnnotationSet(this.annot);
+		if (this.instance.ofSubmodel()) {
+			if (this.annotOut == null) {
+				this.annotOut = new AnnotationSet(this.annot);
+			}
+			this.annotOut.merge(set);
 		}
-		this.annotOut.merge(set);
-
+		
 		return cache.getIteration(pd, set);
 	}
 	
