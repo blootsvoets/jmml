@@ -6,7 +6,6 @@ import eu.mapperproject.jmml.specification.Mapper;
 import eu.mapperproject.jmml.specification.Port;
 import eu.mapperproject.jmml.specification.SEL;
 import eu.mapperproject.jmml.specification.Submodel;
-import eu.mapperproject.jmml.specification.YesNoChoice;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
@@ -34,15 +33,27 @@ public class CouplingTopologyDecorator extends GraphDecorator<AnnotatedInstanceP
 	private final static SimpleNode START = new SimpleNode("start", "label=\"\",shape=circle,fill=black,style=filled,fillcolor=black,width=0.25");
 	/** An end node. */
 	private final static SimpleNode END = new SimpleNode("end", "label=\"\",shape=doublecircle,style=filled,fillcolor=black,width=0.25");
+	private final boolean withType;
 
-	public CouplingTopologyDecorator() {
+	public CouplingTopologyDecorator(boolean withType_) {
 		super(true);
+		this.withType = withType_;
 	}
 
 	@Override
 	public StyledNode decorateNode(AnnotatedInstancePort node) {
 		Category cat = Category.getCategory((AnnotatedDomain)node.getInstance().getDomain());
-		return new SimpleNode(node.getInstance().getId(), node.getInstance().ofSubmodel() ? "shape=rectangle" : "shape=hexagon", cat);
+		AnnotatedInstance inst = node.getInstance();
+		String style, id = inst.getId();
+		if (inst.ofSubmodel()) {
+			style = "shape=rectangle";
+			if (withType) id += " [" + inst.getSubmodelInstance().getId() + "]";
+		}
+		else {
+			style = "shape=hexagon";
+			if (withType) id += " [" + inst.getMapperInstance().getId() + "]";
+		}
+		return new SimpleNode(id,  style, cat);
 	}
 
 	@Override
