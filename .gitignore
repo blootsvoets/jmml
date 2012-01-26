@@ -2,3 +2,6 @@
 nbactions-Canal.xml
 !.gitignore
 /target/
+/jmml-api/~/
+/jmml-api/nbactions.xml
+/jmml-api/nbactions-ISR.xml
