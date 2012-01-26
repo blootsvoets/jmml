@@ -18,21 +18,21 @@ public class AnnotatedDefinitions extends Definitions {
 	
 	public AnnotatedDefinitions() {
 		Distinguisher<Class<?>,Identifiable> dist = new DistinguishClass(new Class[] {Filter.class, Mapper.class, Submodel.class});
-		filterOrMapperOrSubmodel = new UniqueLists<Class<?>,AnnotatedDefinition>(dist);
+		terminalOrFilterOrMapper = new UniqueLists<Class<?>,AnnotatedDefinition>(dist);
 		dist = new DistinguishClass(new Class[] {Datatype.class});
 		this.datatype = new UniqueLists<Class<?>,Datatype>(dist);
 	}
 	
 	public Mapper getMapper(String id) {
-		return (Mapper)((UniqueLists)this.filterOrMapperOrSubmodel).getById(1, id);
+		return (Mapper)((UniqueLists)this.terminalOrFilterOrMapper).getById(1, id);
 	}
 
 	public AnnotatedFilter getFilter(String id) {
-		return (AnnotatedFilter)((UniqueLists)this.filterOrMapperOrSubmodel).getById(0, id);
+		return (AnnotatedFilter)((UniqueLists)this.terminalOrFilterOrMapper).getById(0, id);
 	}
 
 	public Submodel getSubmodel(String id) {
-		return (Submodel)((UniqueLists)this.filterOrMapperOrSubmodel).getById(2, id);
+		return (Submodel)((UniqueLists)this.terminalOrFilterOrMapper).getById(2, id);
 	}
 
 	public Datatype getDatatype(String id) {
