@@ -1,15 +1,6 @@
 package eu.mapperproject.jmml.util;
 
-/*
- * 
- */
-
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  *
@@ -53,18 +44,18 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public Object[] toArray() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return Arrays.copyOf(elems, size);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T[] toArray(T[] ts) {
+	public <U> U[] toArray(U[] ts) {
 		if (ts.length >= size) {
 			System.arraycopy(elems, 0, ts, 0, size);
 			return ts;
 		}
 		else {
-			return (T[])Arrays.copyOf(elems, size);
+			return (U[])Arrays.copyOf(elems, size, ts.getClass());
 		}
 	}
 
