@@ -1,20 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import eu.mapperproject.jmml.specification.Definition;
-import eu.mapperproject.jmml.specification.Definitions;
-import eu.mapperproject.jmml.specification.Domain;
-import eu.mapperproject.jmml.specification.Filter;
-import eu.mapperproject.jmml.specification.Formula;
-import eu.mapperproject.jmml.specification.Instance;
-import eu.mapperproject.jmml.specification.InstancePort;
-import eu.mapperproject.jmml.specification.Mapper;
-import eu.mapperproject.jmml.specification.Model;
-import eu.mapperproject.jmml.specification.ObjectFactory;
-import eu.mapperproject.jmml.specification.Port;
-import eu.mapperproject.jmml.specification.Ports;
-import eu.mapperproject.jmml.specification.Submodel;
-import eu.mapperproject.jmml.specification.Topology;
-import eu.mapperproject.jmml.specification.Unit;
+import eu.mapperproject.jmml.specification.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRegistry;
@@ -87,6 +73,11 @@ public class ObjectFactoryAnnotated extends ObjectFactory {
 	@Override
 	public Ports createPorts() {
 		return new AnnotatedPorts();
+	}
+	
+	@Override
+	public Param createParam() {
+		return new AnnotatedParam();
 	}
 	
 	public static AnnotatedModel getModel() {
