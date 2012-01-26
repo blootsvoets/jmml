@@ -1,0 +1,45 @@
+group muscle_cxa;
+delimiters "%", "%"
+
+cxa(inst,params,classpath,libpath,connection) ::= <<# configuration file for a MUSCLE CxA
+abort "this is a configuration file for to be used with the MUSCLE bootstrap utility"   if __FILE__ == $0
+
+# add build for this cxa to system paths (i.e. CLASSPATH)
+m = Muscle.LAST
+m.add_classpath "%classpath%"
+m.add_libpath  "%libpath%"
+
+# configure cxa properties
+cxa = Cxa.LAST
+
+cxa.env["cxa_path"] = File.dirname(__FILE__)
+
+# declare kernels
+%inst:kernel()%
+# parameters
+%params:param()%
+# configure connection scheme
+cs = cxa.cs
+%connection:attach()%
+>>
+
+attach(connection) ::= <<
+cs.attach('%connection.from%' => '%connection.to%') {
+    %connection.coupling:tie()%}
+
+>>
+
+tie(coupling) ::= <<
+tie('%coupling.from.port.id%', '%coupling.to.port.id%')
+
+>>
+
+kernel(kernel) ::= <<
+cxa.add_kernel('%kernel.id%')
+
+>>
+
+param(params) ::= <<
+cxa.env['%params.instid%:%params.param.id%']=%if(!params.param.numeric)%"%endif%%params.param.value%%if(!params.param.numeric)%"%endif%
+
+>>

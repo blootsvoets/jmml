@@ -8,6 +8,7 @@ import javax.xml.bind.JAXBException;
 
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
+import eu.mapperproject.jmml.io.MUSCLEExporter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
@@ -136,6 +137,10 @@ public class JMML {
 				if (opt.ssm != null) {
 					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
 					exp.export(opt.ssm);
+				}
+				if (opt.cxa != null) {
+					MUSCLEExporter exp = new MUSCLEExporter(doc.topology);
+					exp.export(opt.cxa);
 				}
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file.", e);

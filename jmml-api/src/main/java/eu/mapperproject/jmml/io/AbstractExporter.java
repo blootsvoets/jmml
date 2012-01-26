@@ -41,6 +41,7 @@ public abstract class AbstractExporter {
 		}
 	}
 
+	/** Print the object to the associated outputstream */
 	protected abstract void convert() throws IOException;
 	
 	protected void print(StringBuilder sb) throws IOException {
