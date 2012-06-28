@@ -1,10 +1,5 @@
 package eu.mapperproject.jmml.util;
 
-/*
- * 
- */
-
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -23,17 +18,25 @@ public class ArraySet<V> implements Set<V> {
 		this(5);
 	}
 	
-	public ArraySet(Set<? extends V> col) {
+	public ArraySet(Collection<? extends V> col) {
 		this(col.size());
+		for (V v : col) {
+			this.add(v);
+		}
+	}
+	
+	public ArraySet(Set<? extends V> col) {
 		if (col instanceof ArraySet) {
 			values = Arrays.copyOf(((ArraySet<? extends V>)col).values, col.size());
 		}
 		else {
+			values = (V[]) new Object[col.size()];
 			Iterator<? extends V> iter = col.iterator();
 			for (int i = 0; i < col.size(); i++) {
 				values[i] = iter.next();
 			}
 		}
+		this.size = col.size();
 	}
 	
 	@SuppressWarnings({"unchecked"})
@@ -180,6 +183,19 @@ public class ArraySet<V> implements Set<V> {
 			int newCapacity = Math.max(newSize, values.length*2 + 1);
 			values = Arrays.copyOf(values, newCapacity);
 		}
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder(size*50);
+		sb.append('{');
+		for (int i = 0; i < size-1; i++) {
+			sb.append(values[i]).append(',');
+		}
+		if (size != 0) {
+			sb.append(values[size-1]);
+		}
+		sb.append('}');
+		return sb.toString();
 	}
 	
 	private class SetIterator implements Iterator<V> {

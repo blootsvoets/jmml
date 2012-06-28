@@ -1,10 +1,5 @@
 package eu.mapperproject.jmml.util;
 
-/*
- * 
- */
-
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,7 +10,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- *
+ * A full Map implementation meant for small maps. It stores its values in two arrays, making storage
+ * requirements low, and gives lookup a low overhead but an asymptotic time of O(n). Instead of calling equals
+ * for each comparison, hashCode is called and if the hashCode matches then equals is called. This means
+ * hashCode and equals should both be implemented.
  * @author Joris Borgdorff
  */
 public class ArrayMap<K,V> implements Map<K, V>, Serializable {
@@ -141,9 +139,10 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 	V remove(int index) {
 		V tmp = values[index];
-		System.arraycopy(hashes, index + 1, hashes, index, size - index - 1);
-		System.arraycopy(keys, index + 1, keys, index, size - index - 1);
-		System.arraycopy(values, index + 1, values, index, size - index - 1);
+		int start = index + 1, end = size - index - 1;
+		System.arraycopy(hashes, start, hashes, index, end);
+		System.arraycopy(keys, start, keys, index, end);
+		System.arraycopy(values, start, values, index, end);
 		size--;
 		return tmp;
 	}
@@ -194,6 +193,19 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 			keys = Arrays.copyOf(keys, newCapacity);
 			values = Arrays.copyOf(values, newCapacity);
 		}
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder(size*100);
+		sb.append('{');
+		for (int i = 0; i < size - 1; i++) {
+			sb.append(keys[i]).append(" => ").append(values[i]).append(',');
+		}
+		if (size > 0) {
+			sb.append(keys[size-1]).append(" => ").append(values[size-1]);
+		}
+		sb.append('}');
+		return sb.toString();
 	}
 	
 	private class KeySet implements Set<K> {
@@ -516,7 +528,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 		@Override
 		public boolean addAll(Collection<? extends V> clctn) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			throw new UnsupportedOperationException("Not supported.");
 		}
 
 		@Override
@@ -549,7 +561,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 
 		@Override
 		public boolean add(V e) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			throw new UnsupportedOperationException("Not supported.");
 		}
 	}
 }

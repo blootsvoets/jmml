@@ -3,7 +3,8 @@ package eu.mapperproject.jmml.util;
 import java.util.*;
 
 /**
- *
+ * A fast implementation of a List. It does no runtime checking to keep access times as fast as possible. 
+ * Direct manipulation is preferred over the helper class java.util.Arrays.
  * @author Joris Borgdorff
  */
 public class FastArrayList<T> implements List<T> {
@@ -17,8 +18,14 @@ public class FastArrayList<T> implements List<T> {
 	
 	@SuppressWarnings("unchecked")
 	public FastArrayList(int initialCapacity) {
-		this.elems = (T[])new Object[initialCapacity];
+		this((T[])new Object[initialCapacity]);
+		this.size = 0;
+	}
+	
+	public FastArrayList(T[] initialArray) {
+		this.elems = initialArray;
 		this.iter = new FastIterator();
+		this.size = initialArray.length;
 	}
 
 	@Override
@@ -44,18 +51,20 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public Object[] toArray() {
-		return Arrays.copyOf(elems, size);
+		Object[] ret = new Object[size];
+		System.arraycopy(elems, 0, ret, 0, size);
+		return ret;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <U> U[] toArray(U[] ts) {
+	public <T> T[] toArray(T[] ts) {
 		if (ts.length >= size) {
 			System.arraycopy(elems, 0, ts, 0, size);
 			return ts;
 		}
 		else {
-			return (U[])Arrays.copyOf(elems, size, ts.getClass());
+			return (T[])this.toArray();
 		}
 	}
 
@@ -77,6 +86,7 @@ public class FastArrayList<T> implements List<T> {
 		return false;
 	}
 
+	/** Not implemented */
 	@Override
 	public boolean containsAll(Collection<?> clctn) {
 		throw new UnsupportedOperationException("Not supported yet.");
@@ -84,19 +94,36 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public boolean addAll(Collection<? extends T> clctn) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		int newSize = size + clctn.size();
+		ensureCapacity(newSize);
+		if (clctn instanceof List) {
+			List<? extends T> list = (List<? extends T>) clctn;
+			for (int i = size; i < newSize; i++) {
+				elems[i] = list.get(i - size);
+			}
+		} else {
+			Iterator<? extends T> addIter = clctn.iterator();
+			for (int i = size; i < newSize; i++) {
+				elems[i] = addIter.next();
+			}
+		}
+		size = newSize;
+		return true;
 	}
 
+	/** Not implemented */
 	@Override
 	public boolean addAll(int i, Collection<? extends T> clctn) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	/** Not implemented */
 	@Override
 	public boolean removeAll(Collection<?> clctn) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	/** Not implemented */
 	@Override
 	public boolean retainAll(Collection<?> clctn) {
 		throw new UnsupportedOperationException("Not supported yet.");
@@ -104,6 +131,9 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public void clear() {
+		for (int i = 0; i < size; i++) {
+			this.elems[i] = null;
+		}
 		size = 0;
 	}
 
@@ -114,8 +144,6 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public T set(int i, T e) {
-		if (i >= size)
-			throw new IndexOutOfBoundsException("Can not set element at index " + i + " with size " + size + ".");
 		T tmp = elems[i];
 		elems[i] = e;
 		return tmp;
@@ -126,22 +154,26 @@ public class FastArrayList<T> implements List<T> {
 		if (i == size) {
 			this.add(e);
 		}
-		ensureCapacity(size + 1);
-		System.arraycopy(elems, i, elems, i + 1, size - i);
-		elems[i] = e;
+		else {
+			ensureCapacity(size + 1);
+			System.arraycopy(elems, i, elems, i + 1, size - i);
+			elems[i] = e;
+		}
 	}
 
 	@Override
 	public T remove(int i) {
 		size--;
+		T tmp = elems[i];
 		if (i == size) {
 			return elems[i];
-		}
-		else {
-			T tmp = elems[i];
+		} else {
 			System.arraycopy(elems, i + 1, elems, i, size - i);
-			return tmp;
 		}
+		// Free space
+		elems[size] = null;
+		
+		return tmp;
 	}
 
 	@Override
@@ -195,11 +227,48 @@ public class FastArrayList<T> implements List<T> {
 		return elems;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(50*size);
+		sb.append('[');
+		for (int i = 0; i < size - 1; i++) {
+			sb.append(elems[i]).append(", ");
+		}
+		if (size > 0) {
+			sb.append(elems[size-1]);
+		}
+		sb.append(']');
+		return sb.toString();
+	}
+	
 	private void ensureCapacity(int capacity) {
 		if (elems.length <= capacity) {
 			int newLen = Math.max(elems.length * 2 + 1, capacity);
-			elems = Arrays.copyOf(elems, newLen);
+			@SuppressWarnings("unchecked")
+			T[] tmp = (T[]) new Object[newLen];
+			System.arraycopy(elems, 0, tmp, 0, size);
+			elems = tmp;
 		}
+	}
+	
+	public boolean equals(Object o) {
+		if (o == null || !o.getClass().equals(this.getClass())) return false;
+		FastArrayList other = (FastArrayList)o;
+		if (size != other.size) return false;
+		for (int i = 0; i < size; i++) {
+			if (elems[i] == null ? other.elems[i] != null : !elems[i].equals(other.elems[i])) return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + this.size;
+		for (int i = 0; i < size; i++) {
+			hash = 31 * hash + (elems[i] == null ? 0 : elems[i].hashCode());
+		}
+		return hash;
 	}
 	
 	private final class FastIterator implements ListIterator<T> {
@@ -228,6 +297,7 @@ public class FastArrayList<T> implements List<T> {
 		@Override
 		public void remove() {
 			FastArrayList.this.remove(i);
+			i--;
 		}
 		
 		void reset() {
