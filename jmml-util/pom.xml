@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>eu.mapperproject.jmml</groupId>
 		<artifactId>jmml</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.1</version>
 	</parent>
 	
 	<groupId>eu.mapperproject.jmml</groupId>
 	<artifactId>jmml-util</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<packaging>jar</packaging>
 	<name>jmml-util</name>
 	<url>http://maven.apache.org</url>
@@ -33,22 +33,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>colt</groupId>
-			<artifactId>colt</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-api</artifactId>
-			<version>2.0.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-graph-impl</artifactId>
-			<version>2.0.1</version>
-			<type>jar</type>
 		</dependency>
 	</dependencies>
 	<properties>

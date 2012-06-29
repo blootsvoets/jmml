@@ -1,4 +1,4 @@
-package eu.mapperproject.jmml.specification.util;
+package eu.mapperproject.jmml.util;
 
 import eu.mapperproject.jmml.util.numerical.InterpretedVersion;
 import static org.junit.Assert.*;

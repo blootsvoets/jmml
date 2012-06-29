@@ -1,25 +1,20 @@
 package eu.mapperproject.jmml.io;
 
-import eu.mapperproject.jmml.util.FastArrayList;
-import java.io.File;
-import java.io.IOException;
-
-import eu.mapperproject.jmml.util.Indent;
-import eu.mapperproject.jmml.util.graph.Category;
+import eu.mapperproject.jmml.util.graph.Tree;
 import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.util.graph.Edge;
-import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.PTGraph;
+import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.StyledEdge;
 import eu.mapperproject.jmml.util.graph.StyledNode;
-import eu.mapperproject.jmml.util.graph.Tree;
+import eu.mapperproject.jmml.util.graph.Category;
+import eu.mapperproject.jmml.util.graph.Edge;
+import eu.mapperproject.jmml.util.FastArrayList;
+import eu.mapperproject.jmml.util.Indent;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

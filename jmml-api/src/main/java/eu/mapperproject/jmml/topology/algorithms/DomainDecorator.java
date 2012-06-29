@@ -1,13 +1,13 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.util.graph.Category;
-import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.util.graph.Edge;
-import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.SimpleNode;
+import eu.mapperproject.jmml.util.graph.Cluster;
 import eu.mapperproject.jmml.util.graph.SimpleStyledEdge;
-import eu.mapperproject.jmml.util.graph.StyledEdge;
+import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.StyledNode;
+import eu.mapperproject.jmml.util.graph.StyledEdge;
+import eu.mapperproject.jmml.util.graph.Category;
+import eu.mapperproject.jmml.util.graph.Edge;
 
 /**
  * Adds decoration to a show a coupling topology using graphviz

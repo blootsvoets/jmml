@@ -1,4 +1,4 @@
-package eu.mapperproject.jmml.specification.numerical;
+package eu.mapperproject.jmml.util.numerical;
 
 import eu.mapperproject.jmml.util.numerical.InterpretedFormula;
 import static org.junit.Assert.*;

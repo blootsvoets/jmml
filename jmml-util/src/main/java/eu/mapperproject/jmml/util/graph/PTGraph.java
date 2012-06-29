@@ -3,11 +3,6 @@ package eu.mapperproject.jmml.util.graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import java.util.TreeMap;
 
 /**
@@ -30,15 +25,6 @@ public class PTGraph<T, E extends Edge<T>> {
 		this.directed = directed;
 		this.nodes = new ArrayList<T>(nodes);
 		this.edges = new ArrayList<E>(edges);
-	}
-
-	/**
-	 * Create a PTGraph as a copy of given JUNG Graph.
-	 * If any of the edges have null as from or to node, it will be replaced
-	 * with given source or sink nodes respectively.
-	 */
-	public PTGraph(Graph<T, E> graph, T source, T sink) {
-		this(graph instanceof DirectedGraph, graph.getVertices(), graph.getEdges());
 	}
 
 	/**
@@ -109,31 +95,6 @@ public class PTGraph<T, E extends Edge<T>> {
 
 	public boolean containsEdge(E e) {
 		return this.edges.contains(e);
-	}
-
-	/**
-	 * Create a JUNG graph out of the current PTGraph.
-	 * Any edges with a from or to node being null, will have those nodes
-	 * replaced by given source and sink nodes respectively.
-	 */
-	public Graph<T,Edge<T>> getJungGraph(T source, T sink) {
-		Graph<T, Edge<T>> graph;
-		if (this.directed) {
-			graph = new DirectedSparseGraph<T,Edge<T>>();
-		}
-		else {
-			graph = new UndirectedSparseGraph<T,Edge<T>>();
-		}
-		
-		for (T n : this.getNodes()) {
-			graph.addVertex(n);
-		}
-		
-		for (Edge<T> e : this.edges) {
-			graph.addEdge(e, e.getFrom(), e.getTo());
-		}
-		
-		return graph;
 	}
 
 	/**

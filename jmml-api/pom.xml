@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>eu.mapperproject.jmml</groupId>
 		<artifactId>jmml</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.1</version>
 	</parent>
   
 	<groupId>eu.mapperproject.jmml</groupId>
 	<artifactId>jmml-api</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<packaging>jar</packaging>
 
 	<name>jmml-api</name>
@@ -52,18 +52,6 @@
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-api</artifactId>
-			<version>2.0.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-graph-impl</artifactId>
-			<version>2.0.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
 			<version>1.17</version>
@@ -72,12 +60,12 @@
 		<dependency>
 			<groupId>eu.mapperproject.jmml</groupId>
 			<artifactId>jmml-specification</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.mapperproject.jmml</groupId>
 			<artifactId>jmml-util</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.1</version>
 		</dependency>
 	</dependencies>
 </project>

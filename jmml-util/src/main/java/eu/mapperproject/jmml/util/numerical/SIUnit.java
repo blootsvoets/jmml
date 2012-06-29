@@ -1,9 +1,8 @@
 package eu.mapperproject.jmml.util.numerical;
 
+import eu.mapperproject.jmml.util.numerical.ScaleFactor.Dimension;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
 
 /**
  * Represents a number with a unit
@@ -12,19 +11,19 @@ import eu.mapperproject.jmml.util.numerical.ScaleModifier.Dimension;
  */
 public class SIUnit implements Comparable<SIUnit> {	
 	private final double value;
-	private final ScaleModifier scale;
+	private final ScaleFactor scale;
 	private final static Pattern siPattern = Pattern.compile("(-?[0-9.]+)([eE](-?[0-9]+))?\\s*(\\w*\\s*\\w*)");
 	
 	public static SIUnit valueOf(String siunit) {
 		Matcher m = siPattern.matcher(siunit);
 		if (m.find()) {
 			double value = Double.parseDouble(m.group(1));
-			ScaleModifier scale = ScaleModifier.parseScale(m.group(m.groupCount()));
+			ScaleFactor scale = ScaleFactor.parseScale(m.group(m.groupCount()));
 
 			// Parse exponent inherent to scientific notation
 			String expStr = m.group(3);
 			if (expStr != null) {
-				ScaleModifier exp = new ScaleModifier(Integer.parseInt(expStr));
+				ScaleFactor exp = new ScaleFactor(Integer.parseInt(expStr));
 				scale = scale.add(exp);
 			}
 			
@@ -35,12 +34,12 @@ public class SIUnit implements Comparable<SIUnit> {
 		}
 	}
 	
-	public SIUnit(double value, ScaleModifier scale) {
+	public SIUnit(double value, ScaleFactor scale) {
 		this.value = value;
 		this.scale = scale;
 	}
 	
-	public SIUnit(double value, ScaleModifier scale, Dimension dim) {
+	public SIUnit(double value, ScaleFactor scale, Dimension dim) {
 		this.value = value;
 		this.scale = scale.changeDimension(dim);
 	}
@@ -74,6 +73,11 @@ public class SIUnit implements Comparable<SIUnit> {
 	/** Get the double value of the current scale. If this unit falls out of the range of a double, +-infinity is returned. */ 
 	public double doubleValue() {
 		return this.scale.apply(this.value);
+	}
+
+	/** Get the double value at another scale. If this unit falls out of the range of a double, +-infinity is returned. */ 
+	public double doubleValue(ScaleFactor scaleMod) {
+		return scaleMod.convert(this.scale).apply(this.value);
 	}
 
 	/** Get the log10 of the current SIUnit */

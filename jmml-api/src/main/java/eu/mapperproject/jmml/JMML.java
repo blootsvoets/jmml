@@ -1,11 +1,7 @@
 package eu.mapperproject.jmml;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-
-import javax.xml.bind.JAXBException;
-
+import eu.mapperproject.jmml.util.graph.Cluster;
+import eu.mapperproject.jmml.util.graph.PTGraph;
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
 import eu.mapperproject.jmml.io.MUSCLEExporter;
@@ -13,20 +9,16 @@ import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
-import eu.mapperproject.jmml.topology.algorithms.CouplingInstance;
-import eu.mapperproject.jmml.topology.algorithms.CouplingTopologyDecorator;
-import eu.mapperproject.jmml.topology.algorithms.DomainDecorator;
-import eu.mapperproject.jmml.topology.algorithms.ProcessIteration;
-import eu.mapperproject.jmml.topology.algorithms.TaskGraph;
-import eu.mapperproject.jmml.topology.algorithms.TaskGraphDecorator;
-import eu.mapperproject.jmml.util.graph.Cluster;
+import eu.mapperproject.jmml.topology.algorithms.*;
 import eu.mapperproject.jmml.util.graph.Edge;
-import eu.mapperproject.jmml.util.graph.PTGraph;
-
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.xml.bind.JAXBException;
 
 /**
  * An MML document.

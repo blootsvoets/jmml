@@ -1,5 +1,5 @@
 */target/
-nbactions-Canal.xml
+nbactions-*
 !.gitignore
 /target/
 /jmml-api/~/

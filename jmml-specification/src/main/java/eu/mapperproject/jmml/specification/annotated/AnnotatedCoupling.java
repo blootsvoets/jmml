@@ -1,10 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import eu.mapperproject.jmml.specification.Apply;
-import eu.mapperproject.jmml.specification.Coupling;
-import eu.mapperproject.jmml.specification.Datatype;
-import eu.mapperproject.jmml.specification.InstancePort;
-import eu.mapperproject.jmml.specification.SEL;
+import eu.mapperproject.jmml.specification.*;
 import eu.mapperproject.jmml.util.graph.Edge;
 import java.util.logging.Level;
 import java.util.logging.Logger;

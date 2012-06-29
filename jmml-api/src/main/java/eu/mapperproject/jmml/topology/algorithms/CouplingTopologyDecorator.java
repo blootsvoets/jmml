@@ -1,25 +1,15 @@
 package eu.mapperproject.jmml.topology.algorithms;
 
-import eu.mapperproject.jmml.specification.Coupling;
-import eu.mapperproject.jmml.specification.Instance;
-import eu.mapperproject.jmml.specification.Mapper;
-import eu.mapperproject.jmml.specification.Port;
-import eu.mapperproject.jmml.specification.SEL;
-import eu.mapperproject.jmml.specification.Submodel;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedDomain;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedPort;
-import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
-import eu.mapperproject.jmml.util.graph.AnnotatedStyledEdge;
-import eu.mapperproject.jmml.util.graph.Category;
-import eu.mapperproject.jmml.util.graph.GraphDecorator;
-import eu.mapperproject.jmml.util.graph.PTGraph;
 import eu.mapperproject.jmml.util.graph.SimpleNode;
 import eu.mapperproject.jmml.util.graph.SimpleStyledEdge;
-import eu.mapperproject.jmml.util.graph.StyledEdge;
+import eu.mapperproject.jmml.util.graph.PTGraph;
+import eu.mapperproject.jmml.util.graph.GraphDecorator;
 import eu.mapperproject.jmml.util.graph.StyledNode;
+import eu.mapperproject.jmml.util.graph.StyledEdge;
+import eu.mapperproject.jmml.util.graph.Category;
+import eu.mapperproject.jmml.util.graph.AnnotatedStyledEdge;
+import eu.mapperproject.jmml.specification.*;
+import eu.mapperproject.jmml.specification.annotated.*;
 import java.util.ArrayList;
 import javax.xml.bind.JAXBElement;
 
