@@ -1,6 +1,7 @@
 package eu.mapperproject.jmml.util.numerical;
 
 import eu.mapperproject.jmml.util.numerical.ScaleFactor.Dimension;
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,16 +10,16 @@ import java.util.regex.Pattern;
  * @author Joris Borgdorff
  *
  */
-public class SIUnit implements Comparable<SIUnit> {	
-	private final double value;
-	private final ScaleFactor scale;
+public class SIUnit implements Comparable<SIUnit>, Serializable {	
+	protected final double value;
+	protected final ScaleFactor scale;
 	private final static Pattern siPattern = Pattern.compile("(-?[0-9.]+)([eE](-?[0-9]+))?\\s*(\\w*\\s*\\w*)");
 	
 	public static SIUnit valueOf(String siunit) {
 		Matcher m = siPattern.matcher(siunit);
 		if (m.find()) {
 			double value = Double.parseDouble(m.group(1));
-			ScaleFactor scale = ScaleFactor.parseScale(m.group(m.groupCount()));
+			ScaleFactor scale = ScaleFactor.valueOf(m.group(m.groupCount()));
 
 			// Parse exponent inherent to scientific notation
 			String expStr = m.group(3);
@@ -39,15 +40,33 @@ public class SIUnit implements Comparable<SIUnit> {
 		this.scale = scale;
 	}
 	
-	public SIUnit(double value, ScaleFactor scale, Dimension dim) {
-		this.value = value;
-		this.scale = scale.changeDimension(dim);
+	protected SIUnit(SIUnit other) {
+		this.value = other.value;
+		this.scale = other.scale;
 	}
 	
 	/** Add the given SIUnit to the current */
 	public SIUnit add(SIUnit other) {
 		double oval = getSuitableValue(other);
 		return new SIUnit(oval + this.value, this.scale);
+	}
+
+	/** Multiply the given SIUnit with the current */
+	public SIUnit mult(SIUnit other) {
+		double oval = getSuitableValue(other);
+		return new SIUnit(this.value * oval, this.scale);
+	}
+	
+	/** Multiply this unit by a long */
+	public SIUnit mult(long other) {
+		return new SIUnit(this.value, this.scale.mult(other));
+	}
+
+	
+	/** Add the given SIUnit to the current */
+	public SIUnit sub(SIUnit other) {
+		double oval = getSuitableValue(other);
+		return new SIUnit(this.value - oval, this.scale);
 	}
 
 	/** Divide this unit by a long */

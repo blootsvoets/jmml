@@ -1,10 +1,8 @@
 package eu.mapperproject.jmml.util.numerical;
 
-import eu.mapperproject.jmml.util.numerical.SIUnit;
-import eu.mapperproject.jmml.util.numerical.ScaleFactor;
 import eu.mapperproject.jmml.util.numerical.ScaleFactor.Dimension;
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,7 +12,7 @@ public class SIUnitTest {
 	
 	@Before
 	public void setUp() { 
-		o1s = new SIUnit(1, ScaleFactor.SI, Dimension.TIME);
+		o1s = new SIUnit(1, ScaleFactor.SECOND);
 		o1min = new SIUnit(1, ScaleFactor.MINUTE);
 	}
 	

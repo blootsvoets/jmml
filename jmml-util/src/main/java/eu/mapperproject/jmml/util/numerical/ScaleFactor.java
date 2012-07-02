@@ -2,9 +2,10 @@ package eu.mapperproject.jmml.util.numerical;
 
 import eu.mapperproject.jmml.util.parser.MultiStringParseToken;
 import eu.mapperproject.jmml.util.parser.ParseToken;
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class ScaleFactor implements Comparable<ScaleFactor>{
+public class ScaleFactor implements Comparable<ScaleFactor>, Serializable {
 	public enum Dimension {
 		DATA, TIME, SPACE, OTHER;
 	}
@@ -12,10 +13,16 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	private final BigInteger mult;
 	private final BigInteger div;
 	private final Dimension dim;
+	private final String dimName;
 
 	/** Create a ScaleModifier with a power of ten size and a dimension. */
 	public ScaleFactor(int exp, Dimension dim) {
+		this(exp, dim, dim == null ? null : dim.toString().toLowerCase());
+	}
+
+	public ScaleFactor(int exp, Dimension dim, String dimName) {
 		this.dim = dim;
+		this.dimName = dimName;
 		if (exp >= 0) {
 			mult = BigInteger.TEN.pow(exp);
 			div = BigInteger.ONE;
@@ -28,22 +35,33 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 
 	/** Create a ScaleModifier with a power of ten size. */
 	public ScaleFactor(int exp) {
-		this(exp, null);
+		this(exp, null, null);
 	}
 
 	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
 	public ScaleFactor(long m, long div, Dimension dim) {
-		this(BigInteger.valueOf(m), BigInteger.valueOf(div), dim);
+		this(BigInteger.valueOf(m), BigInteger.valueOf(div), dim, dim == null ? null : dim.toString().toLowerCase());
+	}
+
+	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
+	public ScaleFactor(long m, long div, Dimension dim, String dimName) {
+		this(BigInteger.valueOf(m), BigInteger.valueOf(div), dim, dimName);
 	}
 
 	/** Create a ScaleModifier with a dividend m and a divisor div */
 	public ScaleFactor(long m, long div) {
-		this(m, div, null);
+		this(m, div, null, null);
 	}
 
 	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
 	public ScaleFactor(BigInteger m, BigInteger div, Dimension dim) {
+		this(m, div, dim, dim == null ? null : dim.toString().toLowerCase());
+	}
+	
+	/** Create a ScaleModifier with a dividend m and a divisor div and a dimension */
+	public ScaleFactor(BigInteger m, BigInteger div, Dimension dim, String dimName) {
 		this.dim = dim;
+		this.dimName = dimName;
 		BigInteger gcd = m.gcd(div);
 		this.mult = m.divide(gcd);
 		this.div = div.divide(gcd);
@@ -51,13 +69,14 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 
 	/** Create a ScaleModifier with a dividend m and a divisor div */
 	public ScaleFactor(BigInteger m, BigInteger div) {
-		this(m, div, null);
+		this(m, div, null, null);
 	}
 	
 	/** Add a scale to another */
 	public ScaleFactor add(ScaleFactor other) {
 		Dimension d = other.dim == null ? this.dim : other.dim;
-		return new ScaleFactor(mult.multiply(other.mult), div.multiply(other.div), d);
+		String dN = other.dimName == null ? this.dimName : other.dimName;
+		return new ScaleFactor(mult.multiply(other.mult), div.multiply(other.div), d, dN);
 	}
 
 	/**
@@ -65,7 +84,8 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	 */
 	public ScaleFactor div(ScaleFactor other) {
 		Dimension d = other.dim == null ? this.dim : other.dim;
-		return new ScaleFactor(mult.multiply(other.div), div.multiply(other.mult), d);
+		String dN = other.dimName == null ? this.dimName : other.dimName;
+		return new ScaleFactor(mult.multiply(other.div), div.multiply(other.mult), d, dN);
 	}
 	
 	/**
@@ -86,9 +106,14 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	
 	/** Divide the scale by a value */
 	public ScaleFactor div(long d) {
-		return new ScaleFactor(this.mult, this.div.multiply(BigInteger.valueOf(d)), this.dim);
+		return new ScaleFactor(this.mult, this.div.multiply(BigInteger.valueOf(d)), this.dim, this.dimName);
 	}
 
+	/** Multiply the scale by a value */
+	public ScaleFactor mult(long d) {
+		return new ScaleFactor(this.mult.multiply(BigInteger.valueOf(d)), this.div, this.dim, this.dimName);
+	}
+	
 	/**
 	 * Apply the log10 to the modifier and return the result as a double
 	 */
@@ -116,7 +141,7 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 		double m = this.mult.doubleValue();
 		double d = this.div.doubleValue();
 		if (m == Double.POSITIVE_INFINITY || d == Double.POSITIVE_INFINITY) {
-			throw new IllegalStateException("Can not apply numbers larger than longs");
+			throw new IllegalStateException("Can not apply numbers larger than doubles");
 		}
 		
 		return (orig*m)/d;
@@ -140,8 +165,12 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	 * Set the dimensional axis of this scale modifier
 	 * @param dim Dimension to be set
 	 */
-	ScaleFactor changeDimension(Dimension dim) {
+	public ScaleFactor withDimension(Dimension dim) {
 		return new ScaleFactor(this.mult, this.div, dim);
+	}
+	
+	public ScaleFactor withDimension(Dimension dim, String dimName) {
+		return new ScaleFactor(this.mult, this.div, dim, dimName);
 	}
 	
 	@Override
@@ -166,7 +195,8 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	public boolean equals(Object other) {
 		if (!other.getClass().equals(this.getClass())) return false;
 		ScaleFactor sm = (ScaleFactor)other;
-		return this.div.equals(sm.div) && this.mult.equals(sm.mult) && this.dim == sm.dim;
+		return this.div.equals(sm.div) && this.mult.equals(sm.mult) && this.dim == sm.dim &&
+				(this.dimName == null ? sm.dimName == null : dimName.equals(sm.dimName));
 	}
 	
 	@Override
@@ -174,12 +204,13 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 		int hashCode = this.mult.hashCode();
 		hashCode = 31*hashCode + this.div.hashCode();
 		hashCode = 31*hashCode + this.dim.hashCode();
+		hashCode = 31*hashCode + (this.dimName == null ? 0 : this.dimName.hashCode());
 		return hashCode;
 	}
 	
 	@Override
 	public String toString() {
-		String dimStr = this.dim == null ? "" : "[" + this.dim + "]";
+		String dimStr = this.dimName == null ? "" : "[" + this.dimName + "]";
 		if (this.mult.equals(BigInteger.ONE) && !this.div.equals(BigInteger.ONE)) {
 			return this.div + "^-1" + dimStr;
 		}
@@ -196,6 +227,9 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 
 	public final static ScaleFactor SI = new ScaleFactor(0);
 
+	public final static ScaleFactor METER = new ScaleFactor(0, Dimension.SPACE);
+	
+	public final static ScaleFactor SECOND = new ScaleFactor(0, Dimension.TIME);
 	public final static ScaleFactor MINUTE = new ScaleFactor(60, 1, Dimension.TIME);
 	public final static ScaleFactor HOUR = new ScaleFactor(60*60, 1, Dimension.TIME);
 	public final static ScaleFactor DAY = new ScaleFactor(60*60*24, 1, Dimension.TIME);
@@ -204,6 +238,7 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	public final static ScaleFactor YEAR = new ScaleFactor(60*60*24*365, 1, Dimension.TIME);
 
 	public final static ScaleFactor BIT = new ScaleFactor(1, 8, Dimension.DATA);
+	public final static ScaleFactor BYTE = new ScaleFactor(0, Dimension.DATA);
 
 	public final static ScaleFactor DECI = new ScaleFactor(-1);
 	public final static ScaleFactor CENTI = new ScaleFactor(-2);
@@ -255,7 +290,7 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 	}
 
 	/** Parse a string and convert it to a ScaleModifier */
-	public static ScaleFactor parseScale(String s) {
+	public static ScaleFactor valueOf(String s) {
 		ScaleFactor scale = null;
 		Dimension dim = null;
 		if (s.length() == 0) s = null;
@@ -308,7 +343,7 @@ public class ScaleFactor implements Comparable<ScaleFactor>{
 				scale = SI;
 			}
 			if (scale.isDimensionless() && dim != null) {
-				scale = scale.changeDimension(dim);
+				scale = scale.withDimension(dim);
 			}
 
 			return scale;
