@@ -1,13 +1,8 @@
 package eu.mapperproject.jmml.util;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A full Map implementation meant for small maps. It stores its values in two arrays, making storage
@@ -199,13 +194,48 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		StringBuilder sb = new StringBuilder(size*100);
 		sb.append('{');
 		for (int i = 0; i < size - 1; i++) {
-			sb.append(keys[i]).append(" => ").append(values[i]).append(',');
+			sb.append(keys[i]).append(" => ").append(values[i]).append(", ");
 		}
 		if (size > 0) {
 			sb.append(keys[size-1]).append(" => ").append(values[size-1]);
 		}
 		sb.append('}');
 		return sb.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 83 * hash + this.size;
+		int keyHash = 0;
+		int valueHash = 0;
+		for (int i = 0; i < size; i++) {
+			keyHash += this.hashes[i];
+			valueHash += this.values[i] == null ? 0 : this.values[i].hashCode();
+		}
+		hash = 83 * hash + keyHash;
+		hash = 83 * hash + valueHash;
+		return hash;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || !o.getClass().equals(getClass())) return false;
+		
+		ArrayMap other = (ArrayMap)o;
+		if (size != other.size) return false;
+		
+		for (int i = 0; i < size; i++) {
+			int index = indexOfKey(other.keys[i]);
+			
+			if (index == -1) return false;
+			if (other.values[i] == null) {
+				if (values[index] != null) return false;
+			}
+			else if (!other.values[i].equals(values[index]))
+				return false;
+		}
+		return true;
 	}
 	
 	private class KeySet implements Set<K> {
@@ -299,7 +329,44 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public void clear() {
 			ArrayMap.this.clear();
 		}
-	
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder(size*50);
+			sb.append('[');
+			for (int i = 0; i < size - 1; i++) {
+				sb.append(keys[i]).append(", ");
+			}
+			if (size > 0) {
+				sb.append(keys[size-1]);
+			}
+			sb.append(']');
+			return sb.toString();
+		}
+		
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 83 * hash + size;
+			int keyHash = 0;
+			for (int i = 0; i < size; i++) {
+				keyHash += hashes[i];
+			}
+			hash = 83 * hash + keyHash;
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || !o.getClass().equals(getClass())) return false;
+
+			KeySet other = (KeySet)o;
+			if (size != other.size()) return false;
+
+			for (Object key : other) {
+				if (indexOfKey(key) == -1) return false;
+			}
+			return true;
+		}
 	}
 
 	private class EntrySet implements Set<Entry<K,V>> {
@@ -401,6 +468,21 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public void clear() {
 			ArrayMap.this.clear();
 		}
+		
+		@Override
+		public String toString() {
+			return ArrayMap.this.toString();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			return ArrayMap.this.equals(other);
+		}
+		
+		@Override
+		public int hashCode() {
+			return ArrayMap.this.hashCode();
+		}
 	}
 	
 	private class MapIterator<T> implements Iterator<T> {
@@ -470,6 +552,28 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 			values[i] = v;
 			return tmp;
 		}
+		
+		@Override
+		public String toString() {
+			return keys[i] + " => " + values[i];
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || !o.getClass().equals(getClass())) return false;
+			MapEntry other = (MapEntry)o;
+			return (keys[i] == null ? other.getKey() == null : keys[i].equals(other.getKey()))
+					&& (values[i] == null ? other.getValue() == null : values[i].equals(other.getValue()));
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 3;
+			hash = 97 * hash + (keys[i] == null ? 0 : keys[i].hashCode());
+			hash = 97 * hash + (values[i] == null ? 0 : values[i].hashCode());
+			return hash;
+		}
+
 	}
 	
 	private class ValueCollection implements Collection<V> {
@@ -512,7 +616,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		
 		@Override
 		public boolean remove(Object o) {
-			int index = indexOfValue(o);
+			int index = ArrayMap.this.indexOfValue(o);
 			if (index == -1) return false;
 			ArrayMap.this.remove(index);
 			return true;
@@ -562,6 +666,69 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		@Override
 		public boolean add(V e) {
 			throw new UnsupportedOperationException("Not supported.");
+		}
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder(size*50);
+			sb.append('[');
+			for (int i = 0; i < size - 1; i++) {
+				sb.append(values[i]).append(" ");
+			}
+			if (size > 0) {
+				sb.append(values[size-1]);
+			}
+			sb.append(']');
+			return sb.toString();
+		}
+		
+			
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 83 * hash + size;
+			int valueHash = 0;
+			for (int i = 0; i < size; i++) {
+				valueHash += values[i] == null ? 0 : values[i].hashCode();
+			}
+			hash = 83 * hash + valueHash;
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || !o.getClass().equals(getClass())) return false;
+
+			ValueCollection other = (ValueCollection)o;
+			if (size != other.size()) return false;
+			boolean[] found = new boolean[size];
+
+			for (Object value : other) {
+				int index = 0;
+				while (true) {
+					index = indexOfValue(value, index);
+					if (index == -1) return false;
+					if (!found[index]) {
+						found[index] = true;
+						break;
+					}
+					index++;
+				}
+			}
+			return true;
+		}
+		
+		private int indexOfValue(Object o, int startAt) {
+			if (o == null) {
+				for (int i = startAt; i < size; i++) {
+					if (values[i] == null) return i;
+				}
+			}
+			else {
+				for (int i = startAt; i < size; i++) {
+					if (o.equals(values[i])) return i;
+				}
+			}
+			return -1;
 		}
 	}
 }
