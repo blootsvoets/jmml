@@ -4,7 +4,7 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 import java.util.logging.Logger;
 
 /**
- *
+ * Prefixes xMML with xmml and MAD with mad; warns for non-namespaces elements.
  * @author Joris Borgdorff
  */
 public class NamespacePrefixMapperImpl extends NamespacePrefixMapper {

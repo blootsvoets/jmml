@@ -2,13 +2,11 @@
  * 
  */
 package eu.mapperproject.jmml.specification;
-import static org.junit.Assert.assertSame;
 
-import org.junit.Test;
-
-import eu.mapperproject.jmml.specification.Unit;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedScale;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedUnit;
+import static org.junit.Assert.assertSame;
+import org.junit.Test;
 
 /**
  * @author Joris Borgdorff

@@ -8,7 +8,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
- *
+ * Creates a model with a specific objectfactory and namespacemapper.
  * @author Joris Borgdorff
  */
 public class AnnotatedModel extends Model {

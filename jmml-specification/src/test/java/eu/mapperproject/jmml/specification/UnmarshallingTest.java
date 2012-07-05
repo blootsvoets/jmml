@@ -5,13 +5,13 @@ import eu.mapperproject.jmml.specification.annotated.ObjectFactoryAnnotated;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBContext;
-import java.io.InputStream;
-import javax.xml.bind.JAXBException;
 import org.junit.Test;
 
 /**

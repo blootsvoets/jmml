@@ -1,8 +1,6 @@
 package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.*;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlRegistry;
 
 /**
@@ -14,40 +12,33 @@ public class ObjectFactoryAnnotated extends ObjectFactory {
 	private static AnnotatedModel m = null;
 	
 	@Override
-	public Model createModel() {
-		m = new AnnotatedModel();
-		return m;
-	}
-	
-	@Override
-	public Domain createDomain() {
-		return new AnnotatedDomain();
-	}
-	
-	@Override
-	public Unit createUnit() {
-		return new AnnotatedUnit();
+	public Apply createApply() {
+		return new AnnotatedApply();
 	}
 	
 	@Override
 	public Definition createDefinition() {
 		return new AnnotatedDefinition();
 	}
+	
 	@Override
 	public Definitions createDefinitions() {
 		return new AnnotatedDefinitions();
 	}
+	
+	@Override
+	public Domain createDomain() {
+		return new AnnotatedDomain();
+	}
+
+	@Override
+	public Filter createFilter() {
+		return new Filter();
+	}
+
 	@Override
 	public Formula createFormula() {
 		return new AnnotatedFormula();
-	}
-	@Override
-	public InstancePort createInstancePort() {
-		return new AnnotatedInstancePort();
-	}
-	@Override
-	public Topology createTopology() {
-		return new AnnotatedTopology();
 	}
 	
 	@Override
@@ -55,6 +46,17 @@ public class ObjectFactoryAnnotated extends ObjectFactory {
 		return new AnnotatedInstance();
 	}
 
+	@Override
+	public InstancePort createInstancePort() {
+		return new AnnotatedInstancePort();
+	}
+	
+	@Override
+	public Model createModel() {
+		m = new AnnotatedModel();
+		return m;
+	}
+	
 	@Override
 	public Submodel createSubmodel() {
 		return new Submodel();
@@ -66,20 +68,35 @@ public class ObjectFactoryAnnotated extends ObjectFactory {
 	}
 
 	@Override
-	public Filter createFilter() {
-		return new Filter();
+	public Param createParam() {
+		return new AnnotatedParam();
 	}
-
+	
 	@Override
 	public Ports createPorts() {
 		return new AnnotatedPorts();
 	}
 	
 	@Override
-	public Param createParam() {
-		return new AnnotatedParam();
+	public Range createRange() {
+		return new AnnotatedRange();
 	}
-	
+
+	@Override
+	public Scale createScale() {
+		return new AnnotatedScale();
+	}
+
+	@Override
+	public Topology createTopology() {
+		return new AnnotatedTopology();
+	}
+
+	@Override
+	public Unit createUnit() {
+		return new AnnotatedUnit();
+	}
+
 	public static AnnotatedModel getModel() {
 		return m;
 	}

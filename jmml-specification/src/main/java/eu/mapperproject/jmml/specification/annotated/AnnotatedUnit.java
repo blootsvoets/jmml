@@ -2,7 +2,6 @@ package eu.mapperproject.jmml.specification.annotated;
 
 import eu.mapperproject.jmml.specification.Unit;
 import eu.mapperproject.jmml.util.numerical.SIUnit;
-import java.text.ParseException;
 
 /**
  *

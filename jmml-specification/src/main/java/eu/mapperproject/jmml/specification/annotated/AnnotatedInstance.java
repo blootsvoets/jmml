@@ -1,17 +1,8 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import eu.mapperproject.jmml.specification.Port;
-import eu.mapperproject.jmml.util.Numbered;
-import eu.mapperproject.jmml.specification.Instance;
-import eu.mapperproject.jmml.specification.Mapper;
-import eu.mapperproject.jmml.specification.MultiDimensionalScale;
-import eu.mapperproject.jmml.specification.OptionalChoice;
-import eu.mapperproject.jmml.specification.Otherscale;
-import eu.mapperproject.jmml.specification.SEL;
-import eu.mapperproject.jmml.specification.Scale;
-import eu.mapperproject.jmml.specification.Submodel;
-import eu.mapperproject.jmml.specification.YesNoChoice;
+import eu.mapperproject.jmml.specification.*;
 import eu.mapperproject.jmml.util.ArrayMap;
+import eu.mapperproject.jmml.util.Numbered;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +12,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 
 /**
- *
+ * Adds scale names to scales, if they were unnamed, and adds timestep functionality.
  * @author Joris Borgdorff
  */
 public class AnnotatedInstance extends Instance implements Numbered {

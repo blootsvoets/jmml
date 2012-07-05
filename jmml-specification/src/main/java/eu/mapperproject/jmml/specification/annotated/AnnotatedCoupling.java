@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Validates the couplings on timescales and datatypes
  * @author Joris Borgdorff
  */
 public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstancePort> {

@@ -6,7 +6,7 @@ import eu.mapperproject.jmml.specification.Unit;
 import eu.mapperproject.jmml.util.numerical.SIUnit;
 
 /**
- *
+ * Adds functionality dealing with regular scales and number of steps.
  * @author Joris Borgdorff
  */
 public class AnnotatedScale extends Scale {

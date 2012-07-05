@@ -1,7 +1,5 @@
 package eu.mapperproject.jmml;
 
-import eu.mapperproject.jmml.util.graph.Cluster;
-import eu.mapperproject.jmml.util.graph.PTGraph;
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
 import eu.mapperproject.jmml.io.MUSCLEExporter;
@@ -10,7 +8,9 @@ import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.topology.algorithms.*;
+import eu.mapperproject.jmml.util.graph.Cluster;
 import eu.mapperproject.jmml.util.graph.Edge;
+import eu.mapperproject.jmml.util.graph.PTGraph;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
