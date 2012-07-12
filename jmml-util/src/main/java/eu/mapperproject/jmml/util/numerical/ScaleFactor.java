@@ -193,7 +193,7 @@ public class ScaleFactor implements Comparable<ScaleFactor>, Serializable {
 	// Object
 	@Override
 	public boolean equals(Object other) {
-		if (!other.getClass().equals(this.getClass())) return false;
+		if (other == null || !other.getClass().equals(this.getClass())) return false;
 		ScaleFactor sm = (ScaleFactor)other;
 		return this.div.equals(sm.div) && this.mult.equals(sm.mult) && this.dim == sm.dim &&
 				(this.dimName == null ? sm.dimName == null : dimName.equals(sm.dimName));

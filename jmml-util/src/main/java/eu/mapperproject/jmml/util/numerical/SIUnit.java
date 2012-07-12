@@ -86,7 +86,12 @@ public class SIUnit implements Comparable<SIUnit>, Serializable {
 	
 	/** Get the value of another SIUnit in the same scale as the current */
 	private double getSuitableValue(SIUnit other) {
-		return this.scale.convert(other.scale).apply(other.value);
+		// Frequently, the scales are the same.
+		if (this.scale.compareTo(other.scale) == 0) {
+			return other.value;
+		} else {
+			return this.scale.convert(other.scale).apply(other.value);
+		}
 	}
 	
 	/** Get the double value of the current scale. If this unit falls out of the range of a double, +-infinity is returned. */ 
@@ -127,6 +132,9 @@ public class SIUnit implements Comparable<SIUnit>, Serializable {
 	 */
 	@Override
 	public int compareTo(SIUnit o) {
-		return Double.valueOf(this.value).compareTo(this.getSuitableValue(o));
+		double other = this.getSuitableValue(o);
+		if (value == other) return 0;
+		else if (value < other) return -1;
+		else return 1;
 	}
 }
