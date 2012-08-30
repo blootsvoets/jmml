@@ -124,7 +124,17 @@ public class SIUnit implements Comparable<SIUnit>, Serializable {
 	
 	@Override
 	public String toString() {
-		return this.value + "*" + this.scale;
+		int e = (int)this.scale.log10();
+		String str = String.valueOf(doubleValue(new ScaleFactor(e)));
+		if (e != 1) {
+			str += "e" + e;
+		}
+		String unit = this.scale.getDimension().unit();
+		if (unit == null) {
+			return str;
+		} else {
+			return str + ' ' + unit;
+		}
 	}
 
 	/* (non-Javadoc)

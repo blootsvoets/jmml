@@ -7,7 +7,15 @@ import java.math.BigInteger;
 
 public class ScaleFactor implements Comparable<ScaleFactor>, Serializable {
 	public enum Dimension {
-		DATA, TIME, SPACE, OTHER;
+		DATA("b"), TIME("s"), SPACE("m"), OTHER(null);
+		private final String unit;
+		Dimension(String unit) {
+			this.unit = unit;
+		}
+		
+		public String unit() {
+			return unit;
+		}
 	}
 
 	private final BigInteger mult;
