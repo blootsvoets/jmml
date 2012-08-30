@@ -18,6 +18,7 @@ import javax.xml.bind.JAXBElement;
 public class AnnotatedInstance extends Instance implements Numbered {
 	private transient final static Logger logger = Logger.getLogger(AnnotatedInstance.class.getName());
 	private transient int number;
+	private transient Terminal terminalInst;
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
 	private transient final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
@@ -67,13 +68,32 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	public void setSubmodel(String sub) {
 		this.submodel = sub;
 		if (sub != null) {
-			if (this.mapper != null) {
-				throw new IllegalStateException("Cannot create an instance of both a submodel and a mapper.");
+			if (this.mapper != null || this.terminal != null) {
+				throw new IllegalStateException("Cannot create an instance of both a submodel and a mapper or a terminal.");
 			}
 			if (this.id == null) {
 				this.id = sub;
 			}
 			this.submodelInst = ObjectFactoryAnnotated.getModel().getDefinitions().getSubmodel(this.submodel);
+		}
+	}
+	
+	public Terminal getTerminalInstance() {
+		if (this.terminalInst == null) this.setTerminal(this.terminal);
+		return this.terminalInst;
+	}
+
+	@Override
+	public void setTerminal(String term) {
+		this.terminal = term;
+		if (term != null) {
+			if (this.submodel != null || this.mapper != null) {
+				throw new IllegalStateException("Cannot create an instance of both a terminal and a submodel or a mapper.");
+			}
+			if (this.id == null) {
+				this.id = term;
+			}
+			this.terminalInst = ObjectFactoryAnnotated.getModel().getDefinitions().getTerminal(this.terminal);
 		}
 	}
 
@@ -84,6 +104,12 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	public boolean ofSubmodel() {
 		return this.getSubmodelInstance() != null;
+	}
+	public boolean ofMapper() {
+		return this.getMapperInstance() != null;
+	}
+	public boolean ofTerminal() {
+		return this.getTerminalInstance() != null;
 	}
 	
 	public AnnotatedPorts getPorts() {
@@ -100,12 +126,18 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	
 	public AnnotatedScale getTimescaleInstance() {
 		if (this.ofSubmodel()) {
-			AnnotatedScale as;
-			if (this.timescale != null){
+			AnnotatedScale as = null;
+			AnnotatedScale instTimescale = (AnnotatedScale)this.getSubmodelInstance().getTimescale();
+			if (this.timescale == null){
+				as = instTimescale;
+			} else {
 				as = this.timescale;
-			}
-			else {
-				as = (AnnotatedScale)this.getSubmodelInstance().getTimescale();
+				if (as.getDelta() == null) {
+					as.setDelta(instTimescale.getDelta());
+				}
+				if (as.getTotal() == null) {
+					as.setTotal(instTimescale.getTotal());
+				}
 			}
 			if (as.getId() == null) {
 				as.setId("t");
@@ -122,7 +154,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			}
 			Map<String,MultiDimensionalScale> scales = new ArrayMap<String, MultiDimensionalScale>();
 			overrideScales(this.submodelInst.getSpacescale(), scales, spaceNames);
-			overrideScales(this.getSpacescale(), scales, spaceNames);
+			overrideScales(spacescale, scales, spaceNames);
 			
 			return new ArrayList<MultiDimensionalScale>(scales.values());
 		}
@@ -136,7 +168,7 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			}
 			Map<String,Otherscale> scales = new ArrayMap<String, Otherscale>();
 			overrideScales(this.submodelInst.getOtherscale(), scales, otherNames);
-			overrideScales(this.getOtherscale(), scales, otherNames);
+			overrideScales(otherscale, scales, otherNames);
 			
 			return new ArrayList<Otherscale>(scales.values());
 		}
