@@ -132,7 +132,7 @@ public class AnnotatedScale extends Scale {
 		this.steps = -1;
 		
 		AnnotatedRange ar = (AnnotatedRange) r;
-		if (ar != null & ar.isRegular()) {
+		if (ar != null && ar.isRegular()) {
 			this.regularTotal = ar.getMin();
 			this.total = null;
 		} else {
@@ -146,7 +146,7 @@ public class AnnotatedScale extends Scale {
 		this.steps = -1;
 		
 		AnnotatedRange ar = (AnnotatedRange) r;
-		if (ar != null & ar.isRegular()) {
+		if (ar != null && ar.isRegular()) {
 			this.regularDelta = ar.getMin();
 			this.delta = null;
 		} else {
