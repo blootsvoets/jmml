@@ -2,7 +2,7 @@ package eu.mapperproject.jmml;
 
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
-import eu.mapperproject.jmml.io.MUSCLEExporter;
+import eu.mapperproject.jmml.io.MUSCLECxAExporter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedModel;
@@ -131,7 +131,7 @@ public class JMML {
 					exp.export(opt.ssm);
 				}
 				if (opt.cxa != null) {
-					MUSCLEExporter exp = new MUSCLEExporter(doc.topology);
+					MUSCLECxAExporter exp = new MUSCLECxAExporter(doc.topology);
 					exp.export(opt.cxa);
 				}
 			} catch (IOException e) {

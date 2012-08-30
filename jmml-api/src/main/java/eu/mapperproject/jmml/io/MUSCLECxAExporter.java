@@ -6,10 +6,13 @@ package eu.mapperproject.jmml.io;
 import eu.mapperproject.jmml.specification.*;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedScale;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
 import eu.mapperproject.jmml.util.ArrayMap;
 import eu.mapperproject.jmml.util.ArraySet;
 import eu.mapperproject.jmml.util.FastArrayList;
+import eu.mapperproject.jmml.util.numerical.SIUnit;
+import eu.mapperproject.jmml.util.numerical.ScaleFactor;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +26,12 @@ import org.stringtemplate.v4.STGroupFile;
  *
  * @author Joris Borgdorff
  */
-public class MUSCLEExporter extends AbstractExporter {
-	private final static Logger log = Logger.getLogger(MUSCLEExporter.class.getName());
+public class MUSCLECxAExporter extends AbstractExporter {
+	private final static Logger log = Logger.getLogger(MUSCLECxAExporter.class.getName());
 	private final AnnotatedTopology topology;
+	private final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
 	
-	public MUSCLEExporter(AnnotatedTopology topology) {
+	public MUSCLECxAExporter(AnnotatedTopology topology) {
 		this.topology = topology;
 	}
 	
@@ -38,25 +42,31 @@ public class MUSCLEExporter extends AbstractExporter {
 		ST cxa = stg.getInstanceOf("cxa");
 		
 		List<Instance> insts = topology.getInstance();
-		Submodel submodel;
-		Mapper mapper;
-		Implementation impl;
 		Set<String> classPaths = new ArraySet<String>(); int classPathLength = 0;
 		Set<String> libPaths = new ArraySet<String>(); int libPathLength = 0;
 		Map<String,Connection> connections = new ArrayMap<String,Connection>();
 		int i = 0;
+		SIUnit maxTime = new SIUnit(-1,ScaleFactor.SECOND);
 		
 		// Add kernels, class- and libpath, and parameters to template
 		for (Instance oldInst : insts) {
+			Submodel submodel = null;
+			Mapper mapper;
+			Terminal terminal;
+			Implementation impl;
 			i++;
 			AnnotatedInstance inst = (AnnotatedInstance) oldInst;
 			if (inst.ofSubmodel()) {
 				submodel = inst.getSubmodelInstance();
 				impl = submodel.getImplementation();
-			}
-			else {
+			} else if (inst.ofMapper()) {
 				mapper = inst.getMapperInstance();
 				impl = mapper.getImplementation();
+			} else if (inst.ofTerminal()) {
+				terminal = inst.getTerminalInstance();
+				impl = terminal.getImplementation();
+			} else {
+				throw new IllegalStateException("Instance " + inst + " is not defined as a submodel, mapper, or terminal");
 			}
 			
 			if(impl != null) {
@@ -76,10 +86,39 @@ public class MUSCLEExporter extends AbstractExporter {
 			
 			cxa.add("inst", inst);
 			
+			String instName = inst.getId();
 			for (Param param : inst.getParam()) {
-				cxa.addAggr("params.{instid, param}", inst.getId(), param);
+				cxa.addAggr("params.{instid, param}", instName, param);
+			}
+			
+			if (submodel != null) {
+				AnnotatedScale scale = inst.getTimescaleInstance();
+				SIUnit total = scale.getMaxTotal();
+				if (total.compareTo(maxTime) > 0) {
+					maxTime = total;
+				}
+				setParam(cxa, instName, "dt", scale.getMinDelta().toString());
+				setParam(cxa, instName, "T", maxTime.toString());
+				int iname = 0;
+				for (MultiDimensionalScale ss : inst.getSpacescaleInstance()) {
+					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
+					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
+					iname++;
+					int dims = (int)ss.getDimensions().doubleValue();
+					for (int dim = 1; dim < dims; dim++) {
+						setParam(cxa, instName, "d" + spaceNames[iname], ss.getMinDelta().toString());
+						setParam(cxa, instName, spaceNames[iname].toUpperCase(), ss.getMaxTotal().toString());
+						iname++;
+					}
+				}
+				for (Otherscale ss : inst.getOtherscaleInstance()) {
+					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
+					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
+				}
 			}
 		}
+		
+		cxa.add("max_timesteps", maxTime);
 		
 		if (classPathLength > 0) {
 			cxa.add("classpath", concat(classPaths, classPathLength));
@@ -103,6 +142,13 @@ public class MUSCLEExporter extends AbstractExporter {
 		
 		cxa.add("connection", connections.values());
 		this.out.write(cxa.render());
+	}
+	
+	private static void setParam(ST cxa, String instance, String name, String value) {
+		Param param = new Param();
+		param.setId(name);
+		param.setValue(value);				
+		cxa.addAggr("params.{instid, param}", instance, param);
 	}
 	
 	private static String concat(Set<String> paths, int length) {

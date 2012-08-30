@@ -1,7 +1,7 @@
 group muscle_cxa;
 delimiters "%", "%"
 
-cxa(inst,params,classpath,libpath,connection) ::= <<# configuration file for a MUSCLE CxA
+cxa(inst,params,classpath,libpath,connection,max_timesteps) ::= <<# configuration file for a MUSCLE CxA
 abort "this is a configuration file for to be used with the MUSCLE bootstrap utility"   if __FILE__ == $0
 
 # add build for this cxa to system paths (i.e. CLASSPATH)
@@ -13,6 +13,7 @@ m.add_libpath  "%libpath%"
 cxa = Cxa.LAST
 
 cxa.env["cxa_path"] = File.dirname(__FILE__)
+cxa.env["max_timesteps"] = "%max_timesteps%"
 
 # declare kernels
 %inst:kernel()%
