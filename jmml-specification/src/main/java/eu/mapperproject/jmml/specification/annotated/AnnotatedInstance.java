@@ -33,7 +33,13 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	@Override
 	public String getId() {
 		if (this.id == null) {
-			return this.mapper == null ? this.submodel : this.mapper;
+			if (this.submodel != null) {
+				return this.submodel;
+			} else if (this.mapper != null) {
+				return this.mapper;
+			} else {
+				return this.terminal;
+			}
 		}
 		return this.id;
 	}
@@ -44,6 +50,18 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			this.id = value;
 		}
     }
+	
+	public String getClazz() {
+		if (this.ofSubmodel()) {
+			return this.submodelInst.getClazz();
+		} else if (this.ofMapper()) {
+			return this.mapperInst.getClazz();
+		} else if (this.ofTerminal()) {
+			return this.terminalInst.getClazz();
+		} else {
+			throw new IllegalStateException("Instance " + this + " does not describe a computational element.");
+		}
+	}
 
 	@Override
 	public void setMapper(String map) {
@@ -115,11 +133,11 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	public AnnotatedPorts getPorts() {
 		if (this.ofSubmodel()) {
 			return (AnnotatedPorts)this.submodelInst.getPorts();
-		}
-		else if (this.getMapperInstance() != null) {
+		} else if (this.ofMapper()) {
 			return (AnnotatedPorts)this.mapperInst.getPorts();
-		}
-		else {
+		} else if (this.ofTerminal()) {
+			return (AnnotatedPorts)this.terminalInst.getPorts();
+		} else {
 			throw new IllegalStateException("Instance " + getId() + " does can not return ports, since it does not have a mapper or submodel to point to.");
 		}
 	}

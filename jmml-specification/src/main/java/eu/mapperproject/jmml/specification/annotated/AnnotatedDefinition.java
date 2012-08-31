@@ -1,7 +1,7 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import eu.mapperproject.jmml.util.Numbered;
 import eu.mapperproject.jmml.specification.Definition;
+import eu.mapperproject.jmml.util.Numbered;
 
 /**
  *
@@ -15,6 +15,30 @@ public class AnnotatedDefinition extends Definition implements Numbered {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 	
+	public String getPackage() {
+		if (clazz == null) {
+			return null;
+		}
+		int lastDot = clazz.lastIndexOf('.');
+		if (lastDot == -1) {
+			return null;
+		} else {
+			return clazz.substring(0, lastDot);
+		}
+	}
+	
+	public String getClazzName() {
+		if (clazz == null) {
+			return id;
+		}
+		int lastDot = clazz.lastIndexOf('.');
+		if (lastDot == -1) {
+			return clazz;
+		} else {
+			return clazz.substring(lastDot+1);
+		}
+	}
+		
 	@Override
 	public void setNumber(int num) {
 		this.number = num;

@@ -1,8 +1,8 @@
 package eu.mapperproject.jmml.specification.annotated;
 
-import eu.mapperproject.jmml.util.Identifiable;
 import eu.mapperproject.jmml.specification.Datatype;
 import eu.mapperproject.jmml.specification.Port;
+import eu.mapperproject.jmml.util.Identifiable;
 
 /**
  *
@@ -10,6 +10,7 @@ import eu.mapperproject.jmml.specification.Port;
  */
 public class AnnotatedPort extends Port implements Identifiable {
 	private transient Datatype datatypeInst;
+	private transient String dataclass;
 	
 	public Datatype getDatatypeInstance() {
 		if (this.datatypeInst == null) this.setDatatype(this.datatype);
@@ -20,6 +21,17 @@ public class AnnotatedPort extends Port implements Identifiable {
 	public void setDatatype(String dt) {
 		this.datatype = dt;
 		this.datatypeInst = ObjectFactoryAnnotated.getModel().getDefinitions().getDatatype(this.datatype);
+		if (this.datatypeInst == null) {
+			throw new IllegalArgumentException("Datatype " + dt + " not defined.");
+		}
+	}
+	
+	public void setDataclass(String dt) {
+		this.dataclass = dt;
+	}
+	
+	public String getDataclass() {
+		return this.dataclass;
 	}
 	
 	@Override
