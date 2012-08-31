@@ -1,7 +1,7 @@
 group muscle_cxa;
 delimiters "%", "%"
 
-cxa(inst,params,classpath,libpath,connection,max_timesteps) ::= <<# configuration file for a MUSCLE CxA
+cxa(inst,term,params,classpath,libpath,connection,max_timesteps) ::= <<# configuration file for a MUSCLE CxA
 abort "this is a configuration file for to be used with the MUSCLE bootstrap utility"   if __FILE__ == $0
 
 # add build for this cxa to system paths (i.e. CLASSPATH)
@@ -17,6 +17,7 @@ cxa.env["max_timesteps"] = "%max_timesteps%"
 
 # declare kernels
 %inst:kernel()%
+%term:terminal()%
 # parameters
 %params:param()%
 # configure connection scheme
@@ -35,8 +36,13 @@ tie('%coupling.from.port.id%', '%coupling.to.port.id%')
 
 >>
 
+terminal(terminal) ::= <<
+cxa.add_terminal('%terminal.id%'%if(terminal.clazz)%, '%terminal.clazz%'%endif%)
+
+>>
+
 kernel(kernel) ::= <<
-cxa.add_kernel('%kernel.id%')
+cxa.add_kernel('%kernel.id%'%if(kernel.clazz)%, '%kernel.clazz%'%endif%)
 
 >>
 

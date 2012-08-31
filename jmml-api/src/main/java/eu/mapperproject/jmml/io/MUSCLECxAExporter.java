@@ -52,7 +52,7 @@ public class MUSCLECxAExporter extends AbstractExporter {
 		for (Instance oldInst : insts) {
 			Submodel submodel = null;
 			Mapper mapper;
-			Terminal terminal;
+			Terminal terminal = null;
 			Implementation impl;
 			i++;
 			AnnotatedInstance inst = (AnnotatedInstance) oldInst;
@@ -84,7 +84,11 @@ public class MUSCLECxAExporter extends AbstractExporter {
 				}
 			}
 			
-			cxa.add("inst", inst);
+			if (terminal == null) {
+				cxa.add("inst", inst);
+			} else {
+				cxa.add("term", inst);
+			}
 			
 			String instName = inst.getId();
 			for (Param param : inst.getParam()) {
