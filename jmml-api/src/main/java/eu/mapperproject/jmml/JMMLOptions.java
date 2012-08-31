@@ -23,6 +23,9 @@ public class JMMLOptions {
 	@Parameter(names={"--ssm", "-s"},converter=FileConverter.class,validateWith=WritableFile.class)
 	public File ssm;
 	
+	@Parameter(names={"--muscle", "-m"},converter=FileConverter.class)
+	public File muscle;
+
 	@Parameter(names={"--cxa", "-c"},converter=FileConverter.class,validateWith=WritableFile.class)
 	public File cxa;
 	
@@ -53,7 +56,7 @@ public class JMMLOptions {
 	}
 	
 	public boolean wantsOutput() {
-		return this.topology != null || this.taskgraph != null || this.ssm != null || this.domain != null || this.cxa != null;
+		return this.topology != null || this.taskgraph != null || this.ssm != null || this.domain != null || this.cxa != null || this.muscle != null;
 	}
 	
 	public void printUsage() {

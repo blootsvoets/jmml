@@ -2,6 +2,7 @@ package eu.mapperproject.jmml;
 
 import eu.mapperproject.jmml.io.CouplingTopologyToScaleMapExporter;
 import eu.mapperproject.jmml.io.GraphToGraphvizExporter;
+import eu.mapperproject.jmml.io.MUSCLECodeGenerator;
 import eu.mapperproject.jmml.io.MUSCLECxAExporter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstancePort;
@@ -48,10 +49,12 @@ public class JMML {
 	
 	private final static Logger logger = Logger.getLogger(JMML.class.getName());
 	
-	private AnnotatedTopology topology;
+	private final AnnotatedTopology topology;
+	private final AnnotatedModel model;
 
 	/** Create a new xMML document */
 	public JMML(AnnotatedModel model) {
+		this.model = model;
 		this.topology = model.getTopology();
 	}
 	
@@ -130,6 +133,10 @@ public class JMML {
 					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
 					exp.export(opt.ssm);
 				}
+				if (opt.muscle != null) {
+					MUSCLECodeGenerator gen = new MUSCLECodeGenerator(doc.model);
+					gen.create(opt.muscle);
+				}
 				if (opt.cxa != null) {
 					MUSCLECxAExporter exp = new MUSCLECxAExporter(doc.topology);
 					exp.export(opt.cxa);
@@ -143,6 +150,7 @@ public class JMML {
 			}
 		}
 		else {
+			System.out.println("No output method requested.");
 			opt.printUsage();
 		}
 	}
