@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "x$JMML_HOME" == "x" ]; then
+    export JMML_HOME=$PWD
+fi
+
+cd $JMML_HOME/jmml-api
+mvn -q exec:java -Dexec.workingdir="$OLDPWD" -Dexec.mainClass="eu.mapperproject.jmml.JMML" -Dexec.args="$*" -Dexec.classpathScope=runtime 
