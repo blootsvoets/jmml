@@ -8,6 +8,7 @@ import eu.mapperproject.jmml.specification.Mapper.Type;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedCoupling;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedDefinition;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedDefinitions;
+import eu.mapperproject.jmml.specification.annotated.AnnotatedFilter;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedInstance;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedPort;
 import eu.mapperproject.jmml.specification.annotated.AnnotatedTopology;
@@ -47,7 +48,7 @@ public class MUSCLEJavaExporter extends AbstractExporter {
 	@Override
 	protected void convert() throws IOException {
 		log.info("Generating muscle snippet");
-		final STGroup stg = new STGroupFile("muscle_java_submodel.stg");
+		final STGroup stg = new STGroupFile("muscle_java.stg");
 		
 		ST st;
 		Map<String,Datatype> chooseData = new HashMap<String,Datatype>();
@@ -113,6 +114,10 @@ public class MUSCLEJavaExporter extends AbstractExporter {
 					st.add("outports", p);
 				}
 			}
+		} else if (this.def instanceof Filter) {
+			st = stg.getInstanceOf("filter");
+			AnnotatedFilter f = (AnnotatedFilter)def;
+			st.add("datatype_in", f.getDatatypeInInstance());
 		} else {
 			return;
 		}
