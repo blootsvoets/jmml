@@ -1,5 +1,6 @@
 package eu.mapperproject.jmml.util;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -45,8 +46,7 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		this.iter.reset();
-		return this.iter;
+		return this.iter.reset();
 	}
 
 	@Override
@@ -57,22 +57,26 @@ public class FastArrayList<T> implements List<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T[] toArray(T[] ts) {
 		if (ts.length >= size) {
 			System.arraycopy(elems, 0, ts, 0, size);
+			if (ts.length > size) {
+				ts[size] = null;
+			}
 			return ts;
-		}
-		else {
-			return (T[])this.toArray();
+		} else {
+			Class<? extends Object[]> cl = ts.getClass();
+			@SuppressWarnings("unchecked")
+			T[] ret =  (T[])(cl == Object[].class ? new Object[size] : Array.newInstance(cl.getComponentType(), size));
+			System.arraycopy(elems, 0, ret, 0, size);
+			return ret;
 		}
 	}
 
 	@Override
 	public boolean add(T e) {
 		ensureCapacity(size + 1);
-		elems[size] = e;
-		this.size++;
+		elems[this.size++] = e;
 		return true;
 	}
 
@@ -153,6 +157,7 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public boolean retainAll(Collection<?> clctn) {
+		@SuppressWarnings("unchecked")
 		T[] newElems = (T[])new Object[size];
 		int index = 0;
 		for (int i = 0; i < size; i++) {
@@ -172,7 +177,7 @@ public class FastArrayList<T> implements List<T> {
 	@Override
 	public void clear() {
 		for (int i = 0; i < size; i++) {
-			this.elems[i] = null;
+			this.elems[i] = null; // gc
 		}
 		size = 0;
 	}
@@ -198,6 +203,7 @@ public class FastArrayList<T> implements List<T> {
 			ensureCapacity(size + 1);
 			System.arraycopy(elems, i, elems, i + 1, size - i);
 			elems[i] = e;
+			size++;
 		}
 	}
 
@@ -210,8 +216,7 @@ public class FastArrayList<T> implements List<T> {
 		} else {
 			System.arraycopy(elems, i + 1, elems, i, size - i);
 		}
-		// Free space
-		elems[size] = null;
+		elems[size] = null; // gc
 		
 		return tmp;
 	}
@@ -222,8 +227,7 @@ public class FastArrayList<T> implements List<T> {
 			for (int i = 0; i < size; i++) {
 				if (elems[i] == null) return i;
 			}
-		}
-		else {
+		} else {
 			for (int i = 0; i < size; i++) {
 				if (o.equals(elems[i])) return i;
 			}
@@ -237,8 +241,7 @@ public class FastArrayList<T> implements List<T> {
 			for (int i = size - 1; i >= 0; i--) {
 				if (elems[i] == null) return i;
 			}
-		}
-		else {
+		} else {
 			for (int i = size - 1; i >= 0; i--) {
 				if (o.equals(elems[i])) return i;
 			}
@@ -248,14 +251,12 @@ public class FastArrayList<T> implements List<T> {
 
 	@Override
 	public ListIterator<T> listIterator() {
-		this.iter.reset();
-		return this.iter;
+		return this.iter.reset();
 	}
 
 	@Override
 	public ListIterator<T> listIterator(int i) {
-		this.iter.reset(i);
-		return this.iter;
+		return this.iter.reset(i);
 	}
 
 	@Override
@@ -336,16 +337,17 @@ public class FastArrayList<T> implements List<T> {
 
 		@Override
 		public void remove() {
-			FastArrayList.this.remove(i);
-			i--;
+			FastArrayList.this.remove(i--);
 		}
 		
-		void reset() {
+		FastIterator reset() {
 			i = -1;
+			return this;
 		}
 		
-		void reset(int i_) {
+		FastIterator reset(int i_) {
 			this.i = i_;
+			return this;
 		}
 		
 		@Override
@@ -406,8 +408,7 @@ public class FastArrayList<T> implements List<T> {
 
 		@Override
 		public Iterator<T> iterator() {
-			this.subIter.reset();
-			return this.subIter;
+			return this.subIter.reset();
 		}
 
 		@Override
@@ -418,6 +419,7 @@ public class FastArrayList<T> implements List<T> {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public <T> T[] toArray(T[] a) {
 			if (a.length >= this.size) {
 				System.arraycopy(elems, from, a, 0, this.size);
@@ -563,14 +565,12 @@ public class FastArrayList<T> implements List<T> {
 
 		@Override
 		public ListIterator<T> listIterator() {
-			this.subIter.reset();
-			return this.subIter;
+			return this.subIter.reset();
 		}
 
 		@Override
 		public ListIterator<T> listIterator(int index) {
-			this.subIter.reset(from + index);
-			return this.subIter;
+			return this.subIter.reset(from + index);
 		}
 
 		@Override
@@ -607,12 +607,14 @@ public class FastArrayList<T> implements List<T> {
 				i--;
 			}
 
-			void reset() {
+			FastSubIterator reset() {
 				i = from - 1;
+				return this;
 			}
 
-			void reset(int i_) {
+			FastSubIterator reset(int i_) {
 				this.i = i_;
+				return this;
 			}
 
 			@Override

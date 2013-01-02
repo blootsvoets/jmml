@@ -6,19 +6,109 @@ package eu.mapperproject.jmml.util;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import static org.junit.Assert.*;
 import org.junit.*;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author jborgdo1
  */
 public class FastArrayListTest {
-	
-	public FastArrayListTest() {
-	}
+		public static void main(String[] args) {
+		// Preload classes
+		List<String> map1 = new ArrayList<String>();
+		List<String> map2 = new FastArrayList<String>();
+		
+		for (int i = 1; i < 3000; i++) {
+			String[] s = new String[i];
+			String[] r = new String[i];
+			for (int j = 0; j < i; j++) {
+				s[j] = "sub" + j;
+			}
+			long t = System.nanoTime();
+			List<String> list = new FastArrayList<String>(i);
+			for (int j = 0; j < i; j++) {
+				list.add(s[j]);
+			}
+			int k = 0;
+			for (String str : list) {
+				r[k++] = str;
+			}
+//			System.out.println(i + ": " + (System.nanoTime() - t) + " ns");
+			for (int j = 0; j < i; j++) {
+				s[j] = r[j];
+			}
+		}
+		
+		for (int i = 1; i < 3000; i++) {
+			String[] s = new String[i];
+			String[] r = new String[i];
+			for (int j = 0; j < i; j++) {
+				s[j] = "sub" + j;
+			}
+			long t = System.nanoTime();
+			List<String> list = new ArrayList<String>(i);
+			for (int j = 0; j < i; j++) {
+				list.add(s[j]);
+			}
+			int k = 0;
+			for (String str : list) {
+				r[k++] = str;
+			}
+//			System.out.println(i + ": " + (System.nanoTime() - t) + " ns");
+			for (int j = 0; j < i; j++) {
+				s[j] = r[j];
+			}
+		}
 
+		
+		System.out.println("FastArrayList");
+		for (int i = 1; i < 3000; i++) {
+			String[] s = new String[i];
+			String[] r = new String[i];
+			for (int j = 0; j < i; j++) {
+				s[j] = "sub" + j;
+			}
+			long t = System.nanoTime();
+			List<String> list = new FastArrayList<String>(i);
+			for (int j = 0; j < i; j++) {
+				list.add(s[j]);
+			}
+			int k = 0;
+			for (String str : list) {
+				r[k++] = str;
+			}
+			System.out.println(i + "\t" + (System.nanoTime() - t));
+			for (int j = 0; j < i; j++) {
+				s[j] = r[j];
+			}
+		}
+
+		System.out.println("ArrayList");
+		for (int i = 1; i < 3000; i++) {
+			String[] s = new String[i];
+			String[] r = new String[i];
+			for (int j = 0; j < i; j++) {
+				s[j] = "sub" + j;
+			}
+			long t = System.nanoTime();
+			List<String> list = new ArrayList<String>(i);
+			for (int j = 0; j < i; j++) {
+				list.add(s[j]);
+			}
+			int k = 0;
+			for (String str : list) {
+				r[k++] = str;
+			}
+			System.out.println(i + "\t" + (System.nanoTime() - t));
+			for (int j = 0; j < i; j++) {
+				s[j] = r[j];
+			}
+		}
+	}
+	
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 	}

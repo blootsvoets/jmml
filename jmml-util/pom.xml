@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>eu.mapperproject.jmml</groupId>
 		<artifactId>jmml</artifactId>
-		<version>0.1</version>
+		<version>0.1.1</version>
 	</parent>
 	
 	<groupId>eu.mapperproject.jmml</groupId>
 	<artifactId>jmml-util</artifactId>
-	<version>0.1</version>
+	<version>0.1.1</version>
 	<packaging>jar</packaging>
 	<name>jmml-util</name>
 	<url>http://maven.apache.org</url>

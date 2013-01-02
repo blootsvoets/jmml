@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 public class ScaleFactor implements Comparable<ScaleFactor>, Serializable {
+	private static final long serialVersionUID = 1L;
 	public enum Dimension {
 		DATA("b"), TIME("s"), SPACE("m"), OTHER(null);
 		private final String unit;
@@ -70,9 +71,22 @@ public class ScaleFactor implements Comparable<ScaleFactor>, Serializable {
 	public ScaleFactor(BigInteger m, BigInteger div, Dimension dim, String dimName) {
 		this.dim = dim;
 		this.dimName = dimName;
-		BigInteger gcd = m.gcd(div);
-		this.mult = m.divide(gcd);
-		this.div = div.divide(gcd);
+		
+		// Try to keep the ratio as small as possible. If one of the multiplier
+		// or division is 1, the gcd will also be 1.
+		if (m.equals(BigInteger.ONE) || div.equals(BigInteger.ONE)) {
+			this.mult = m;
+			this.div = div;
+		} else {
+			BigInteger gcd = m.gcd(div);
+			if (gcd.equals(BigInteger.ONE)) {
+				this.mult = m;
+				this.div = div;
+			} else {
+				this.mult = m.divide(gcd);
+				this.div = div.divide(gcd);
+			}
+		}
 	}
 
 	/** Create a ScaleModifier with a dividend m and a divisor div */

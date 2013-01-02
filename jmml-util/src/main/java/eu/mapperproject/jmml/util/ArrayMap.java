@@ -1,8 +1,13 @@
 package eu.mapperproject.jmml.util;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.*;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * A full Map implementation meant for small maps. It stores its values in two arrays, making storage
@@ -12,6 +17,7 @@ import java.util.*;
  * @author Joris Borgdorff
  */
 public class ArrayMap<K,V> implements Map<K, V>, Serializable {
+	private static final long serialVersionUID = 1L;
 	enum IteratorType {
 		KEYS, VALUES, ENTRY;
 	}
@@ -359,6 +365,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public boolean equals(Object o) {
 			if (o == null || !o.getClass().equals(getClass())) return false;
 
+			@SuppressWarnings("unchecked")
 			KeySet other = (KeySet)o;
 			if (size != other.size()) return false;
 
@@ -561,6 +568,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		@Override
 		public boolean equals(Object o) {
 			if (o == null || !o.getClass().equals(getClass())) return false;
+			@SuppressWarnings("unchecked")
 			MapEntry other = (MapEntry)o;
 			return (keys[i] == null ? other.getKey() == null : keys[i].equals(other.getKey()))
 					&& (values[i] == null ? other.getValue() == null : values[i].equals(other.getValue()));
@@ -698,6 +706,7 @@ public class ArrayMap<K,V> implements Map<K, V>, Serializable {
 		public boolean equals(Object o) {
 			if (o == null || !o.getClass().equals(getClass())) return false;
 
+			@SuppressWarnings("unchecked")
 			ValueCollection other = (ValueCollection)o;
 			if (size != other.size()) return false;
 			boolean[] found = new boolean[size];
