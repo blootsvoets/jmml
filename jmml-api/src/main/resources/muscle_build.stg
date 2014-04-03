@@ -1,0 +1,287 @@
+group muscle_cxa;
+delimiters "%", "%"
+
+submodel(pkg,cls,finitports,oiports,sports,ofports,datatypes,params,state) ::= <</* This file was generated with jMML */
+package %pkg%;
+
+import muscle.core.kernel.Submodel;
+import muscle.core.model.Timestamp;
+%datatypes:includeDatatype()%
+
+public class %cls% extends Submodel {
+%finitports:declare()%%ofports:declare()%%oiports:declare()%%state:declare()%%params:declParam()%
+	// Initialize model
+	@Override
+	protected Timestamp init(Timestamp previousOrigin) {
+		// TODO: Add parameters
+		%params:readParam()%
+%if(state)%
+		// Read the state, if any
+		if (%state_in.id% == null) {
+			// TODO: initialize state
+		}
+
+%endif%
+		%finitports:fin()%
+		// Do some computations
+
+%if(oiports)%
+		// Prepare state for sending intermediate observations
+		%oiports:setnull()%
+%endif%
+		Timestamp origin = super.init(previousOrigin);
+%finitports:updatetime()%		return origin;
+	}
+
+%if(oiports)%
+	// Do intermediate observation
+	@Override @SuppressWarnings("unchecked")
+	protected void intermediateObservation() {
+		%oiports:out()%	}
+%endif%
+
+	// Solve one step of your submodel
+	@Override
+	protected void solvingStep() {
+		%sports:in()%
+		
+		// Solve your submodel step here
+%if(oiports)%
+
+		// Prepare state for sending intermediate observations
+		%oiports:setnull()%
+%endif%
+%if(ofports)%
+
+		// Prepare state for sending final observations
+		%ofports:setnull()%
+%endif%	}
+	%if(ofports||state)%
+	// Do a final observation or checkpointing
+	@Overrride
+	protected void finalObservation() {
+%if(ofports)%
+		%ofports:out()%%endif%%if(state)%
+		// TODO: save meaningful state
+		%state.id% = null;
+%endif%	}
+%endif%
+}
+
+>>
+
+faninmapper(pkg,cls,inports,outports,datatypes,params) ::= <</* This file was generated with jMML */
+package %pkg%;
+
+import muscle.core.kernel.FanInMapper;
+import muscle.core.model.Timestamp;
+import muscle.core.model.Observation;
+%datatypes:includeDatatype()%
+
+public class %cls% extends FanInMapper {
+%params:declParam()%
+	// Initialize the mapper
+	@Override
+	protected void init() {
+		// TODO: Add parameters
+		%params:readParam()%
+		// Initialize state
+	}
+
+	// Do a mapping from many ports and send it as the 'value' field
+	@Override
+	protected void receiveAll() {
+		%inports:inObs()%
+		// Do some mapping here
+		%outports:declarenull()%
+		// TODO: Deduce current and next timestep from the received messages
+		Timestamp time = null;
+		Timestamp nextTime = null;
+		
+		// Set the value to be sent
+		this.value = new Observation(%outports.id%, time, nextTime);
+	}
+}
+
+>>
+
+fanoutmapper(pkg,cls,inports,outports,datatypes,params) ::= <</* This file was generated with jMML */
+package %pkg%;
+
+import muscle.core.kernel.FanOutMapper;
+import muscle.core.model.Observation;
+%datatypes:includeDatatype()%
+
+public class %cls% extends FanOutMapper {
+%params:declParam()%
+	// Initialize the mapper
+	@Override
+	protected void init() {
+		// TODO: Add parameters
+		%params:readParam()%
+		// Initialize state
+	}
+
+	// Do a mapping from the 'value' field which was received
+	@Override @SuppressWarnings("unchecked")
+	protected void sendAll() {
+		// Read the data
+		%inports.dataclass% %inports.id% = value.getData();
+		
+		// Do some mapping here
+		%outports:declarenull()%
+		
+		// Send the data
+		%outports:outObs()%	}
+}
+
+>>
+
+mapper(pkg,cls,inports,outports,datatypes,params) ::= <</* This file was generated with jMML */
+package %pkg%;
+
+import muscle.core.kernel.Mapper;
+import muscle.core.model.Observation;
+%datatypes:includeDatatype()%
+
+public class %cls% extends Mapper {
+	private Timestamp time, nextTime;
+%inports:declare()%%params:declParam()%
+
+	// Initialize the mapper
+	@Override
+	protected void init() {
+		// TODO: Add parameters
+		%params:readParam()%
+		// Initialize state
+	}
+
+	// Receive messages from all ports
+	@Override
+	protected void receiveAll() {
+		// Read the data
+		%inports:inObsValue()%
+		// Set the time to one of the received observations
+		time = %inports.id%Obs.getTimestamp();
+		nextTime = %inports.id%Obs.getNextTimestamp();
+	}
+
+	// Do a mapping from the received values to the out ports
+	@Override @SuppressWarnings("unchecked")
+	protected void sendAll() {
+		// Do some mapping here
+		%outports:declarenull()%
+		
+		// Send the data
+		%outports:outObs()%	}
+}
+
+>>
+
+filter(pkg,cls,datatype_in,datatype_out,params) ::= <</* This file was generated with jMML */
+package %pkg%;
+
+import muscle.core.kernel.FanInMapper;
+import muscle.core.model.Timestamp;
+import muscle.core.model.Observation;
+%datatype_in:includeDatatype()%%datatype_out:includeDatatype()%
+
+public class %cls% extends AbstractObservationFilter<%datatype_in.clazzName%, %datatype_out.clazzName%> {
+	private double arg;
+	%params:setParam()%
+	public %cls%(double arg) {
+		super();
+		this.arg = arg;
+	}
+	
+	// Do a mapping from many ports and send it as the 'value' field
+	@Override
+	protected void apply(Observation<%datatype_in.clazzName%> msg) {
+		// Do some filtering or transformation
+		
+		//TODO: some actual assignment
+		%datatype_out.clazzName% out = null;
+		put(out);
+	}
+}
+
+>>
+
+fin(port) ::= <<
+Observation<%port.dataclass%> %port.id%Obs = (Observation<%port.dataclass%>) in("%port.id%").receiveObservation();
+%port.id% = %port.id%Obs.getData();
+
+>>
+
+updatetime(port) ::= <<
+		if (%port.id%Obs.getTimestamp().compareTo(origin) > 0) {
+			origin = %port.id%Obs.getTimestamp();
+		}
+
+>>
+
+in(port) ::= <<
+%port.dataclass% %port.id% = (%port.dataclass%) in("%port.id%").receive();
+
+>>
+
+inObs(port) ::= <<
+Observation<%port.dataclass%> %port.id%Obs = (Observation<%port.dataclass%>) in("%port.id%").receiveObservation();
+
+>>
+
+inObsValue(port) ::= <<
+%port:inObs()%%port.id% = %port.id%Obs.getValue();
+
+>>
+
+out(port) ::= <<
+out("%port.id%").send(%port.id%);
+
+>>
+outObs(port) ::= <<
+out("%port.id%").send(%port.id%, value.getTimestamp(), value.getNextTimestamp());
+
+>>
+outObsTime(port) ::= <<
+out("%port.id%").send(%port.id%, time, nextTime);
+
+>>
+
+declare(port) ::= <<
+	private %port.dataclass% %port.id%;
+
+>>
+
+declParam(param) ::= <<
+	private %if(param.bool)%boolean%elseif(param.int)%int%elseif(param.numeric)%double%else%String%endif% %param.id%;
+
+>>
+
+setParam(param) ::= <<
+	private %if(param.bool)%boolean%elseif(param.int)%int%elseif(param.numeric)%double%else%String%endif% %param.id% = %param.value%;
+
+>>
+
+readParam(param) ::= <<
+%param.id% = get%if(param.bool)%Bool%elseif(param.int)%Int%elseif(param.numeric)%Double%endif%Property("%param.id%");
+
+>>
+
+declarenull(port) ::= <<
+// TODO: Replace with actual assignment
+%port.dataclass% %port.id% = null;
+
+>>
+
+setnull(port) ::= <<
+// TODO: Replace with actual assignment
+%port.id% = null;
+
+>>
+
+includeDatatype(datatype) ::= <<
+%if(datatype.clazzName&&datatype.package)%
+import %datatype.package%.%datatype.clazzName%;
+%endif%
+>>
