@@ -72,7 +72,7 @@ public class MUSCLEJavaExporter extends AbstractExporter {
 				}
 				Datatype datatype = datatypes.get(p.getDatatype());
 				chooseData.put(datatype.getId(), datatype);
-				((AnnotatedPort)p).setDataclass(datatype.getClazzName());
+//				((AnnotatedPort)p).setDataclass(datatype.getClazzName());
 				
 				switch (p.getOperator()) {
 					case OI:
@@ -106,7 +106,7 @@ public class MUSCLEJavaExporter extends AbstractExporter {
 				
 				Datatype datatype = datatypes.get(p.getDatatype());
 				chooseData.put(datatype.getId(), datatype);
-				((AnnotatedPort)p).setDataclass(datatype.getClazzName());
+//				((AnnotatedPort)p).setDataclass(datatype.getClazzName());
 				
 				if (port.getName().getLocalPart().equals("in")) {
 					st.add("inports", p);
@@ -122,8 +122,8 @@ public class MUSCLEJavaExporter extends AbstractExporter {
 			return;
 		}
 		
-		st.add("pkg", def.getPackage());
-		st.add("cls", def.getClazzName());
+//		st.add("pkg", def.getPackage());
+//		st.add("cls", def.getClazzName());
 		st.add("params", params);
 		st.add("datatypes", chooseData.values());
 

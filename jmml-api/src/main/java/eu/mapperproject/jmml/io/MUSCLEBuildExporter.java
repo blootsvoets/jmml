@@ -50,80 +50,80 @@ public class MUSCLEBuildExporter extends AbstractExporter {
 		Map<String,Connection> connections = new ArrayMap<String,Connection>();
 		int i = 0;
 		SIUnit maxTime = new SIUnit(-1,ScaleFactor.SECOND);
-		
-		// Add kernels, class- and libpath, and parameters to template
-		for (Instance oldInst : insts) {
-			Submodel submodel = null;
-			Mapper mapper;
-			Terminal terminal = null;
-			Implementation impl;
-			i++;
-			AnnotatedInstance inst = (AnnotatedInstance) oldInst;
-			if (inst.ofSubmodel()) {
-				submodel = inst.getSubmodelInstance();
-				impl = submodel.getImplementation();
-			} else if (inst.ofMapper()) {
-				mapper = inst.getMapperInstance();
-				impl = mapper.getImplementation();
-			} else if (inst.ofTerminal()) {
-				terminal = inst.getTerminalInstance();
-				impl = terminal.getImplementation();
-			} else {
-				throw new IllegalStateException("Instance " + inst + " is not defined as a submodel, mapper, or terminal");
-			}
-			
-			if(impl != null) {
-				String path;
-				for (Library lib : impl.getLibrary()) {
-					path = lib.getPath();
-					if (path != null && libPaths.add(path)) {
-						libPathLength += path.length() + 1;
-					}
-				}
-
-				path = impl.getPath();
-				if (path != null && classPaths.add(path)) {
-					classPathLength += path.length() + 1;
-				}
-			}
-			
-			if (terminal == null) {
-				cxa.add("inst", inst);
-			} else {
-				cxa.add("term", inst);
-			}
-			
-			String instName = inst.getId();
-			for (Param param : inst.getParam()) {
-				cxa.addAggr("params.{instid, param}", instName, param);
-			}
-			
-			if (submodel != null) {
-				AnnotatedScale scale = inst.getTimescaleInstance();
-				SIUnit total = scale.getMaxTotal();
-				if (total.compareTo(maxTime) > 0) {
-					maxTime = total;
-				}
-				setParam(cxa, instName, "dt", scale.getMinDelta().toString());
-				setParam(cxa, instName, "T", maxTime.toString());
-				int iname = 0;
-				for (MultiDimensionalScale ss : inst.getSpacescaleInstance()) {
-					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
-					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
-					iname++;
-					int dims = (int)ss.getDimensions().doubleValue();
-					for (int dim = 1; dim < dims; dim++) {
-						setParam(cxa, instName, "d" + spaceNames[iname], ss.getMinDelta().toString());
-						setParam(cxa, instName, spaceNames[iname].toUpperCase(), ss.getMaxTotal().toString());
-						iname++;
-					}
-				}
-				for (Otherscale ss : inst.getOtherscaleInstance()) {
-					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
-					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
-				}
-			}
-		}
+//		
+//		// Add kernels, class- and libpath, and parameters to template
+//		for (Instance oldInst : insts) {
+//			Submodel submodel = null;
+//			Mapper mapper;
+//			Terminal terminal = null;
+//			Implementation impl;
+//			i++;
+//			AnnotatedInstance inst = (AnnotatedInstance) oldInst;
+//			if (inst.ofSubmodel()) {
+//				submodel = inst.getSubmodelInstance();
+//				impl = submodel.getImplementation();
+//			} else if (inst.ofMapper()) {
+//				mapper = inst.getMapperInstance();
+//				impl = mapper.getImplementation();
+//			} else if (inst.ofTerminal()) {
+//				terminal = inst.getTerminalInstance();
+//				impl = terminal.getImplementation();
+//			} else {
+//				throw new IllegalStateException("Instance " + inst + " is not defined as a submodel, mapper, or terminal");
+//			}
+//			
+//			if(impl != null) {
+//				String path;
+//				for (Library lib : impl.getLibrary()) {
+//					path = lib.getPath();
+//					if (path != null && libPaths.add(path)) {
+//						libPathLength += path.length() + 1;
+//					}
+//				}
+//
+//				path = impl.getPath();
+//				if (path != null && classPaths.add(path)) {
+//					classPathLength += path.length() + 1;
+//				}
+//			}
+//			
+//			if (terminal == null) {
+//				cxa.add("inst", inst);
+//			} else {
+//				cxa.add("term", inst);
+//			}
+//			
+//			String instName = inst.getId();
+//			for (Param param : inst.getParam()) {
+//				cxa.addAggr("params.{instid, param}", instName, param);
+//			}
+//			
+//			if (submodel != null) {
+//				AnnotatedScale scale = inst.getTimescaleInstance();
+//				SIUnit total = scale.getMaxTotal();
+//				if (total.compareTo(maxTime) > 0) {
+//					maxTime = total;
+//				}
+//				setParam(cxa, instName, "dt", scale.getMinDelta().toString());
+//				setParam(cxa, instName, "T", maxTime.toString());
+//				int iname = 0;
+//				for (MultiDimensionalScale ss : inst.getSpacescaleInstance()) {
+//					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
+//					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
+//					iname++;
+//					int dims = (int)ss.getDimensions().doubleValue();
+//					for (int dim = 1; dim < dims; dim++) {
+//						setParam(cxa, instName, "d" + spaceNames[iname], ss.getMinDelta().toString());
+//						setParam(cxa, instName, spaceNames[iname].toUpperCase(), ss.getMaxTotal().toString());
+//						iname++;
+//					}
+//				}
+//				for (Otherscale ss : inst.getOtherscaleInstance()) {
+//					setParam(cxa, instName, "d" + ss.getId(), ss.getMinDelta().toString());
+//					setParam(cxa, instName, ss.getId().toUpperCase(), ss.getMaxTotal().toString());
+//				}
+//			}
+//		}
 		
 		cxa.add("max_timesteps", maxTime);
 		
@@ -136,16 +136,16 @@ public class MUSCLEBuildExporter extends AbstractExporter {
 		}
 		
 		// Add couplings to template
-		for (Coupling cOld : topology.getCoupling()) {
-			AnnotatedCoupling coupling = (AnnotatedCoupling)cOld;
-			String id = coupling.getFrom().getInstance().getId() + "." + coupling.getTo().getInstance().getId();
-			Connection conn = connections.get(id);
-			if (conn == null) {
-				conn = new Connection();
-				connections.put(id, conn);
-			}
-			conn.addCoupling(coupling);
-		}
+//		for (Coupling cOld : topology.getCoupling()) {
+//			AnnotatedCoupling coupling = (AnnotatedCoupling)cOld;
+//			String id = coupling.getFrom().getInstance().getId() + "." + coupling.getTo().getInstance().getId();
+//			Connection conn = connections.get(id);
+//			if (conn == null) {
+//				conn = new Connection();
+//				connections.put(id, conn);
+//			}
+//			conn.addCoupling(coupling);
+//		}
 		
 		cxa.add("connection", connections.values());
 		this.out.write(cxa.render());

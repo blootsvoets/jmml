@@ -53,21 +53,21 @@ public class MUSCLECxAExporter extends AbstractExporter {
 			Submodel submodel = null;
 			Mapper mapper;
 			Terminal terminal = null;
-			Implementation impl;
+			Implementation impl = null;
 			i++;
 			AnnotatedInstance inst = (AnnotatedInstance) oldInst;
-			if (inst.ofSubmodel()) {
-				submodel = inst.getSubmodelInstance();
-				impl = submodel.getImplementation();
-			} else if (inst.ofMapper()) {
-				mapper = inst.getMapperInstance();
-				impl = mapper.getImplementation();
-			} else if (inst.ofTerminal()) {
-				terminal = inst.getTerminalInstance();
-				impl = terminal.getImplementation();
-			} else {
-				throw new IllegalStateException("Instance " + inst + " is not defined as a submodel, mapper, or terminal");
-			}
+//			if (inst.ofSubmodel()) {
+//				submodel = inst.getSubmodelInstance();
+//				impl = submodel.getImplementation();
+//			} else if (inst.ofMapper()) {
+//				mapper = inst.getMapperInstance();
+//				impl = mapper.getImplementation();
+//			} else if (inst.ofTerminal()) {
+//				terminal = inst.getTerminalInstance();
+//				impl = terminal.getImplementation();
+//			} else {
+//				throw new IllegalStateException("Instance " + inst + " is not defined as a submodel, mapper, or terminal");
+//			}
 			
 			if(impl != null) {
 				String path;

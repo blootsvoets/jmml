@@ -62,17 +62,17 @@ public class MUSCLECodeGenerator {
 					def.setClazz(clazz);
 				}
 
-				String pkg = def.getPackage();
-				if (pkg.startsWith("muscle.")) {
-					log.log(Level.INFO, "Not creating MUSCLE class {0}", clazz);
-					continue;
-				}
-				String dirname = pkg.replace('.', '/');
-				File javaDir = mkdir(srcdir, dirname);
+//				String pkg = def.getPackage();
+//				if (pkg.startsWith("muscle.")) {
+//					log.log(Level.INFO, "Not creating MUSCLE class {0}", clazz);
+//					continue;
+//				}
+//				String dirname = pkg.replace('.', '/');
+//				File javaDir = mkdir(srcdir, dirname);
 
 				try {
 					MUSCLEJavaExporter javaExport = new MUSCLEJavaExporter(def, datatypes);
-					javaExport.export(new File(javaDir, def.getClazzName() + ".java"));
+//					javaExport.export(new File(javaDir, def.getClazzName() + ".java"));
 				} catch (Exception ex) {
 					log.log(Level.WARNING, "CxA file could not be generated: " + ex, ex);
 				}
