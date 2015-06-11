@@ -12,24 +12,27 @@ import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 
 /**
- * Adds scale names to scales, if they were unnamed, and adds timestep functionality.
+ * Adds scale names to scales, if they were unnamed, and adds timestep
+ * functionality.
+ *
  * @author Joris Borgdorff
  */
 public class AnnotatedInstance extends Instance implements Numbered {
+
 	private transient final static Logger logger = Logger.getLogger(AnnotatedInstance.class.getName());
 	private transient int number;
 	private transient Terminal terminalInst;
 	private transient Mapper mapperInst;
 	private transient Submodel submodelInst;
-	private transient final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
-	private transient final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
-	
+	public final static String[] spaceNames = {"x", "y", "z", "u", "v", "w"};
+	public final static String[] otherNames = {"a", "b", "c", "d", "e", "f"};
+
 	public AnnotatedInstance() {
 		super();
 		this.mapperInst = null;
 		this.submodelInst = null;
 	}
-	
+
 	@Override
 	public String getId() {
 		if (this.id == null) {
@@ -43,14 +46,14 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		}
 		return this.id;
 	}
-	
+
 	@Override
 	public void setId(String value) {
 		if (value != null) {
 			this.id = value;
 		}
-    }
-	
+	}
+
 	public String getClazz() {
 		if (this.ofSubmodel()) {
 			return this.submodelInst.getClazz();
@@ -76,12 +79,14 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			this.mapperInst = ObjectFactoryAnnotated.getModel().getDefinitions().getMapper(this.mapper);
 		}
 	}
-	
+
 	public Mapper getMapperInstance() {
-		if (this.mapperInst == null) this.setMapper(this.mapper);
+		if (this.mapperInst == null) {
+			this.setMapper(this.mapper);
+		}
 		return this.mapperInst;
 	}
-	
+
 	@Override
 	public void setSubmodel(String sub) {
 		this.submodel = sub;
@@ -95,9 +100,11 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			this.submodelInst = ObjectFactoryAnnotated.getModel().getDefinitions().getSubmodel(this.submodel);
 		}
 	}
-	
+
 	public Terminal getTerminalInstance() {
-		if (this.terminalInst == null) this.setTerminal(this.terminal);
+		if (this.terminalInst == null) {
+			this.setTerminal(this.terminal);
+		}
 		return this.terminalInst;
 	}
 
@@ -116,37 +123,41 @@ public class AnnotatedInstance extends Instance implements Numbered {
 	}
 
 	public Submodel getSubmodelInstance() {
-		if (this.submodelInst == null) this.setSubmodel(this.submodel);
+		if (this.submodelInst == null) {
+			this.setSubmodel(this.submodel);
+		}
 		return this.submodelInst;
 	}
-	
+
 	public boolean ofSubmodel() {
 		return this.getSubmodelInstance() != null;
 	}
+
 	public boolean ofMapper() {
 		return this.getMapperInstance() != null;
 	}
+
 	public boolean ofTerminal() {
 		return this.getTerminalInstance() != null;
 	}
-	
+
 	public AnnotatedPorts getPorts() {
 		if (this.ofSubmodel()) {
-			return (AnnotatedPorts)this.submodelInst.getPorts();
+			return (AnnotatedPorts) this.submodelInst.getPorts();
 		} else if (this.ofMapper()) {
-			return (AnnotatedPorts)this.mapperInst.getPorts();
+			return (AnnotatedPorts) this.mapperInst.getPorts();
 		} else if (this.ofTerminal()) {
-			return (AnnotatedPorts)this.terminalInst.getPorts();
+			return (AnnotatedPorts) this.terminalInst.getPorts();
 		} else {
 			throw new IllegalStateException("Instance " + getId() + " does can not return ports, since it does not have a mapper or submodel to point to.");
 		}
 	}
-	
+
 	public AnnotatedScale getTimescaleInstance() {
 		if (this.ofSubmodel()) {
 			AnnotatedScale as = null;
-			AnnotatedScale instTimescale = (AnnotatedScale)this.getSubmodelInstance().getTimescale();
-			if (this.timescale == null){
+			AnnotatedScale instTimescale = (AnnotatedScale) this.getSubmodelInstance().getTimescale();
+			if (this.timescale == null) {
 				as = instTimescale;
 			} else {
 				as = this.timescale;
@@ -170,10 +181,10 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			if (spacescale == null) {
 				spacescale = new ArrayList<MultiDimensionalScale>();
 			}
-			Map<String,MultiDimensionalScale> scales = new ArrayMap<String, MultiDimensionalScale>();
+			Map<String, MultiDimensionalScale> scales = new ArrayMap<String, MultiDimensionalScale>();
 			overrideScales(this.submodelInst.getSpacescale(), scales, spaceNames);
 			overrideScales(spacescale, scales, spaceNames);
-			
+
 			return new ArrayList<MultiDimensionalScale>(scales.values());
 		}
 		return null;
@@ -184,16 +195,16 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			if (otherscale == null) {
 				otherscale = new ArrayList<Otherscale>();
 			}
-			Map<String,Otherscale> scales = new ArrayMap<String, Otherscale>();
+			Map<String, Otherscale> scales = new ArrayMap<String, Otherscale>();
 			overrideScales(this.submodelInst.getOtherscale(), scales, otherNames);
 			overrideScales(otherscale, scales, otherNames);
-			
+
 			return new ArrayList<Otherscale>(scales.values());
 		}
 		return null;
 	}
-	
-	private <V extends Scale> void overrideScales(Collection<V> with, Map<String,V> scales, String[] names) {
+
+	private <V extends Scale> void overrideScales(Collection<V> with, Map<String, V> scales, String[] names) {
 		List<V> nameless = new ArrayList<V>();
 		String sid;
 		for (V os : with) {
@@ -212,74 +223,77 @@ public class AnnotatedInstance extends Instance implements Numbered {
 			if (j >= names.length) {
 				logger.warning("With more than 6 scales, please provide names, now random names are used.");
 				sid = names[0] + Math.random();
-			}
-			else {
+			} else {
 				sid = names[j++];
 			}
 			while (scales.containsKey(sid)) {
 				if (j >= names.length) {
 					logger.warning("With more than 6 scales, please provide names, now random names are used.");
 					sid = names[0] + Math.random();
-				}
-				else {
+				} else {
 					sid = names[j++];
 				}
 			}
 
 			os.setId(sid);
 			scales.put(sid, os);
-		}		
+		}
 	}
-	
+
 	@Override
 	public boolean deepEquals(Object o) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
-	
+
 	@Override
 	public int getNumber() {
 		return this.number;
 	}
-	
+
 	@Override
 	public void setNumber(int num) {
 		this.number = num;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || getClass() != o.getClass()) return false;
-		return this.number == ((AnnotatedInstance)o).number;
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		return this.number == ((AnnotatedInstance) o).number;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return number;
 	}
-	
+
 	@Override
 	public String toString() {
 		return (ofSubmodel() ? "submodel " : "mapper ")
-			+ this.id
-			+ "<" + (ofSubmodel() ? submodel : mapper) + ">)";
+				+ this.id
+				+ "<" + (ofSubmodel() ? submodel : mapper) + ">)";
 	}
-	
+
 	public boolean isFinal() {
 		if (this.ofSubmodel()) {
 			Submodel sub = this.getSubmodelInstance();
-			for (JAXBElement<Port> port : ((AnnotatedPorts)sub.getPorts()).getInOrOut()) {
-				if (port.getValue().getOperator() == SEL.OF) return false;
+			for (JAXBElement<Port> port : ((AnnotatedPorts) sub.getPorts()).getInOrOut()) {
+				if (port.getValue().getOperator() == SEL.OF) {
+					return false;
+				}
 			}
 			return true;
-		}
-		else {
+		} else {
 			Mapper map = this.getMapperInstance();
-			return !((AnnotatedPorts)map.getPorts()).hasOutPort();
+			return !((AnnotatedPorts) map.getPorts()).hasOutPort();
 		}
 	}
-	
+
 	/**
-	 * Whether this instance should be completed after a given number of timesteps
+	 * Whether this instance should be completed after a given number of
+	 * timesteps
+	 *
 	 * @param steps the number of timesteps so far
 	 */
 	public boolean isCompleted(int steps) {
@@ -288,31 +302,27 @@ public class AnnotatedInstance extends Instance implements Numbered {
 		}
 		return true;
 	}
-	
+
 	public OptionalChoice isStateful() {
 		if (this.ofSubmodel()) {
 			if (this.stateful == null) {
 				return this.getSubmodelInstance().getStateful();
-			}
-			else {
+			} else {
 				return this.stateful;
 			}
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
-	
+
 	public boolean isInit() {
 		if (this.init == null && this.ofSubmodel()) {
 			Submodel sub = this.getSubmodelInstance();
-			return sub.getInit() == YesNoChoice.YES || !((AnnotatedPorts)sub.getPorts()).hasInPort();
-		}
-		else if (this.init == null && this.mapper != null) {
+			return sub.getInit() == YesNoChoice.YES || !((AnnotatedPorts) sub.getPorts()).hasInPort();
+		} else if (this.init == null && this.mapper != null) {
 			Mapper map = this.getMapperInstance();
-			return this.getMapperInstance().getInit() == YesNoChoice.YES || !((AnnotatedPorts)map.getPorts()).hasInPort();
-		}
-		else {
+			return this.getMapperInstance().getInit() == YesNoChoice.YES || !((AnnotatedPorts) map.getPorts()).hasInPort();
+		} else {
 			return this.init == YesNoChoice.YES;
 		}
 	}

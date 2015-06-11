@@ -7,19 +7,21 @@ import eu.mapperproject.jmml.util.numerical.SIUnit;
 
 /**
  * Adds functionality dealing with regular scales and number of steps.
+ *
  * @author Joris Borgdorff
  */
 public class AnnotatedScale extends Scale {
+
 	private transient int steps;
-	
+
 	public AnnotatedScale() {
 		super();
 		this.steps = -1;
 	}
-	
+
 	/**
-	 * Calculate the number of steps that can be taken given the ranges
-	 * Returns -1 if delta or max is not set or not definite
+	 * Calculate the number of steps that can be taken given the ranges Returns
+	 * -1 if delta or max is not set or not definite
 	 */
 	public int getSteps() {
 		if (steps == -1) {
@@ -34,7 +36,7 @@ public class AnnotatedScale extends Scale {
 		}
 		return steps;
 	}
-	
+
 	public boolean deltaIsRegular() {
 		if (this.delta != null) {
 			this.setDelta(delta);
@@ -48,43 +50,66 @@ public class AnnotatedScale extends Scale {
 		}
 		return this.regularTotal != null;
 	}
-	
+
 	public boolean isDefinite() {
 		return (this.deltaIsRegular() || (this.delta != null && this.delta.isDefinite()))
-			&& (this.totalIsRegular() || (this.total != null && this.total.isDefinite()));
+				&& (this.totalIsRegular() || (this.total != null && this.total.isDefinite()));
 	}
 
 	public SIUnit getMinDelta() {
-		if (this.deltaIsRegular()) return ((AnnotatedUnit)this.regularDelta).interpret();
-		else if (this.delta != null) return this.delta.minSIUnit();
+		if (this.deltaIsRegular()) {
+			return ((AnnotatedUnit) this.regularDelta).interpret();
+		} else if (this.delta != null) {
+			return this.delta.minSIUnit();
+		}
 		return null;
 	}
+
 	public SIUnit getMeanDelta() {
-		if (this.deltaIsRegular()) return ((AnnotatedUnit)this.regularDelta).interpret();
-		else if (this.delta != null) return this.delta.meanSIUnit();
+		if (this.deltaIsRegular()) {
+			return ((AnnotatedUnit) this.regularDelta).interpret();
+		} else if (this.delta != null) {
+			return this.delta.meanSIUnit();
+		}
 		return null;
 	}
+
 	public SIUnit getMaxDelta() {
-		if (this.deltaIsRegular()) return ((AnnotatedUnit)this.regularDelta).interpret();
-		else if (this.delta != null) return this.delta.maxSIUnit();
+		if (this.deltaIsRegular()) {
+			return ((AnnotatedUnit) this.regularDelta).interpret();
+		} else if (this.delta != null) {
+			return this.delta.maxSIUnit();
+		}
 		return null;
 	}
+
 	public SIUnit getMinTotal() {
-		if (this.totalIsRegular()) return ((AnnotatedUnit)this.regularTotal).interpret();
-		else if (this.total != null) return this.total.minSIUnit();
+		if (this.totalIsRegular()) {
+			return ((AnnotatedUnit) this.regularTotal).interpret();
+		} else if (this.total != null) {
+			return this.total.minSIUnit();
+		}
 		return null;
 	}
+
 	public SIUnit getMeanTotal() {
-		if (this.totalIsRegular()) return ((AnnotatedUnit)this.regularTotal).interpret();
-		else if (this.total != null) return this.total.meanSIUnit();
+		if (this.totalIsRegular()) {
+			return ((AnnotatedUnit) this.regularTotal).interpret();
+		} else if (this.total != null) {
+			return this.total.meanSIUnit();
+		}
 		return null;
 	}
+
 	public SIUnit getMaxTotal() {
-		if (this.totalIsRegular()) return ((AnnotatedUnit)this.regularTotal).interpret();
-		else if (this.total != null) return this.total.maxSIUnit();
+		if (this.totalIsRegular()) {
+			return ((AnnotatedUnit) this.regularTotal).interpret();
+		} else if (this.total != null) {
+			return this.total.maxSIUnit();
+		}
 		return null;
 	}
-	
+
 	@Override
 	public AnnotatedUnit getRegularDelta() {
 		return (deltaIsRegular() ? (AnnotatedUnit) this.regularDelta : null);
@@ -130,7 +155,7 @@ public class AnnotatedScale extends Scale {
 	@Override
 	public void setTotal(Range r) {
 		this.steps = -1;
-		
+
 		AnnotatedRange ar = (AnnotatedRange) r;
 		if (ar != null && ar.isRegular()) {
 			this.regularTotal = ar.getMin();
@@ -144,7 +169,6 @@ public class AnnotatedScale extends Scale {
 	@Override
 	public void setDelta(Range r) {
 		this.steps = -1;
-		
 		AnnotatedRange ar = (AnnotatedRange) r;
 		if (ar != null && ar.isRegular()) {
 			this.regularDelta = ar.getMin();
@@ -157,47 +181,54 @@ public class AnnotatedScale extends Scale {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || !getClass().equals(o.getClass())) return false;
-		AnnotatedScale as = (AnnotatedScale)o;
+		if (o == null || !getClass().equals(o.getClass())) {
+			return false;
+		}
+		AnnotatedScale as = (AnnotatedScale) o;
 		boolean dr = this.deltaIsRegular(), tr = this.totalIsRegular();
 		return (dr == as.deltaIsRegular()) && (tr != as.totalIsRegular())
 				&& (dr ? this.regularDelta.equals(as.regularDelta)
-					: (this.delta == null ? as.delta == null : this.delta.equals(as.delta)))
+						: (this.delta == null ? as.delta == null : this.delta.equals(as.delta)))
 				&& (tr ? this.regularTotal.equals(as.regularTotal)
-					: (this.total == null ? as.total == null : this.total.equals(as.total)));
+						: (this.total == null ? as.total == null : this.total.equals(as.total)));
 	}
-	
+
 	public boolean isContiguous(AnnotatedScale s) {
 		return (this.getMinTotal().compareTo(s.getMinDelta()) <= 0
 				&& s.getMinDelta().compareTo(this.getMaxTotal()) <= 0
 				&& this.getMaxTotal().compareTo(s.getMaxDelta()) <= 0)
-			||
-				(s.getMinTotal().compareTo(this.getMinDelta()) <= 0
+				|| (s.getMinTotal().compareTo(this.getMinDelta()) <= 0
 				&& this.getMinDelta().compareTo(s.getMaxTotal()) <= 0
 				&& s.getMaxTotal().compareTo(this.getMaxDelta()) <= 0);
 	}
 
 	public boolean isSeparated(AnnotatedScale s) {
 		return (this.getMaxTotal().compareTo(s.getMinDelta()) < 0
-			|| s.getMaxTotal().compareTo(this.getMinDelta()) < 0);
+				|| s.getMaxTotal().compareTo(this.getMinDelta()) < 0);
 	}
 
 	public boolean isOverlapping(AnnotatedScale s) {
 		return (this.getMaxDelta().compareTo(s.getMinTotal()) < 0
-			&& s.getMaxDelta().compareTo(this.getMinTotal()) < 0);
+				&& s.getMaxDelta().compareTo(this.getMinTotal()) < 0);
 	}
-	
+
 	public boolean hasGreaterOrEqualMaximumTo(AnnotatedScale s) {
 		return this.getMaxTotal().compareTo(s.getMaxTotal()) >= 0;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int hash = 3;
-		if (this.deltaIsRegular()) hash = hash * 31 + 17 * this.regularDelta.hashCode();
-		else if (delta != null)    hash = hash * 29 + 17 * this.delta.hashCode();
-		if (this.totalIsRegular()) hash = hash * 31 + 17 * this.regularTotal.hashCode();
-		else if (total != null)    hash = hash * 29 + 17 * this.total.hashCode();
+		if (this.deltaIsRegular()) {
+			hash = hash * 31 + 17 * this.regularDelta.hashCode();
+		} else if (delta != null) {
+			hash = hash * 29 + 17 * this.delta.hashCode();
+		}
+		if (this.totalIsRegular()) {
+			hash = hash * 31 + 17 * this.regularTotal.hashCode();
+		} else if (total != null) {
+			hash = hash * 29 + 17 * this.total.hashCode();
+		}
 		return hash;
 	}
 }

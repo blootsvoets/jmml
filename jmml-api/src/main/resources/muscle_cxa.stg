@@ -1,52 +1,65 @@
 group muscle_cxa;
 delimiters "%", "%"
 
-cxa(inst,term,params,classpath,libpath,connection,max_timesteps) ::= <<# configuration file for a MUSCLE CxA
-abort "this is a configuration file for to be used with the MUSCLE bootstrap utility"   if __FILE__ == $0
+cxa(inst,nativeinst,mpiinst,pythoninst,matlabinst,term,params,classpath,libpath,connection,max_timesteps) ::= <<# Set class and library paths
+%if(classpath)%add_classpath "%classpath%"%endif%
+%if(libpath)%add_libpath "%libpath%"%endif%
 
-# add build for this cxa to system paths (i.e. CLASSPATH)
-m = Muscle.LAST
-m.add_classpath "%classpath%"
-m.add_libpath  "%libpath%"
-
-# configure cxa properties
-cxa = Cxa.LAST
-
-cxa.env["cxa_path"] = File.dirname(__FILE__)
-cxa.env["max_timesteps"] = "%max_timesteps%"
+# total simulation time
+$env["max_timesteps"] = "%max_timesteps%"
 
 # declare kernels
 %inst:kernel()%
+%nativeinst:nativekernel()%
+%mpiinst:mpikernel()%
+%pythoninst:pykernel()%
+%matlabinst:matkernel()%
 %term:terminal()%
 # parameters
 %params:param()%
-# configure connection scheme
-cs = cxa.cs
+# configure coupling
 %connection:attach()%
 >>
 
 attach(connection) ::= <<
-cs.attach('%connection.from%' => '%connection.to%') {
-    %connection.coupling:tie()%}
+%connection.from%.couple(%connection.to%, %if(connection.equalPort)%'%connection.equalPort%'%elseif(connection.filters)%{'%connection.coupling.from.port.id%' => '%connection.coupling.to.port.id%'}%else%'%connection.coupling.from.port.id%' => '%connection.coupling.to.port.id%'%endif%%if(connection.filters)%, [%connection.filters:filter(); separator=", "%]%endif%)
 
 >>
 
-tie(coupling) ::= <<
-tie('%coupling.from.port.id%', '%coupling.to.port.id%')
-
->>
+ports(coupling) ::= <<'%coupling.from.port.id%' => '%coupling.to.port.id%', >>
+filter(f) ::= <<'%f%'>>
 
 terminal(terminal) ::= <<
-cxa.add_terminal('%terminal.id%'%if(terminal.clazz)%, '%terminal.clazz%'%endif%)
+%terminal.id% = Terminal.new('%terminal.id%'%if(terminal.clazz)%, '%terminal.clazz%'%endif%)
 
 >>
 
 kernel(kernel) ::= <<
-cxa.add_kernel('%kernel.id%'%if(kernel.clazz)%, '%kernel.clazz%'%endif%)
+%kernel.id% = Instance.new('%kernel.id%'%if(kernel.clazz)%, '%kernel.clazz%'%endif%)
+
+>>
+
+pykernel(kernel) ::= <<
+%kernel.inst.id% = PythonInstance.new('%kernel.inst.id%', '%kernel.script%')
+
+>>
+
+mpikernel(kernel) ::= <<
+%kernel.inst.id% = MPIInstance.new('%kernel.inst.id%', '%kernel.executable%')
+
+>>
+
+matkernel(kernel) ::= <<
+%kernel.inst.id% = MatlabInstance.new('%kernel.inst.id%', '%kernel.script%')
+
+>>
+
+nativekernel(kernel) ::= <<
+%kernel.inst.id% = NativeInstance.new('%kernel.inst.id%', '%kernel.executable%')
 
 >>
 
 param(params) ::= <<
-cxa.env['%params.instid%:%params.param.id%']=%if(!params.param.numeric)%"%endif%%params.param.value%%if(!params.param.numeric)%"%endif%
+%params.instid%['%params.param.id%']=%if(!params.param.numeric)%"%endif%%params.param.value%%if(!params.param.numeric)%"%endif%
 
 >>
