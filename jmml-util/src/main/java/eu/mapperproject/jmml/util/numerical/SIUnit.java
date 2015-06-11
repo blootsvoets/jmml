@@ -129,12 +129,13 @@ public class SIUnit implements Comparable<SIUnit>, Serializable {
 		if (e != 1) {
 			str += "e" + e;
 		}
-		String unit = this.scale.getDimension().unit();
-		if (unit == null) {
-			return str;
-		} else {
-			return str + ' ' + unit;
+		if (!this.scale.isDimensionless()) {
+			String unit = this.scale.getDimension().unit();
+			if (unit != null) {
+				str += ' ' + unit;
+			}
 		}
+		return str;
 	}
 
 	/* (non-Javadoc)
