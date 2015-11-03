@@ -3,7 +3,8 @@
   xmlns="http://java.sun.com/xml/ns/jaxb"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xmml="http://www.mapper-project.eu/xmml"
-  elementFormDefault="qualified">
+  elementFormDefault="qualified"
+  schemaLocation="xmml.xsd">
   <globalBindings typesafeEnumBase="xs:NCName"/>
   
   <bindings schemaLocation="mad.xsd">
