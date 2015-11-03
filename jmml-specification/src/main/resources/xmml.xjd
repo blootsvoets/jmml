@@ -3,17 +3,10 @@
   xmlns="http://java.sun.com/xml/ns/jaxb"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xmml="http://www.mapper-project.eu/xmml"
-  elementFormDefault="qualified"
-  schemaLocation="xmml.xsd">
-  <globalBindings typesafeEnumBase="xs:NCName"/>
-  
-  <bindings schemaLocation="mad.xsd">
-	  <schemaBindings>
-      <package name="eu.mapperproject.mad.specification"/>
-    </schemaBindings>
-  </bindings>
-
+  elementFormDefault="qualified">
   <bindings schemaLocation="xmml.xsd">
+    <globalBindings typesafeEnumBase="xs:NCName"/>
+
     <schemaBindings>
       <package name="eu.mapperproject.jmml.specification"/>
     </schemaBindings>
@@ -82,5 +75,11 @@
     <bindings node="//xs:simpleType[@name='formula']">
       <class name="formula"/>
     </bindings>
+  </bindings>
+
+  <bindings schemaLocation="mad.xsd">
+    <schemaBindings>
+      <package name="eu.mapperproject.mad.specification"/>
+    </schemaBindings>
   </bindings>
 </bindings>
