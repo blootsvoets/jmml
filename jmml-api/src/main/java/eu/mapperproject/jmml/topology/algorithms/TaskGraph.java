@@ -35,7 +35,7 @@ public class TaskGraph {
 	public void computeGraph() {
 		TaskGraphState state = new TaskGraphState(this.topology);
 		List<ProcessIteration> initProcs = descriptionToIteration(topology.getInitialInstances());
-		int i = 0;
+		long i = 0;
 
 		// Initialize processes with no initialization
 		for (ProcessIteration pi : initProcs) {
@@ -45,7 +45,7 @@ public class TaskGraph {
 		// As long as there are active processes, continue building the graph
 		for (ProcessIteration pi : state) {
 			i++;
-			if (i % 10000 == 0) {
+			if (i % 1000000 == 0) {
 				System.out.print("After " + i + " iterations, processing node " + pi);
 				AnnotatedScale sc = pi.getInstance().getTimescaleInstance();
 				if (sc != null) {
