@@ -121,25 +121,25 @@ public class JMML {
 			
 			try {
 				if (opt.taskgraph != null) {
-					doc.export(GraphType.TASK, dot, opt.taskgraph, !opt.nocollapse);
+					doc.export(GraphType.TASK, dot, new File(opt.taskgraph).getAbsoluteFile(), !opt.nocollapse);
 				}
 				if (opt.topology != null) {
-					doc.export(GraphType.TOPOLOGY, dot, opt.topology, false);
+					doc.export(GraphType.TOPOLOGY, dot, new File(opt.topology).getAbsoluteFile(), false);
 				}
 				if (opt.domain != null) {
-					doc.export(GraphType.DOMAIN, dot, opt.domain, false);
+					doc.export(GraphType.DOMAIN, dot, new File(opt.domain).getAbsoluteFile(), false);
 				}
 				if (opt.ssm != null) {
 					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
-					exp.export(opt.ssm);
+					exp.export(new File(opt.ssm).getAbsoluteFile());
 				}
 				if (opt.muscle != null) {
 					MUSCLECodeGenerator gen = new MUSCLECodeGenerator(doc.model);
-					gen.create(opt.muscle);
+					gen.create(new File(opt.muscle).getAbsoluteFile());
 				}
 				if (opt.cxa != null) {
 					MUSCLECxAExporter exp = new MUSCLECxAExporter(doc.topology);
-					exp.export(opt.cxa);
+					exp.export(new File(opt.cxa).getAbsoluteFile());
 				}
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "An error occurred while trying to write to graphviz file.", e);

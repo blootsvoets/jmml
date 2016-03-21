@@ -21,7 +21,6 @@ public abstract class AbstractExporter {
 		try {
 			fout = new OutputStreamWriter(new FileOutputStream(f), Charset.forName("UTF-8"));
 			this.export(fout);
-			fout.close();
 		} finally {
 			if (fout != null)
 				fout.close();

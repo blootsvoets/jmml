@@ -55,5 +55,6 @@ public class CouplingTopologyToScaleMapExporter extends AbstractExporter {
         // UTF-8 encoding.
         boolean useCSS = true; // we want to use CSS style attributes
         svgGenerator.stream(out, useCSS);
+        svgGenerator.dispose();
 	}
 }

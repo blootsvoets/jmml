@@ -17,31 +17,31 @@ import java.util.List;
 public class JMMLOptions {
 	private JCommander jcom;
 	
-	@Parameter(names={"--no-collapse","-C"})
+	@Parameter(names={"--no-collapse","-C"}, description="In the task graph, do not collapse nodes that are just iterations of the model.")
 	public boolean nocollapse = false;
 	
-	@Parameter(names={"--ssm", "-s"},converter=FileConverter.class,validateWith=WritableFile.class)
-	public File ssm;
+	@Parameter(names={"--ssm", "-s"}, validateWith=WritableFile.class, description="SVG output file of the scale separation map.")
+	public String ssm;
 	
-	@Parameter(names={"--muscle", "-m"},converter=FileConverter.class)
-	public File muscle;
+	@Parameter(names={"--muscle", "-m"}, description="Output directory for MUSCLE 2 skeleton code.")
+	public String muscle;
 
-	@Parameter(names={"--cxa", "-c"},converter=FileConverter.class,validateWith=WritableFile.class)
-	public File cxa;
+	@Parameter(names={"--cxa", "-c"}, validateWith=WritableFile.class, description="Output CxA file, configuration files MUSCLE 2.")
+	public String cxa;
 	
-	@Parameter(names={"--taskgraph", "-g"},converter=FileConverter.class,validateWith=WritableFile.class)
-	public File taskgraph;
+	@Parameter(names={"--taskgraph", "-g"}, validateWith=WritableFile.class, description="PDF of the task graph.")
+	public String taskgraph;
 	
-	@Parameter(names={"--topology","-t"},converter=FileConverter.class,validateWith=WritableFile.class)
-	public File topology;
+	@Parameter(names={"--topology","-t"}, validateWith=WritableFile.class, description="PDF of the MML topology.")
+	public String topology;
 	
-	@Parameter(names={"--domain","-d"},converter=FileConverter.class,validateWith=WritableFile.class)
-	public File domain;
+	@Parameter(names={"--domain","-d"}, validateWith=WritableFile.class, description="SVG of the domains in the model.")
+	public String domain;
 	
-	@Parameter(names={"--dotfile","-o"},converter=FileConverter.class,validateWith=WritableFile.class)
-	private File dotfile;
+	@Parameter(names={"--dotfile","-o"}, validateWith=WritableFile.class, description="Output the raw DOT file for a generated PDF file.")
+	private String dotfile;
 	
-	@Parameter(description="XMML_FILE",validateWith=ReadableFile.class,arity=1)
+	@Parameter(description="XMML_FILE (input file)", validateWith=ReadableFile.class,arity=1)
 	private List<String> xmmlFile = new ArrayList<String>();
 	
 	public JMMLOptions(String... args) {
@@ -68,12 +68,12 @@ public class JMMLOptions {
 			return File.createTempFile("xmml", "dot");
 		}
 		else {
-			return this.dotfile;
+			return new File(this.dotfile).getAbsoluteFile();
 		}
 	}
 	
 	public File getXMMLFile() {
-		return new File(xmmlFile.get(0));
+		return new File(xmmlFile.get(0)).getAbsoluteFile();
 	}
 	
 	public static class WritableFile implements IParameterValidator {
