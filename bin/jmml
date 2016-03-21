@@ -4,5 +4,7 @@ if [ "x$JMML_HOME" == "x" ]; then
     export JMML_HOME=$PWD
 fi
 
+DIR=$PWD
 cd $JMML_HOME/jmml-api
-mvn -q exec:java -Dexec.workingdir="$OLDPWD" -Dexec.mainClass="eu.mapperproject.jmml.JMML" -Dexec.args="$*" -Dexec.classpathScope=runtime 
+echo mvn -q exec:java -Duser.dir="$DIR" -Dexec.workingdir="$DIR" -Dexec.mainClass="eu.mapperproject.jmml.JMML" -Dexec.args="$*" -Dexec.classpathScope=runtime
+mvn -q exec:java -Duser.dir="$DIR" -Dexec.workingdir="$DIR" -Dexec.mainClass="eu.mapperproject.jmml.JMML" -Dexec.args="$*" -Dexec.classpathScope=runtime
