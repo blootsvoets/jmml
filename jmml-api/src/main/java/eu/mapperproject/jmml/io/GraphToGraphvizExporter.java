@@ -206,12 +206,6 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 		this.sink = new FastArrayList<StyledEdge>();
 		this.source = new FastArrayList<StyledEdge>();
 
-		this.graphContents(graph);
-
-		if (sink.isEmpty() && source.isEmpty()) {
-			throw new IllegalArgumentException("There is no clear initial submodel, cannot create graph.");
-		}
-
 		StringBuilder sb = new StringBuilder(200);
 		sb.append(decorator.isDirected() ? "digraph" : "graph");
 		sb.append(" G {");
@@ -222,6 +216,12 @@ public class GraphToGraphvizExporter<V, E extends Edge<V>> extends AbstractExpor
 			sb.append("rankdir=\"LR\";\n");
 		}
 		print(sb);
+
+		this.graphContents(graph);
+
+		if (sink.isEmpty() && source.isEmpty()) {
+			throw new IllegalArgumentException("There is no clear initial submodel, cannot create graph.");
+		}
 
 		if (!sink.isEmpty()) {
 			this.nodeTemplate(sb, sink.get(0).getTo());
