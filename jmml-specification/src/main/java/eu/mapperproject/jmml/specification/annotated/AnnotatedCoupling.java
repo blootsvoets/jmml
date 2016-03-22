@@ -49,24 +49,26 @@ public class AnnotatedCoupling extends Coupling implements Edge<AnnotatedInstanc
 		
 		// Check if datatypes match from one end of the coupling to the other.
 		Datatype d = fromP.getDatatypeInstance();
-		
-		for (Apply a : this.getApply()) {
-			AnnotatedFilter f = ((AnnotatedApply)a).getFilterInstance();
-			Datatype next = f.getDatatypeInInstance();
-			// An empty datatype is assumed to match
-			if (next != null && !d.equals(next)) {
-				logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly by applied filter {1}: {2} expected and {3} received.", new Object[]{this, f.getId(), next.getId(), d.getId()});
-			}
-			next = f.getDatatypeOutInstance();
-			// An empty datatype is assumed to mean ''unchanged''.
-			if (next != null) {
-				d = next;
-			}
-		}
-		
-		if (!d.equals(toP.getDatatypeInstance())) {
-			logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly: {1} expected and {2} received.", new Object[]{this, toP.getDatatype(), d.getId()});
-		}
+
+		if (d != null) {
+            for (Apply a : this.getApply()) {
+                AnnotatedFilter f = ((AnnotatedApply) a).getFilterInstance();
+                Datatype next = f.getDatatypeInInstance();
+                // An empty datatype is assumed to match
+                if (next != null && !d.equals(next)) {
+                    logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly by applied filter {1}: {2} expected and {3} received.", new Object[]{this, f.getId(), next.getId(), d.getId()});
+                }
+                next = f.getDatatypeOutInstance();
+                // An empty datatype is assumed to mean ''unchanged''.
+                if (next != null) {
+                    d = next;
+                }
+            }
+
+            if (!d.equals(toP.getDatatypeInstance())) {
+                logger.log(Level.WARNING, "Datatypes in coupling {0} are not converted correctly: {1} expected and {2} received.", new Object[]{this, toP.getDatatype(), d.getId()});
+            }
+        }
 		
 		// Check if scales match from one end of the coupling to the other.
 		AnnotatedScale ft = afrom.getInstance().getTimescaleInstance();

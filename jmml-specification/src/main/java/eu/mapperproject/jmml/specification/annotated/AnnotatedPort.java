@@ -13,7 +13,12 @@ public class AnnotatedPort extends Port implements Identifiable {
 	private transient String dataclass;
 	
 	public Datatype getDatatypeInstance() {
-		if (this.datatypeInst == null) this.setDatatype(this.datatype);
+        if (this.datatype == null) {
+            return null;
+        }
+		if (this.datatypeInst == null) {
+			this.setDatatype(this.datatype);
+		}
 		return datatypeInst;
 	}
 	
