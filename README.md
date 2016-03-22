@@ -34,6 +34,8 @@ bin/jmml path/to/xmml_file.xml -g path/to/task_graph_file.pdf
 
 Other options are shown when running `bin/jmml`.
 
+The xMML should be validated with the [xMML validate tool](https://github.org/blootsvoets/xmml).
+
 ## Code organization
 
 The code has three modules: _jmml-api_, _jmml-specification_ and _jmml-util_. The _jmml-api_ module contains the actual algorithms, _jmml-specification_ contains the XML bindings to xMML and _jmml-util_ contains unit and formula handling.
