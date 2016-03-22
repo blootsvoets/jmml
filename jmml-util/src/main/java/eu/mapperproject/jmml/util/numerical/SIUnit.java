@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class SIUnit implements Comparable<SIUnit>, Serializable {	
 	protected final double value;
 	protected final ScaleFactor scale;
-	private final static Pattern siPattern = Pattern.compile("(-?[0-9.]+)([eE](-?[0-9]+))?\\s*(\\w*\\s*\\w*)");
+	private final static Pattern siPattern = Pattern.compile("(-?[0-9.]+)([eE]([-+]?[0-9]+))?\\s*(\\w*\\s*\\w*)");
 	
 	public static SIUnit valueOf(String siunit) {
 		Matcher m = siPattern.matcher(siunit);
