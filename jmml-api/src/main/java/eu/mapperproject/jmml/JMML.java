@@ -107,8 +107,9 @@ public class JMML {
 				doc = new JMML(model);
 			} catch (JAXBException ex) {
 				logger.log(Level.SEVERE, "The xMML file could not be parsed or loaded.", ex);
+				System.exit(7);
 			}
-			
+
 			try {
 				if (opt.taskgraph != null) {
 					doc.export(GraphType.TASK, dot, new File(opt.taskgraph).getAbsoluteFile(), !opt.nocollapse);
@@ -134,6 +135,9 @@ public class JMML {
 			} catch (InterruptedException ex) {
 				logger.log(Level.SEVERE, "A PDF document could not be created as the process was interrupted.", ex);
 				System.exit(5);
+			} catch (Exception ex) {
+				logger.log(Level.SEVERE, "Failed to generate output.", ex);
+				System.exit(6);
 			}
 		}
 		else {
