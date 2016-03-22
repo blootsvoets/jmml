@@ -35,9 +35,6 @@ public class JMMLOptions {
 	@Parameter(names={"--topology","-t"}, validateWith=WritableFile.class, description="PDF of the MML topology.")
 	public String topology;
 	
-	@Parameter(names={"--domain","-d"}, validateWith=WritableFile.class, description="SVG of the domains in the model.")
-	public String domain;
-	
 	@Parameter(names={"--dotfile","-o"}, validateWith=WritableFile.class, description="Output the raw DOT file for a generated PDF file.")
 	private String dotfile;
 	
@@ -56,7 +53,7 @@ public class JMMLOptions {
 	}
 	
 	public boolean wantsOutput() {
-		return this.topology != null || this.taskgraph != null || this.ssm != null || this.domain != null || this.cxa != null || this.muscle != null;
+		return this.topology != null || this.taskgraph != null || this.ssm != null || this.cxa != null || this.muscle != null;
 	}
 	
 	public void printUsage() {

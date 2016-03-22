@@ -44,7 +44,7 @@ import javax.xml.bind.JAXBException;
  */
 public class JMML {
 	public enum GraphType {
-		DOMAIN, TASK, TOPOLOGY;
+		TASK, TOPOLOGY;
 	}
 	
 	private final static Logger logger = Logger.getLogger(JMML.class.getName());
@@ -65,9 +65,6 @@ public class JMML {
 	public void export(GraphType gt, File dot, File pdf, boolean collapse) throws IOException, InterruptedException {
 		GraphToGraphvizExporter<?,?> exporter;
 		switch (gt) {
-			case DOMAIN:
-				exporter = new GraphToGraphvizExporter<Cluster,Edge<Cluster>>(new DomainDecorator(), this.getDomainGraph());
-				break;
 			case TASK:
 				exporter = new GraphToGraphvizExporter<ProcessIteration, CouplingInstance>(new TaskGraphDecorator(), this.getTaskGraph(collapse));
 				break;
@@ -95,13 +92,6 @@ public class JMML {
 		return task.getGraph();
 	}
 
-	/** Generate a domain graph */
-	public PTGraph<Cluster,Edge<Cluster>> getDomainGraph() {
-		PTGraph<AnnotatedInstancePort, AnnotatedCoupling> graph;
-		//graph = this.topology.getGraph();
-		//Tree<Cluster<AnnotatedInstancePort,AnnotatedCoupling>> clTree = PTGraph.partition(graph, new CouplingTopologyDecorator());
-		return null; //PTGraph.graphFromTree(clTree);
-	}
 	public static void main(String[] args) throws IOException {
 		readConfiguration();
 		
@@ -125,9 +115,6 @@ public class JMML {
 				}
 				if (opt.topology != null) {
 					doc.export(GraphType.TOPOLOGY, dot, new File(opt.topology).getAbsoluteFile(), false);
-				}
-				if (opt.domain != null) {
-					doc.export(GraphType.DOMAIN, dot, new File(opt.domain).getAbsoluteFile(), false);
 				}
 				if (opt.ssm != null) {
 					CouplingTopologyToScaleMapExporter exp = new CouplingTopologyToScaleMapExporter(doc.topology);
