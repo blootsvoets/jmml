@@ -18,7 +18,7 @@ of for instance a task graph or a coupling topology can be generated.
 
 ## How to run
 
-Dependencies are Java, Maven and Graphviz.
+Dependencies are Java, Maven 3 and Graphviz.
 
 Compile the code with
 
